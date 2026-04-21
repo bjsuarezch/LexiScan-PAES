@@ -1,17 +1,257 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>
-      Tab 3
+      Mi Perfil
     </ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
+<ion-content [fullscreen]="true" class="ion-padding">
   <ion-header collapse="condense">
     <ion-toolbar>
-      <ion-title size="large">Tab 3</ion-title>
+      <ion-title size="large">Mi Perfil</ion-title>
     </ion-toolbar>
   </ion-header>
 
-  <app-explore-container name="Tab 3 page"></app-explore-container>
+  <!-- Loading State -->
+  <ion-spinner *ngIf="isLoading" name="circles"></ion-spinner>
+
+  <!-- No Profile Message -->
+  <div *ngIf="!profileExists && !isLoading" class="no-profile">
+    <ion-icon name="person-outline" class="icon"></ion-icon>
+    <ion-text>
+      <p>No tienes perfil creado</p>
+      <small>Completa tu información para continuar</small>
+    </ion-text>
+  </div>
+
+  <!-- Profile Form -->
+  <form *ngIf="!isLoading" [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="profile-form">
+    
+    <!-- View Mode - Profile Card -->
+    <ion-card *ngIf="profileExists && !isEditing">
+      <ion-card-header>
+        <ion-card-title>Información de Perfil</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <!-- RUT Display -->
+        <ion-item lines="inset">
+          <ion-label>
+            <p>RUT</p>
+            <h3>{{ profileForm.get('rut')?.value }}</h3>
+          </ion-label>
+        </ion-item>
+
+        <!-- Nombre Display -->
+        <ion-item lines="inset">
+          <ion-label>
+            <p>Nombre</p>
+            <h3>{{ profileForm.get('nombre')?.value }}</h3>
+          </ion-label>
+        </ion-item>
+
+        <!-- Email Display -->
+        <ion-item lines="inset">
+          <ion-label>
+            <p>Email</p>
+            <h3>{{ profileForm.get('email')?.value }}</h3>
+          </ion-label>
+        </ion-item>
+
+        <!-- Teléfono Display -->
+        <ion-item lines="inset">
+          <ion-label>
+            <p>Teléfono</p>
+            <h3>{{ profileForm.get('telefono')?.value }}</h3>
+          </ion-label>
+        </ion-item>
+
+        <!-- Dirección Display -->
+        <ion-item lines="inset">
+          <ion-label>
+            <p>Dirección</p>
+            <h3>{{ profileForm.get('direccion')?.value }}</h3>
+          </ion-label>
+        </ion-item>
+
+        <!-- Ciudad Display -->
+        <ion-item lines="inset" *ngIf="profileForm.get('ciudad')?.value">
+          <ion-label>
+            <p>Ciudad</p>
+            <h3>{{ profileForm.get('ciudad')?.value }}</h3>
+          </ion-label>
+        </ion-item>
+
+        <!-- Código Postal Display -->
+        <ion-item lines="none" *ngIf="profileForm.get('codigoPostal')?.value">
+          <ion-label>
+            <p>Código Postal</p>
+            <h3>{{ profileForm.get('codigoPostal')?.value }}</h3>
+          </ion-label>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Edit Mode - Form Fields -->
+    <div *ngIf="isEditing">
+      <!-- RUT Input -->
+      <ion-item>
+        <ion-label position="stacked">RUT</ion-label>
+        <ion-input 
+          formControlName="rut" 
+          placeholder="12.345.678-K"
+          type="text"
+          [readonly]="profileExists">
+        </ion-input>
+      </ion-item>
+      <ion-text color="danger" *ngIf="getErrorMessage('rut')">
+        <p class="ion-padding-start">{{ getErrorMessage('rut') }}</p>
+      </ion-text>
+
+      <!-- Nombre Input -->
+      <ion-item>
+        <ion-label position="stacked">Nombre Completo</ion-label>
+        <ion-input 
+          formControlName="nombre" 
+          placeholder="Nombre completo"
+          type="text">
+        </ion-input>
+      </ion-item>
+      <ion-text color="danger" *ngIf="getErrorMessage('nombre')">
+        <p class="ion-padding-start">{{ getErrorMessage('nombre') }}</p>
+      </ion-text>
+
+      <!-- Email Input -->
+      <ion-item>
+        <ion-label position="stacked">Correo Electrónico</ion-label>
+        <ion-input 
+          formControlName="email" 
+          placeholder="ejemplo@correo.com"
+          type="email">
+        </ion-input>
+      </ion-item>
+      <ion-text color="danger" *ngIf="getErrorMessage('email')">
+        <p class="ion-padding-start">{{ getErrorMessage('email') }}</p>
+      </ion-text>
+
+      <!-- Teléfono Input -->
+      <ion-item>
+        <ion-label position="stacked">Teléfono</ion-label>
+        <ion-input 
+          formControlName="telefono" 
+          placeholder="+56912345678 o 912345678"
+          type="tel">
+        </ion-input>
+      </ion-item>
+      <ion-text color="danger" *ngIf="getErrorMessage('telefono')">
+        <p class="ion-padding-start">{{ getErrorMessage('telefono') }}</p>
+      </ion-text>
+
+      <!-- Dirección Input -->
+      <ion-item>
+        <ion-label position="stacked">Dirección</ion-label>
+        <ion-input 
+          formControlName="direccion" 
+          placeholder="Calle y número de residencia"
+          type="text">
+        </ion-input>
+      </ion-item>
+      <ion-text color="danger" *ngIf="getErrorMessage('direccion')">
+        <p class="ion-padding-start">{{ getErrorMessage('direccion') }}</p>
+      </ion-text>
+
+      <!-- Ciudad Input -->
+      <ion-item>
+        <ion-label position="stacked">Ciudad</ion-label>
+        <ion-input 
+          formControlName="ciudad" 
+          placeholder="Ciudad (opcional)"
+          type="text">
+        </ion-input>
+      </ion-item>
+      <ion-text color="danger" *ngIf="getErrorMessage('ciudad')">
+        <p class="ion-padding-start">{{ getErrorMessage('ciudad') }}</p>
+      </ion-text>
+
+      <!-- Código Postal Input -->
+      <ion-item>
+        <ion-label position="stacked">Código Postal</ion-label>
+        <ion-input 
+          formControlName="codigoPostal" 
+          placeholder="Código postal (opcional)"
+          type="number">
+        </ion-input>
+      </ion-item>
+      <ion-text color="danger" *ngIf="getErrorMessage('codigoPostal')">
+        <p class="ion-padding-start">{{ getErrorMessage('codigoPostal') }}</p>
+      </ion-text>
+
+      <!-- Form Status -->
+      <ion-text *ngIf="submitted && !profileForm.valid" color="warning">
+        <p class="ion-padding">Por favor corrija los errores en el formulario</p>
+      </ion-text>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="button-group">
+      <!-- Edit Button (View Mode) -->
+      <ion-button 
+        *ngIf="profileExists && !isEditing"
+        expand="block" 
+        type="button"
+        (click)="toggleEdit()"
+        class="ion-margin-top">
+        <ion-icon name="pencil" slot="start"></ion-icon>
+        Editar Perfil
+      </ion-button>
+
+      <!-- Save Button (Edit Mode) -->
+      <ion-button 
+        *ngIf="isEditing"
+        expand="block" 
+        type="submit"
+        class="ion-margin-top"
+        [disabled]="submitted && !profileForm.valid">
+        <ion-icon name="checkmark" slot="start"></ion-icon>
+        Guardar Cambios
+      </ion-button>
+
+      <!-- Cancel Button (Edit Mode) -->
+      <ion-button 
+        *ngIf="isEditing"
+        expand="block" 
+        fill="outline"
+        type="button"
+        (click)="cancelEdit()"
+        class="ion-margin-top">
+        <ion-icon name="close" slot="start"></ion-icon>
+        Cancelar
+      </ion-button>
+
+      <!-- Delete Button (View Mode) -->
+      <ion-button 
+        *ngIf="profileExists && !isEditing"
+        expand="block" 
+        color="danger"
+        fill="outline"
+        type="button"
+        (click)="deleteProfile()"
+        class="ion-margin-top">
+        <ion-icon name="trash" slot="start"></ion-icon>
+        Eliminar Perfil
+      </ion-button>
+
+      <!-- Clear Button (Edit Mode - New Profile) -->
+      <ion-button 
+        *ngIf="isEditing && !profileExists"
+        expand="block" 
+        fill="outline"
+        type="button"
+        (click)="resetForm()"
+        class="ion-margin-top">
+        <ion-icon name="refresh" slot="start"></ion-icon>
+        Limpiar
+      </ion-button>
+    </div>
+  </form>
 </ion-content>

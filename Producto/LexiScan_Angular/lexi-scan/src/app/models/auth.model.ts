@@ -12,6 +12,19 @@ export interface IRegistro {
   confirmarContrasena: string;
 }
 
+export interface IUserProfile {
+  id?: string;
+  rut: string;
+  nombre: string;
+  email: string;
+  telefono: string;
+  direccion: string;
+  ciudad?: string;
+  codigoPostal?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
 export interface IValidationErrors {
   [key: string]: string | null;
 }
