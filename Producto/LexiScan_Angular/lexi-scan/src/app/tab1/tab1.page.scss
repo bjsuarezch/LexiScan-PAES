@@ -1,0 +1,35 @@
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  ion-item {
+    --padding-start: 0;
+    --padding-end: 0;
+    margin-bottom: 0.5rem;
+  }
+
+  ion-text {
+    margin-top: -0.5rem;
+    font-size: 0.875rem;
+  }
+
+  ion-button {
+    margin-top: 1rem;
+  }
+}
+
+ion-text {
+  p {
+    margin: 0;
+    padding: 0;
+  }
+}
+
+.ion-margin-top {
+  margin-top: 1rem;
+}
+
+.ion-padding-start {
+  padding-left: 1rem;
+}

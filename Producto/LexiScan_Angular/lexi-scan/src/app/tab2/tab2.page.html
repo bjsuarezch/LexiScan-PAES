@@ -1,17 +1,124 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>
-      Tab 2
+      Registro
     </ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
+<ion-content [fullscreen]="true" class="ion-padding">
   <ion-header collapse="condense">
     <ion-toolbar>
-      <ion-title size="large">Tab 2</ion-title>
+      <ion-title size="large">Registro</ion-title>
     </ion-toolbar>
   </ion-header>
 
-  <app-explore-container name="Tab 2 page"></app-explore-container>
+  <form [formGroup]="registroForm" (ngSubmit)="onSubmit()" class="registro-form">
+    <!-- RUT Input -->
+    <ion-item>
+      <ion-label position="stacked">RUT</ion-label>
+      <ion-input 
+        formControlName="rut" 
+        placeholder="12.345.678-K"
+        type="text">
+      </ion-input>
+    </ion-item>
+    <ion-text color="danger" *ngIf="getErrorMessage('rut')">
+      <p class="ion-padding-start">{{ getErrorMessage('rut') }}</p>
+    </ion-text>
+
+    <!-- Nombre Input -->
+    <ion-item>
+      <ion-label position="stacked">Nombre</ion-label>
+      <ion-input 
+        formControlName="nombre" 
+        placeholder="Nombre completo"
+        type="text">
+      </ion-input>
+    </ion-item>
+    <ion-text color="danger" *ngIf="getErrorMessage('nombre')">
+      <p class="ion-padding-start">{{ getErrorMessage('nombre') }}</p>
+    </ion-text>
+
+    <!-- Email Input -->
+    <ion-item>
+      <ion-label position="stacked">Email</ion-label>
+      <ion-input 
+        formControlName="email" 
+        placeholder="ejemplo@correo.com"
+        type="email">
+      </ion-input>
+    </ion-item>
+    <ion-text color="danger" *ngIf="getErrorMessage('email')">
+      <p class="ion-padding-start">{{ getErrorMessage('email') }}</p>
+    </ion-text>
+
+    <!-- Password Input -->
+    <ion-item>
+      <ion-label position="stacked">Contraseña</ion-label>
+      <ion-input 
+        formControlName="contrasena" 
+        [type]="showPassword ? 'text' : 'password'"
+        placeholder="Mín. 6 caracteres (may, min, números)">
+      </ion-input>
+      <ion-button 
+        fill="clear" 
+        slot="end"
+        (click)="togglePasswordVisibility('password')">
+        <ion-icon 
+          slot="icon-only" 
+          [name]="showPassword ? 'eye-off' : 'eye'">
+        </ion-icon>
+      </ion-button>
+    </ion-item>
+    <ion-text color="danger" *ngIf="getErrorMessage('contrasena')">
+      <p class="ion-padding-start">{{ getErrorMessage('contrasena') }}</p>
+    </ion-text>
+
+    <!-- Confirm Password Input -->
+    <ion-item>
+      <ion-label position="stacked">Confirmar Contraseña</ion-label>
+      <ion-input 
+        formControlName="confirmarContrasena" 
+        [type]="showConfirmPassword ? 'text' : 'password'"
+        placeholder="Confirme su contraseña">
+      </ion-input>
+      <ion-button 
+        fill="clear" 
+        slot="end"
+        (click)="togglePasswordVisibility('confirmPassword')">
+        <ion-icon 
+          slot="icon-only" 
+          [name]="showConfirmPassword ? 'eye-off' : 'eye'">
+        </ion-icon>
+      </ion-button>
+    </ion-item>
+    <ion-text color="danger" *ngIf="getErrorMessage('confirmarContrasena')">
+      <p class="ion-padding-start">{{ getErrorMessage('confirmarContrasena') }}</p>
+    </ion-text>
+
+    <!-- Form Status -->
+    <ion-text *ngIf="submitted && !registroForm.valid" color="warning">
+      <p class="ion-padding">Por favor corrija los errores en el formulario</p>
+    </ion-text>
+
+    <!-- Submit Button -->
+    <ion-button 
+      expand="block" 
+      type="submit"
+      class="ion-margin-top"
+      [disabled]="submitted && !registroForm.valid">
+      Registrarse
+    </ion-button>
+
+    <!-- Reset Button -->
+    <ion-button 
+      expand="block" 
+      fill="outline"
+      type="button"
+      (click)="resetForm()"
+      class="ion-margin-top">
+      Limpiar
+    </ion-button>
+  </form>
 </ion-content>
