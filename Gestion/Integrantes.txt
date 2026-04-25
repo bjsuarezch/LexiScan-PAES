@@ -1,0 +1,7 @@
+RUT            -           nombre                -         email duoc
+
+20.144.801-8      ELIAS YANEZ                 elis.yanez@duocuc.cl
+
+21.937.174-8      VICENTE LEYTON         vi.leytonm@duocuc.cl
+
+21.035.761-0      BENJAMIN SUAREZ      benj.suarez@duocuc.cl
