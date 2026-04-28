@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ILogin } from '../models/auth.model';
 
 @Component({
@@ -13,7 +14,7 @@ export class Tab1Page implements OnInit {
   submitted = false;
   showPassword = false;
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private router: Router) {
     this.initializeForm();
   }
 
@@ -105,5 +106,9 @@ export class Tab1Page implements OnInit {
   resetForm(): void {
     this.loginForm.reset();
     this.submitted = false;
+  }
+
+  goToCreateAccount(): void {
+    this.router.navigate(['/tabs/tab2']);
   }
 }
