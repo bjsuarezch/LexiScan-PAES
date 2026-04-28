@@ -100,6 +100,8 @@ export class Tab1Page implements OnInit {
       // Aquí enviarías los datos al backend
       alert('Login enviado exitosamente');
       this.resetForm();
+      // Navegar a la página de inicio después del login exitoso
+      this.router.navigate(['/home']);
     }
   }
 

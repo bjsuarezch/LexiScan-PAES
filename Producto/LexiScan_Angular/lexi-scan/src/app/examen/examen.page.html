@@ -1,0 +1,62 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Simulacro PAES</ion-title>
+    <ion-buttons slot="end">
+      <ion-button>
+        <ion-icon slot="icon-only" name="ellipsis-vertical"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div class="examen-container">
+    <ion-card class="config-card">
+      <ion-card-content>
+        <h2>Simulacro PAES</h2>
+
+        <!-- Question Selection -->
+        <div class="selection-section">
+          <p class="selection-label">Selecciona la cantidad de preguntas:</p>
+          
+          <div class="slider-container">
+            <span class="slider-min">10</span>
+            <div class="slider-wrapper">
+              <input 
+                type="range" 
+                min="10" 
+                max="65" 
+                [value]="questionCount"
+                (input)="onQuestionCountChange($event)"
+                class="custom-slider">
+              <div class="slider-value">
+                {{ questionCount }}
+              </div>
+            </div>
+            <span class="slider-max">65</span>
+          </div>
+        </div>
+
+        <!-- Time Estimate -->
+        <div class="time-section">
+          <ion-icon name="time"></ion-icon>
+          <span>Tiempo estimado: {{ estimatedTime }} min</span>
+        </div>
+
+        <!-- Divider -->
+        <hr class="divider">
+
+        <!-- Start Button -->
+        <ion-button 
+          expand="block" 
+          class="btn-start"
+          (click)="startExam()">
+          Iniciar Examen
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

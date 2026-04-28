@@ -1,0 +1,171 @@
+ion-header {
+  ion-toolbar {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8c 100%);
+    color: #fff;
+    --border-bottom: none;
+
+    ion-title {
+      font-weight: bold;
+    }
+
+    ion-back-button {
+      color: #fff;
+    }
+  }
+}
+
+ion-content {
+  --background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8c 100%);
+  --padding-start: 0;
+  --padding-end: 0;
+}
+
+/* Centered content container */
+ion-content > * {
+  margin: 0 auto;
+  max-width: 600px;
+  width: 100%;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+
+ion-content > .ion-padding {
+  padding: 20px;
+}
+
+.gym-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding-top: 10px;
+}
+
+.error-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+
+  ion-card-content {
+    padding: 20px;
+    color: #fff;
+
+    .error-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+      color: rgba(255, 255, 255, 0.8);
+
+      ion-icon {
+        font-size: 1.2rem;
+        color: #ff9800;
+      }
+    }
+
+    .error-title {
+      margin: 10px 0;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #ffeb3b;
+    }
+
+    .progress-container {
+      margin-top: 15px;
+
+      .progress-bar {
+        width: 100%;
+        height: 12px;
+        background: linear-gradient(90deg, #4CAF50 0%, #FFC107 35%, #FF6B6B 100%);
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 8px;
+
+        .progress-fill {
+          height: 100%;
+          background: rgba(0, 0, 0, 0.3);
+        }
+      }
+
+      .progress-text {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.8);
+      }
+    }
+  }
+}
+
+.chart-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 20px;
+
+  ion-card-content {
+    padding: 0;
+
+    .radar-chart {
+      width: 100%;
+      height: auto;
+      max-width: 250px;
+      margin: 0 auto;
+    }
+  }
+}
+
+.btn-entrenar {
+  --background: #8bc34a;
+  --background-activated: #7cb342;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 12px 0;
+  border-radius: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  margin: 10px 0;
+}
+
+.coaching-card {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  margin-bottom: 20px;
+
+  ion-card-content {
+    padding: 20px;
+
+    .coaching-content {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+
+      .avatar {
+        flex-shrink: 0;
+
+        ion-icon {
+          font-size: 2.5rem;
+          color: rgba(255, 255, 255, 0.8);
+        }
+      }
+
+      .coaching-text {
+        flex: 1;
+
+        p {
+          margin: 0;
+          color: rgba(255, 255, 255, 0.9);
+          font-size: 0.95rem;
+        }
+      }
+    }
+  }
+}
+
+ion-card {
+  margin: 0;
+}

@@ -1,0 +1,197 @@
+ion-header {
+  ion-toolbar {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8c 100%);
+    color: #fff;
+    --border-bottom: none;
+
+    ion-title {
+      font-weight: bold;
+    }
+
+    ion-back-button {
+      color: #fff;
+    }
+
+    ion-button {
+      color: #fff;
+    }
+  }
+}
+
+ion-content {
+  --background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  --padding-start: 0;
+  --padding-end: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* Centered content container */
+ion-content > * {
+  margin: 0 auto;
+  max-width: 600px;
+  width: 100%;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+
+ion-content > .ion-padding {
+  padding: 20px;
+}
+
+.examen-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100%;
+  padding: 20px;
+}
+
+.config-card {
+  width: 100%;
+  max-width: 400px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+
+  ion-card-content {
+    padding: 30px 20px;
+
+    h2 {
+      margin: 0 0 25px 0;
+      color: #1e3a5f;
+      font-weight: bold;
+      text-align: center;
+      font-size: 1.4rem;
+    }
+  }
+}
+
+.selection-section {
+  margin-bottom: 25px;
+
+  .selection-label {
+    margin: 0 0 15px 0;
+    color: #1e3a5f;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  .slider-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+
+    .slider-min,
+    .slider-max {
+      color: #666;
+      font-weight: 600;
+      font-size: 0.9rem;
+      min-width: 30px;
+    }
+
+    .slider-wrapper {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      .custom-slider {
+        width: 100%;
+        height: 6px;
+        border-radius: 3px;
+        background: linear-gradient(90deg, #ff9800 0%, #ffc107 50%, #999 100%);
+        outline: none;
+        -webkit-appearance: none;
+        appearance: none;
+        padding: 0;
+        margin: 0;
+
+        &::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 45px;
+          height: 45px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8c 100%);
+          cursor: pointer;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          font-weight: bold;
+          font-size: 1rem;
+        }
+
+        &::-moz-range-thumb {
+          width: 45px;
+          height: 45px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8c 100%);
+          cursor: pointer;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+          border: none;
+        }
+      }
+
+      .slider-value {
+        position: absolute;
+        top: -45px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8c 100%);
+        color: white;
+        border-radius: 50%;
+        font-weight: bold;
+        font-size: 1.1rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      }
+    }
+  }
+}
+
+.time-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  color: #1e3a5f;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 20px;
+
+  ion-icon {
+    font-size: 1.2rem;
+    color: #2196f3;
+  }
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid #e0e0e0;
+  margin: 20px 0;
+}
+
+.btn-start {
+  --background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8c 100%);
+  --background-activated: #1a2f4f;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 15px 0;
+  border-radius: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 15px rgba(30, 58, 95, 0.3);
+  margin-top: 10px;
+}

@@ -1,0 +1,51 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Habilidades</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div class="habilidades-container">
+    <h2>Elige una habilidad:</h2>
+    
+    <div class="habilidades-grid">
+      <ion-button 
+        expand="block" 
+        class="habilidad-btn btn-localizar"
+        (click)="selectSkill('Localizar')">
+        Localizar
+      </ion-button>
+      
+      <ion-button 
+        expand="block" 
+        class="habilidad-btn btn-interpretar"
+        (click)="selectSkill('Interpretar')">
+        Interpretar
+      </ion-button>
+      
+      <ion-button 
+        expand="block" 
+        class="habilidad-btn btn-evaluar"
+        (click)="selectSkill('Evaluar')">
+        Evaluar 32%
+      </ion-button>
+      
+      <ion-button 
+        expand="block" 
+        class="habilidad-btn btn-lectura"
+        (click)="selectSkill('Lectura Crítica')">
+        Lectura Crítica 75%
+      </ion-button>
+      
+      <ion-button 
+        expand="block" 
+        class="habilidad-btn btn-vocabulario"
+        (click)="selectSkill('Vocabulario')">
+        Vocabulario 90%
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

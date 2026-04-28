@@ -1,0 +1,87 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>GYM - Revancha</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div class="gym-container">
+    <!-- Error Frecuente Section -->
+    <ion-card class="error-card">
+      <ion-card-content>
+        <div class="error-header">
+          <ion-icon name="flame"></ion-icon>
+          <span>Error frecuente:</span>
+        </div>
+        <p class="error-title">Evaluar argumentos implícitos</p>
+        
+        <!-- Progress Bar -->
+        <div class="progress-container">
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 35%"></div>
+          </div>
+          <span class="progress-text">1.52</span>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Radar Chart Section -->
+    <ion-card class="chart-card">
+      <ion-card-content>
+        <svg viewBox="0 0 200 200" class="radar-chart">
+          <!-- Hexagon grid -->
+          <polygon points="100,30 150,55 150,130 100,170 50,130 50,55" 
+                   fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+          <polygon points="100,50 135,68 135,112 100,150 65,112 65,68" 
+                   fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+          <polygon points="100,70 120,82 120,112 100,130 80,112 80,82" 
+                   fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+          
+          <!-- Data polygon -->
+          <polygon points="100,50 140,75 145,120 105,155 55,120 70,80" 
+                   fill="rgba(76, 175, 80, 0.3)" stroke="#4CAF50" stroke-width="2"/>
+          
+          <!-- Data points -->
+          <circle cx="100" cy="50" r="3" fill="#4CAF50"/>
+          <circle cx="140" cy="75" r="3" fill="#FF9800"/>
+          <circle cx="145" cy="120" r="3" fill="#2196F3"/>
+          <circle cx="105" cy="155" r="3" fill="#4CAF50"/>
+          <circle cx="55" cy="120" r="3" fill="#F44336"/>
+          <circle cx="70" cy="80" r="3" fill="#FFC107"/>
+          
+          <!-- Labels -->
+          <text x="100" y="25" text-anchor="middle" font-size="11" fill="#fff">Interpretar</text>
+          <text x="160" y="100" text-anchor="start" font-size="11" fill="#fff">Vocabulario</text>
+          <text x="120" y="165" text-anchor="middle" font-size="11" fill="#fff">Tipos de Texto</text>
+          <text x="20" y="165" text-anchor="middle" font-size="11" fill="#fff">Lectura Crítica</text>
+          <text x="15" y="75" text-anchor="start" font-size="11" fill="#fff">Evaluar</text>
+        </svg>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Train Button -->
+    <ion-button 
+      expand="block" 
+      class="btn-entrenar"
+      (click)="startTraining()">
+      Entrenar
+    </ion-button>
+
+    <!-- Coaching Card -->
+    <ion-card class="coaching-card">
+      <ion-card-content>
+        <div class="coaching-content">
+          <div class="avatar">
+            <ion-icon name="person-circle"></ion-icon>
+          </div>
+          <div class="coaching-text">
+            <p>Concentrémonos en esto</p>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

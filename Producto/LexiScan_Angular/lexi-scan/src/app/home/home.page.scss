@@ -1,0 +1,186 @@
+ion-header {
+  ion-toolbar {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8c 100%);
+    color: #fff;
+
+    ion-title {
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+  }
+}
+
+ion-content {
+  --background: #f5f5f5;
+  --padding-start: 0;
+  --padding-end: 0;
+}
+
+/* Centered content container */
+ion-content > * {
+  margin: 0 auto;
+  max-width: 600px;
+  width: 100%;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+
+ion-content > .ion-padding {
+  padding: 20px;
+}
+
+.welcome-section {
+  background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8c 100%);
+  padding: 20px;
+  border-radius: 10px;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  h2 {
+    margin: 0 0 5px 0;
+    font-size: 1.8rem;
+    font-weight: bold;
+  }
+
+  .subtitle {
+    margin: 0;
+    font-size: 0.95rem;
+    opacity: 0.9;
+  }
+}
+
+.stats-card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  margin: 15px 0;
+
+  ion-card-content {
+    padding: 20px;
+  }
+
+  .stats-container {
+    display: flex;
+    justify-content: space-around;
+    gap: 20px;
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      color: #1e3a5f;
+
+      ion-icon {
+        font-size: 2rem;
+        color: #ff9800;
+      }
+    }
+  }
+}
+
+.chart-card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  margin: 15px 0;
+  background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8c 100%);
+
+  ion-card-content {
+    padding: 20px;
+    color: #fff;
+
+    h3 {
+      margin: 0 0 15px 0;
+      text-align: center;
+      font-size: 1.1rem;
+    }
+
+    .radar-container {
+      width: 100%;
+      max-width: 250px;
+      margin: 0 auto;
+
+      .radar-chart {
+        width: 100%;
+        height: auto;
+      }
+    }
+  }
+}
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  ion-button {
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 15px 0;
+
+    &.btn-habilidades {
+      --background: #8bc34a;
+      --background-activated: #7cb342;
+    }
+
+    &.btn-gym {
+      --background: #1e3a5f;
+      --background-activated: #152a45;
+    }
+
+    &.btn-examen {
+      --background: #455a64;
+      --background-activated: #37474f;
+    }
+  }
+}
+
+.challenge-card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8c 100%);
+  margin: 20px 0;
+
+  ion-card-content {
+    padding: 20px;
+    color: #fff;
+
+    .challenge-content {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+
+      .avatar {
+        flex-shrink: 0;
+
+        ion-icon {
+          font-size: 3rem;
+          color: rgba(255, 255, 255, 0.8);
+        }
+      }
+
+      .challenge-text {
+        flex: 1;
+
+        p {
+          margin: 5px 0;
+          font-size: 0.95rem;
+          line-height: 1.4;
+
+          &:first-child {
+            color: rgba(255, 255, 255, 0.9);
+          }
+
+          &.challenge-question {
+            color: #ffeb3b;
+            font-weight: 600;
+          }
+        }
+      }
+    }
+  }
+}
+
+ion-card {
+  margin: 15px 0;
+}

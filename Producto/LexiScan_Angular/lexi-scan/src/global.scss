@@ -35,3 +35,35 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import "@ionic/angular/css/palettes/dark.system.css";
+
+/**
+ * Global Layout Styles
+ * Centered, professional design with max-width
+ */
+ion-content {
+  --padding-start: 0;
+  --padding-end: 0;
+
+  .ion-padding {
+    margin: 0 auto;
+    max-width: 600px;
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+}
+
+/* Apply centered container styles to direct content wrappers */
+ion-content > * {
+  margin: 0 auto;
+  max-width: 600px;
+  width: 100%;
+  padding: 0 20px;
+  box-sizing: border-box;
+
+  &.ion-margin-vertical,
+  &.ion-padding {
+    padding: 20px;
+  }
+}
+
