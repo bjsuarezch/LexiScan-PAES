@@ -2,15 +2,20 @@ from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
-from . import crud, database, models, schemas
+import crud, database, models, schemas
 
 models.Base.metadata.create_all(bind=database.engine)
 
 app = FastAPI(title='LexiScan API', version='0.1.0')
 
+origins = [
+    "http://localhost:4200", # El puerto de tu Angular
+    "http://127.0.0.1:4200",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['*'],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=['*'],
     allow_headers=['*'],

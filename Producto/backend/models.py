@@ -1,3 +1,4 @@
+import enum
 from datetime import datetime
 
 from sqlalchemy import (
@@ -5,6 +6,7 @@ from sqlalchemy import (
     CheckConstraint,
     Column,
     DateTime,
+    Enum,
     ForeignKey,
     Integer,
     Numeric,
@@ -15,7 +17,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 
-from .database import Base
+from database import Base
 
 
 class Usuario(Base):
@@ -34,6 +36,13 @@ class Usuario(Base):
     habilidades = relationship('HistorialHabilidades', back_populates='usuario', cascade='all, delete')
     wallet = relationship('EconomiaMonedas', back_populates='usuario', uselist=False, cascade='all, delete')
 
+class HabilidadEnum(enum.Enum):
+    Localizar = "Localizar"
+    Interpretar = "Interpretar"
+    Evaluar = "Evaluar"
+    Lectura_Critica = "Lectura_Critica"
+    Vocabulario = "Vocabulario"
+    Tipos_de_Texto = "Tipos_de_Texto"
 
 class HistorialHabilidades(Base):
     __tablename__ = 'historial_habilidades'

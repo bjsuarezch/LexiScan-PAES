@@ -23,8 +23,7 @@
       "dom"
     ],
     "skipLibCheck": true,
-    "useDefineForClassFields": false,
-    "ignoreDeprecations": "6.0"
+    "useDefineForClassFields": false
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

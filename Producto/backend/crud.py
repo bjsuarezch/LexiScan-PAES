@@ -5,7 +5,7 @@ from typing import List, Optional
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from . import models
+import models
 
 SKILLS = [
     'Localizar',
@@ -59,25 +59,32 @@ def create_user(db: Session, rut: str, nombre_completo: str, email: str, contras
         activo=True,
     )
     db.add(user)
-    db.flush()
-
+    
     for skill in SKILLS:
-        db.add(models.HistorialHabilidades(
+        habilidad = models.HistorialHabilidades(
             rut_usuario=rut,
             nombre_habilidad=skill,
-            nivel_maestria=0.00,
+            nivel_maestria=0.0,
             ultima_actualizacion=datetime.utcnow(),
-        ))
+        )
+        db.add(habilidad)
 
-    db.add(models.EconomiaMonedas(
+    economia = models.EconomiaMonedas(
         rut_usuario=rut,
         saldo_monedas=0,
         total_acumulado=0,
         ultima_transaccion=datetime.utcnow(),
-    ))
+    )
+    db.add(economia)
 
-    db.commit()
-    db.refresh(user)
+    try:
+        db.commit()
+        db.refresh(user)
+    except Exception as e:
+        db.rollback()
+        print(f"Error al crear usuario y habilidades: {e}")
+        raise e
+        
     return user
 
 
