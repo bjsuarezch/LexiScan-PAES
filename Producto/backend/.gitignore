@@ -1,0 +1,5 @@
+# Ignorar el entorno virtual dentro de la carpeta backend
+venv/
+.venv/
+__pycache__/
+*.pyc
