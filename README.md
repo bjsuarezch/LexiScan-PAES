@@ -1,6 +1,6 @@
 # LexiScan-PAES
 
-Aplicación móvil Android diseñada para que estudiantes puedan prepararse y sacar un excelente puntaje en la PAES de Comprensión Lectora. La aplicación proporciona un entorno interactivo con exámenes, seguimiento de habilidades y un gimnasio de práctica personalizado.
+Aplicación diseñada para que estudiantes puedan prepararse y sacar un excelente puntaje en la PAES de Comprensión Lectora. La aplicación proporciona un entorno interactivo con exámenes, seguimiento de habilidades y un gimnasio de práctica personalizado.
 
 ---
 
@@ -94,6 +94,11 @@ cd c:\Users\yelia\LexiScan-PAES\LexiScan-PAES
 ### **Paso 2: Levantando la Base de Datos con Docker**
 
 La base de datos PostgreSQL se levanta automáticamente con Docker Compose:
+
+```bash
+# Abrir Docker-Desktop y verificar que se vea Engine running dentro de docker-desktop
+```
+
 
 ```bash
 # Navegar a la carpeta Producto
