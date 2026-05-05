@@ -145,6 +145,7 @@ source venv/bin/activate
 
 # Instalar dependencias
 pip install -r requirements.txt
+pip install pydantic[email]
 ```
 
 **Dependencias del Backend:**
