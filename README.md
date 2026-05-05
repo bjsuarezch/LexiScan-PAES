@@ -96,6 +96,11 @@ cd c:\Users\yelia\LexiScan-PAES\LexiScan-PAES
 La base de datos PostgreSQL se levanta automáticamente con Docker Compose:
 
 ```bash
+# Abrir Docker-Desktop y verificar que se vea Engine running dentro de docker-desktop
+```
+
+
+```bash
 # Navegar a la carpeta Producto
 cd Producto
 
