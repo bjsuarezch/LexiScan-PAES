@@ -1,0 +1,19 @@
+services:
+  db:
+    image: postgres:15
+    container_name: lexiscan_db_container
+    restart: always
+    environment:
+      POSTGRES_USER: user_lexiscan
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: lexiscan_db
+    ports:
+      - "5432:5432"
+    volumes:
+      # Esta línea es la más importante: vincula tu script SQL 
+      # para que se ejecute automáticamente al crear el contenedor.
+      - ./lexiscan_schema.sql:/docker-entrypoint-initdb.d/lexiscan_schema.sql
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
