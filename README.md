@@ -1,6 +1,6 @@
 # LexiScan-PAES
 
-Aplicación móvil Android diseñada para que estudiantes puedan prepararse y sacar un excelente puntaje en la PAES de Comprensión Lectora. La aplicación proporciona un entorno interactivo con exámenes, seguimiento de habilidades y un gimnasio de práctica personalizado.
+Aplicación diseñada para que estudiantes puedan prepararse y sacar un excelente puntaje en la PAES de Comprensión Lectora. La aplicación proporciona un entorno interactivo con exámenes, seguimiento de habilidades y un gimnasio de práctica personalizado.
 
 ---
 
