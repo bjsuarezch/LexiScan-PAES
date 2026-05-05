@@ -184,3 +184,31 @@ ion-content > .ion-padding {
 ion-card {
   margin: 15px 0;
 }
+
+.skills-card {
+  .skill-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  ion-chip {
+    color: white;
+    font-weight: 600;
+    border-radius: 20px;
+    padding: 0 10px;
+  }
+
+  ion-chip.maestria-full {
+    --background: #2196f3;
+  }
+
+  ion-chip.maestria-media {
+    --background: #4caf50;
+  }
+
+  ion-chip.maestria-baja {
+    --background: #f44336;
+  }
+}

@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ILogin } from '../models/auth.model';
+import { ILogin, IUserProfile } from '../models/auth.model';
+import { HabilidadesService } from '../services/habilidades.service';
+import { ProfileService } from '../services/profile.service';
 
 @Component({
   selector: 'app-tab1',
@@ -14,7 +16,12 @@ export class Tab1Page implements OnInit {
   submitted = false;
   showPassword = false;
 
-  constructor(private fb: FormBuilder, private router: Router) {
+  constructor(
+    private fb: FormBuilder,
+    private router: Router,
+    private habilidadesService: HabilidadesService,
+    private profileService: ProfileService,
+  ) {
     this.initializeForm();
   }
 
@@ -96,12 +103,23 @@ export class Tab1Page implements OnInit {
 
     if (this.loginForm.valid) {
       const loginData: ILogin = this.loginForm.value;
-      console.log('Datos de login validados:', loginData);
-      // Aquí enviarías los datos al backend
-      alert('Login enviado exitosamente');
-      this.resetForm();
-      // Navegar a la página de inicio después del login exitoso
-      this.router.navigate(['/home']);
+      this.habilidadesService.login({ rut: loginData.rut, contrasena: loginData.contrasena }).subscribe({
+        next: response => {
+          const profile: IUserProfile = {
+            rut: response.rut,
+            nombre: response.nombre_completo,
+            email: response.email,
+            telefono: '',
+            direccion: '',
+          };
+          this.profileService.saveProfile(profile);
+          this.router.navigate(['/home']);
+        },
+        error: error => {
+          console.error('Error de login:', error);
+          alert('Login fallido: ' + (error.error?.detail || 'Revisa tus credenciales'));
+        }
+      });
     }
   }
 

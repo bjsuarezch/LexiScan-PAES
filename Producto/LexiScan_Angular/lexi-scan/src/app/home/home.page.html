@@ -15,7 +15,7 @@
 
   <!-- Welcome Section -->
   <div class="welcome-section ion-margin-vertical">
-    <h2>Hola, Benjamin 😊</h2>
+    <h2>Hola, {{ profile?.nombre || 'Benjamin' }} 😊</h2>
     <p class="subtitle">Listo para subir tu puntaje PAES?</p>
   </div>
 
@@ -25,12 +25,28 @@
       <div class="stats-container">
         <div class="stat-item">
           <ion-icon name="flame"></ion-icon>
-          <span>Racha: 7 días</span>
+          <span>Racha: {{ dashboard?.racha_actual ?? '—' }} días</span>
         </div>
         <div class="stat-item">
           <ion-icon name="star"></ion-icon>
-          <span>320 monedas</span>
+          <span>{{ dashboard?.saldo_monedas ?? '—' }} monedas</span>
         </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Skills summary -->
+  <ion-card class="skills-card" *ngIf="dashboard">
+    <ion-card-header>
+      <ion-card-title>Progreso por habilidad</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <div class="skill-grid">
+        <ion-chip
+          *ngFor="let habilidad of dashboard.habilidades"
+          [ngClass]="getClass(habilidad.nivel_maestria)">
+          {{ habilidad.nombre_habilidad }} {{ habilidad.nivel_maestria }}%
+        </ion-chip>
       </div>
     </ion-card-content>
   </ion-card>

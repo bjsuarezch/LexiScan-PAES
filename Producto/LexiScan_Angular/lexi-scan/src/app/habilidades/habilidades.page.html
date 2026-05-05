@@ -13,39 +13,30 @@
     
     <div class="habilidades-grid">
       <ion-button 
+        *ngFor="let habilidad of habilidades"
         expand="block" 
-        class="habilidad-btn btn-localizar"
-        (click)="selectSkill('Localizar')">
-        Localizar
+        class="habilidad-btn"
+        [ngClass]="getClass(habilidad.nivel_maestria)"
+        (click)="selectSkill(habilidad.nombre_habilidad)">
+        {{ habilidad.nombre_habilidad }} {{ habilidad.nivel_maestria }}%
       </ion-button>
-      
-      <ion-button 
-        expand="block" 
-        class="habilidad-btn btn-interpretar"
-        (click)="selectSkill('Interpretar')">
-        Interpretar
-      </ion-button>
-      
-      <ion-button 
-        expand="block" 
-        class="habilidad-btn btn-evaluar"
-        (click)="selectSkill('Evaluar')">
-        Evaluar 32%
-      </ion-button>
-      
-      <ion-button 
-        expand="block" 
-        class="habilidad-btn btn-lectura"
-        (click)="selectSkill('Lectura Crítica')">
-        Lectura Crítica 75%
-      </ion-button>
-      
-      <ion-button 
-        expand="block" 
-        class="habilidad-btn btn-vocabulario"
-        (click)="selectSkill('Vocabulario')">
-        Vocabulario 90%
-      </ion-button>
+    </div>
+
+    <div class="habilidad-detail" *ngIf="selectedHabilidad">
+      <h3>{{ selectedHabilidad.nombre_habilidad }}</h3>
+      <p class="texto-inedito">{{ selectedHabilidad.texto_inedito }}</p>
+      <ion-list>
+        <ion-item *ngFor="let pregunta of selectedHabilidad.preguntas">
+          <ion-label>
+            <h4>{{ pregunta.enunciado }}</h4>
+            <div class="alternativas">
+              <div *ngFor="let key of ['A','B','C','D']">
+                <strong>{{ key }}.</strong> {{ pregunta.alternativas[key] }}
+              </div>
+            </div>
+          </ion-label>
+        </ion-item>
+      </ion-list>
     </div>
   </div>
 </ion-content>

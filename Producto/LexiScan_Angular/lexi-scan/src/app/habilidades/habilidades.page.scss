@@ -95,5 +95,52 @@ ion-content > .ion-padding {
       --background-activated: #689f38;
       color: white;
     }
+
+    &.maestria-full {
+      --background: #2196f3; /* Azul */
+      --background-activated: #1976d2;
+      --color: white;
+    }
+
+    &.maestria-media {
+      --background: #4caf50; /* Verde */
+      --background-activated: #388e3c;
+      --color: white;
+    }
+
+    &.maestria-baja {
+      --background: #f44336; /* Rojo */
+      --background-activated: #d32f2f;
+      --color: white;
+    }
+  }
+
+  .habilidad-detail {
+    margin-top: 20px;
+    padding: 16px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+
+    h3 {
+      margin-top: 0;
+      color: #1e3a5f;
+    }
+
+    .texto-inedito {
+      color: #444;
+      margin-bottom: 16px;
+      line-height: 1.6;
+    }
+
+    .alternativas {
+      display: grid;
+      gap: 10px;
+      margin-top: 10px;
+
+      div {
+        line-height: 1.5;
+      }
+    }
   }
 }

@@ -1,6 +1,9 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { IUserProfile } from '../models/auth.model';
+import { Habilidad } from '../models/habilidad.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +13,7 @@ export class ProfileService {
   private profileSubject = new BehaviorSubject<IUserProfile | null>(null);
   public profile$ = this.profileSubject.asObservable();
 
-  constructor() {
+  constructor(private http: HttpClient) {
     this.loadProfile();
   }
 
@@ -89,6 +92,14 @@ export class ProfileService {
   }
 
   /**
+   * Guardar perfil recibido desde backend
+   */
+  saveProfile(profile: IUserProfile): void {
+    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(profile));
+    this.profileSubject.next(profile);
+  }
+
+  /**
    * Eliminar perfil (DELETE)
    */
   deleteProfile(id: string): Observable<boolean> {
@@ -123,5 +134,12 @@ export class ProfileService {
    */
   private generateId(): string {
     return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  /**
+   * Obtener habilidades del usuario
+   */
+  getHabilidades(rut: string): Observable<Habilidad[]> {
+    return this.http.get<Habilidad[]>(`${environment.apiUrl}/habilidades/${rut}`);
   }
 }

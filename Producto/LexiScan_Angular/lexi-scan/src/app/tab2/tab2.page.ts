@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
-import { IRegistro } from '../models/auth.model';
+import { Router } from '@angular/router';
+import { IRegistro, IUserProfile } from '../models/auth.model';
+import { HabilidadesService } from '../services/habilidades.service';
+import { ProfileService } from '../services/profile.service';
 
 @Component({
   selector: 'app-tab2',
@@ -14,7 +17,12 @@ export class Tab2Page implements OnInit {
   showPassword = false;
   showConfirmPassword = false;
 
-  constructor(private fb: FormBuilder) {
+  constructor(
+    private fb: FormBuilder,
+    private router: Router,
+    private habilidadesService: HabilidadesService,
+    private profileService: ProfileService,
+  ) {
     this.initializeForm();
   }
 
@@ -157,10 +165,28 @@ export class Tab2Page implements OnInit {
         contrasena: this.registroForm.value.contrasena,
         confirmarContrasena: this.registroForm.value.confirmarContrasena
       };
-      console.log('Datos de registro validados:', registroData);
-      // Aquí enviarías los datos al backend
-      alert('Registro enviado exitosamente');
-      this.resetForm();
+      this.habilidadesService.register({
+        rut: registroData.rut,
+        nombre_completo: registroData.nombre,
+        email: registroData.email,
+        contrasena: registroData.contrasena,
+      }).subscribe({
+        next: response => {
+          const profile: IUserProfile = {
+            rut: response.rut,
+            nombre: response.nombre_completo,
+            email: response.email,
+            telefono: '',
+            direccion: '',
+          };
+          this.profileService.saveProfile(profile);
+          this.router.navigate(['/home']);
+        },
+        error: error => {
+          console.error('Error de registro:', error);
+          alert('Registro fallido: ' + (error.error?.detail || 'Revisa tus datos'));
+        }
+      });
     }
   }
 
