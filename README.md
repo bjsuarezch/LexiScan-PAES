@@ -88,7 +88,7 @@ npm --version
 ### **Paso 1: Clonar/Descargar el Proyecto**
 
 ```bash
-cd c:\Users\yelia\LexiScan-PAES\LexiScan-PAES
+https://github.com/bjsuarezch/LexiScan-PAES.git
 ```
 
 ### **Paso 2: Levantando la Base de Datos con Docker**
