@@ -122,3 +122,25 @@ class SesionPreguntas(Base):
     tiempo_respuesta = Column(Integer, nullable=True)
 
     sesion = relationship('SesionExamen', back_populates='preguntas')
+
+
+class ErroresFavoritos(Base):
+    __tablename__ = 'errores_favoritos'
+
+    id_error = Column(Integer, primary_key=True, index=True)
+    rut_usuario = Column(String(12), ForeignKey('usuarios.rut', ondelete='CASCADE'), nullable=False)
+    id_pregunta = Column(Integer, ForeignKey('preguntas_ia.id_pregunta'), nullable=False)
+    id_habilidad = Column(Integer, ForeignKey('historial_habilidades.id_progreso'), nullable=False)
+    veces_fallada = Column(Integer, nullable=False, default=1)
+    resuelta = Column(Boolean, nullable=False, default=False)
+    fecha_registro = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
+    fecha_resolucion = Column(DateTime(timezone=True), nullable=True)
+
+    usuario = relationship('Usuario')
+    pregunta = relationship('PreguntaIA')
+    habilidad = relationship('HistorialHabilidades')
+
+    __table_args__ = (
+        UniqueConstraint('rut_usuario', 'id_pregunta', name='uix_usuario_pregunta'),
+        CheckConstraint('veces_fallada > 0', name='veces_fallada_check'),
+    )

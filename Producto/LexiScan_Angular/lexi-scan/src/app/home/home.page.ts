@@ -70,4 +70,40 @@ export class HomePage implements OnInit {
   onChallengeClick(): void {
     console.log('Challenge clicked');
   }
+
+  getRadarPoints(): string {
+    if (!this.dashboard?.habilidades) return '';
+
+    const center = { x: 100, y: 100 };
+    
+    // Estos vértices deben ser EXACTAMENTE iguales a los del polígono de fondo del HTML
+    const vertices: { [key: string]: { x: number; y: number } } = {
+      'Interpretar':     { x: 100, y: 40 },
+      'Vocabulario':     { x: 155, y: 70 },
+      'Tipos_de_Texto':  { x: 155, y: 130 },
+      'Localizar':       { x: 100, y: 160 },
+      'Lectura_Critica': { x: 45,  y: 130 },
+      'Evaluar':         { x: 45,  y: 70 },
+    };
+
+    const order = ['Interpretar', 'Vocabulario', 'Tipos_de_Texto', 'Localizar', 'Lectura_Critica', 'Evaluar'];
+    const points: string[] = [];
+
+    for (const skill of order) {
+      const vertex = vertices[skill];
+      const habilidad = this.dashboard.habilidades.find(h => h.nombre_habilidad === skill);
+      
+      // Si no encuentra la habilidad, el punto se queda en el centro (0%)
+      const percent = habilidad ? habilidad.nivel_maestria / 100 : 0;
+      
+      // Interpolación lineal entre el centro y el vértice
+      const x = center.x + (vertex.x - center.x) * percent;
+      const y = center.y + (vertex.y - center.y) * percent;
+      
+      points.push(`${x.toFixed(1)},${y.toFixed(1)}`);
+    }
+
+    // Retorna algo como "100,40 127.5,85 ..."
+    return points.join(' ');
+}
 }

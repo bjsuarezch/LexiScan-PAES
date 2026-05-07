@@ -19,7 +19,7 @@ ion-header {
 }
 
 ion-content {
-  --background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  --background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8c 100%);
   --padding-start: 0;
   --padding-end: 0;
   display: flex;
@@ -51,9 +51,9 @@ ion-content > .ion-padding {
 .config-card {
   width: 100%;
   max-width: 400px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  background: rgba(255,255,255,0.95);
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 
   ion-card-content {
     padding: 30px 20px;

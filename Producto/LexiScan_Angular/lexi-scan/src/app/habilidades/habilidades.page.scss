@@ -15,7 +15,7 @@ ion-header {
 }
 
 ion-content {
-  --background: #f5f5f5;
+  --background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8c 100%);
   --padding-start: 0;
   --padding-end: 0;
 }
@@ -41,30 +41,35 @@ ion-content > .ion-padding {
 
   h2 {
     margin: 0;
-    color: #1e3a5f;
+    color: white;
     font-weight: bold;
     font-size: 1.3rem;
     text-align: center;
-    background: white;
+    background: rgba(255,255,255,0.1);
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   }
 }
 
 .habilidades-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
 
   .habilidad-btn {
     font-weight: 600;
-    font-size: 1rem;
-    padding: 15px 0;
-    border-radius: 10px;
+    font-size: 0.75rem;
+    padding: 12px 8px;
+    border-radius: 8px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 90px;
 
     &.btn-localizar {
       --background: #26a69a;
@@ -114,33 +119,61 @@ ion-content > .ion-padding {
       --color: white;
     }
   }
+}
 
-  .habilidad-detail {
-    margin-top: 20px;
-    padding: 16px;
-    background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+.chart-card {
+  background: #222;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  margin-top: 20px;
 
-    h3 {
-      margin-top: 0;
-      color: #1e3a5f;
-    }
+  ion-card-content {
+    padding: 20px;
+  }
 
-    .texto-inedito {
-      color: #444;
-      margin-bottom: 16px;
-      line-height: 1.6;
-    }
+  .radar-label {
+    fill: white;
+    font-size: 10px;
+    font-weight: 500;
+  }
 
-    .alternativas {
-      display: grid;
-      gap: 10px;
-      margin-top: 10px;
+  .radar-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
 
-      div {
-        line-height: 1.5;
-      }
+  .radar-chart {
+    width: 100%;
+    max-width: 300px;
+  }
+}
+
+.habilidad-detail {
+  margin-top: 20px;
+  padding: 16px;
+  background: rgba(255,255,255,0.95);
+  border-radius: 12px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+
+  h3 {
+    margin-top: 0;
+    color: #1e3a5f;
+  }
+
+  .texto-inedito {
+    color: #444;
+    margin-bottom: 16px;
+    line-height: 1.6;
+  }
+
+  .alternativas {
+    display: grid;
+    gap: 10px;
+    margin-top: 10px;
+
+    div {
+      line-height: 1.5;
     }
   }
 }

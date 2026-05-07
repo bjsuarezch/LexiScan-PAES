@@ -1,6 +1,7 @@
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
+from sqlalchemy.sql import text
 
 import crud, database, models, schemas
 
@@ -88,4 +89,12 @@ def crear_examen(examen_request: schemas.ExamenRequest, db: Session = Depends(ge
         raise HTTPException(status_code=400, detail=str(exc))
     if not data:
         raise HTTPException(status_code=404, detail='Usuario no encontrado')
+    return data
+
+
+@app.get('/error-frecuente/{rut}')
+def error_frecuente(rut: str, db: Session = Depends(get_db)):
+    data = crud.get_error_frecuente(db, rut)
+    if not data:
+        return None
     return data

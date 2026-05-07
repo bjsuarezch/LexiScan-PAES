@@ -1,3 +1,65 @@
+.main-container {
+  background: #f8f9fa; // Un fondo gris muy claro para que resalten las tarjetas blancas
+}
+
+.welcome-stats_card {
+  margin: 15px 0;
+  border-radius: 15px;
+  overflow: hidden; // Importante para que el fondo azul de los stats no se salga de las esquinas redondeadas
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+
+  .welcome-header {
+    background: white;
+    padding: 25px 20px; // Amplios márgenes verticales
+    
+    h2 {
+      color: #004aad; // Azul corporativo/educativo
+      font-weight: 700;
+      margin: 0;
+    }
+    .subtitle {
+      color: #666;
+      margin-top: 5px;
+    }
+  }
+
+  .stats-footer {
+    background: #004aad; // Fondo azul
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+
+    .stat-item {
+      color: white; // Letras blancas
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      
+      ion-icon { font-size: 1.2rem; color: #ffca28; } // Iconos resaltados
+    }
+
+    .stat-divider {
+      width: 1px;
+      height: 20px;
+      background: rgba(255,255,255,0.3);
+    }
+  }
+}
+
+.chart-card {
+  background: #222; // Fondo oscuro para que el radar se vea "pro" con letras blancas
+  border-radius: 15px;
+  
+  .radar-label {
+    fill: white; // Letras blancas en el gráfico
+    font-size: 10px;
+    font-weight: 500;
+  }
+}
+
+
 ion-header {
   ion-toolbar {
     background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8c 100%);
@@ -11,7 +73,7 @@ ion-header {
 }
 
 ion-content {
-  --background: #f5f5f5;
+  --background: #1e3a5f;
   --padding-start: 0;
   --padding-end: 0;
 }
@@ -30,10 +92,10 @@ ion-content > .ion-padding {
 }
 
 .welcome-section {
-  background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8c 100%);
+  background: #fff;
   padding: 20px;
   border-radius: 10px;
-  color: #fff;
+  color: #1e3a5f;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
   h2 {
@@ -50,7 +112,8 @@ ion-content > .ion-padding {
 }
 
 .stats-card {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8c 100%);
+  box-shadow: 0 2px 8px #1e3a5f;
   border-radius: 10px;
   margin: 15px 0;
 
@@ -69,7 +132,7 @@ ion-content > .ion-padding {
       align-items: center;
       gap: 8px;
       font-weight: 600;
-      color: #1e3a5f;
+      color: #ffffff;
 
       ion-icon {
         font-size: 2rem;
@@ -83,11 +146,15 @@ ion-content > .ion-padding {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   border-radius: 10px;
   margin: 15px 0;
+  font-weight: 600;
+  font-size: 0.95rem;
   background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8c 100%);
 
   ion-card-content {
     padding: 20px;
     color: #fff;
+    font-weight: 600;
+    font-size: 0.95rem;
 
     h3 {
       margin: 0 0 15px 0;
@@ -103,37 +170,57 @@ ion-content > .ion-padding {
       .radar-chart {
         width: 100%;
         height: auto;
+        font-weight: 600;
+        font-size: 0.95rem;
       }
     }
   }
 }
 
-.button-group {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+.button-group-horizontal {
+  display: flex;            // Los pone en fila
+  justify-content: space-between; // Distribuye el espacio
+  gap: 8px;                 // Espacio entre botones
+  margin: 16px 0;           // Margen vertical para que no peguen a lo de arriba
+  width: 100%;
+
+
 
   ion-button {
+    flex: 1;                // Hace que todos crezcan por igual para llenar el ancho
+    --border-radius: 12px;  // Opcional: para que se vean más modernos
+    margin: 0;              // Quitamos márgenes por defecto de Ionic
+    height: 45px; 
+    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); // Sombreado para el componente
     font-weight: 600;
     font-size: 0.95rem;
     padding: 15px 0;
+    color: #ffffff;
 
     &.btn-habilidades {
-      --background: #8bc34a;
-      --background-activated: #7cb342;
+      --background: linear-gradient(to bottom, #8aad49e8, #358d35e8);
+      --background-activated: rgb(155, 179, 66)e8;
     }
 
     &.btn-gym {
-      --background: #1e3a5f;
+      --background: linear-gradient(to bottom, #366db4, #3a1e5f);
       --background-activated: #152a45;
     }
 
     &.btn-examen {
-      --background: #455a64;
+      --background: linear-gradient(to bottom, #618eb8, #455a64);
       --background-activated: #37474f;
+    }
+
+    // Efecto visual de "hundido" al presionar (opcional pero recomendado)
+    &:active {
+      transform: translateY(2px);
+      --box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
   }
 }
+
+
 
 .challenge-card {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);

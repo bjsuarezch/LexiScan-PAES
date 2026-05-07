@@ -32,4 +32,8 @@ export class HabilidadesService {
   crearExamen(rut: string, cantidad_preguntas: number): Observable<ExamenResponse> {
     return this.http.post<ExamenResponse>(`${this.baseUrl}/examen`, { rut, cantidad_preguntas });
   }
+
+  getErrorFrecuente(rut: string): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/error-frecuente/${encodeURIComponent(rut)}`);
+  }
 }

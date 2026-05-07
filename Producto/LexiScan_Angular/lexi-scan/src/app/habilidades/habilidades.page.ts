@@ -68,4 +68,32 @@ export class HabilidadesPage implements OnInit {
       }
     });
   }
+
+  getRadarPoints(): string {
+    if (!this.habilidades) return '';
+
+    const center = { x: 100, y: 100 };
+    const vertices: { [key: string]: { x: number; y: number } } = {
+      'Interpretar': { x: 100, y: 30 },
+      'Vocabulario': { x: 160, y: 65 },
+      'Tipos_de_Texto': { x: 160, y: 135 },
+      'Localizar': { x: 100, y: 170 },
+      'Lectura_Critica': { x: 40, y: 135 },
+      'Evaluar': { x: 40, y: 65 },
+    };
+
+    const order = ['Interpretar', 'Vocabulario', 'Tipos_de_Texto', 'Localizar', 'Lectura_Critica', 'Evaluar'];
+    const points: string[] = [];
+
+    for (const skill of order) {
+      const vertex = vertices[skill];
+      const habilidad = this.habilidades.find(h => h.nombre_habilidad === skill);
+      const percent = habilidad ? habilidad.nivel_maestria / 100 : 0;
+      const x = center.x + (vertex.x - center.x) * percent;
+      const y = center.y + (vertex.y - center.y) * percent;
+      points.push(`${x.toFixed(1)},${y.toFixed(1)}`);
+    }
+
+    return points.join(' ');
+  }
 }

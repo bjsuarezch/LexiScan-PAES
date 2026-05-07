@@ -235,3 +235,39 @@ def create_exam_session(db: Session, rut: str, cantidad_preguntas: int) -> Optio
             for pregunta in preguntas
         ],
     }
+
+
+def get_error_frecuente(db: Session, rut: str) -> Optional[dict]:
+    """Obtiene el error frecuente (más veces fallado) del usuario que aún no está resuelto."""
+    error = (
+        db.query(models.ErroresFavoritos)
+        .filter(
+            models.ErroresFavoritos.rut_usuario == rut,
+            models.ErroresFavoritos.resuelta == False
+        )
+        .order_by(models.ErroresFavoritos.veces_fallada.desc())
+        .first()
+    )
+    
+    if not error:
+        return None
+    
+    # Obtener datos de la habilidad
+    habilidad = db.query(models.HistorialHabilidades).filter(
+        models.HistorialHabilidades.id_progreso == error.id_habilidad
+    ).first()
+    
+    # Obtener datos de la pregunta
+    pregunta = db.query(models.PreguntaIA).filter(
+        models.PreguntaIA.id_pregunta == error.id_pregunta
+    ).first()
+    
+    return {
+        'id_error': error.id_error,
+        'nombre_habilidad': DISPLAY_NAMES.get(habilidad.nombre_habilidad, habilidad.nombre_habilidad) if habilidad else 'Desconocida',
+        'veces_fallada': error.veces_fallada,
+        'enunciado': pregunta.enunciado if pregunta else 'Pregunta no disponible',
+        'alternativas': pregunta.alternativas if pregunta else {},
+        'respuesta_correcta': pregunta.respuesta_correcta if pregunta else '',
+        'justificacion_cot': pregunta.justificacion_cot if pregunta else '',
+    }
