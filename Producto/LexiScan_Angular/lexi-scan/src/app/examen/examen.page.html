@@ -21,20 +21,24 @@
         <!-- Question Selection -->
         <div class="selection-section">
           <p class="selection-label">Selecciona la cantidad de preguntas:</p>
-          
+
           <div class="slider-container">
             <span class="slider-min">10</span>
-            <div class="slider-wrapper">
-              <input 
-                type="range" 
-                min="10" 
-                max="65" 
+            <div
+              class="slider-wrapper"
+              [style.--percent]="'calc(' + ((questionCount - 10) / (65 - 10) * 100) + '% + ' + (22.5 - (questionCount - 10) / (65 - 10) * 45) + 'px)'"
+            >
+              <input
+                type="range"
+                min="10"
+                max="65"
                 [value]="questionCount"
                 (input)="onQuestionCountChange($event)"
-                class="custom-slider">
-              <div class="slider-value">
-                {{ questionCount }}
-              </div>
+                class="custom-slider"
+              />
+
+              <!-- Este div ahora se moverá siguiendo al thumb -->
+              <div class="slider-value">{{ questionCount }}</div>
             </div>
             <span class="slider-max">65</span>
           </div>
@@ -47,13 +51,10 @@
         </div>
 
         <!-- Divider -->
-        <hr class="divider">
+        <hr class="divider" />
 
         <!-- Start Button -->
-        <ion-button 
-          expand="block" 
-          class="btn-start"
-          (click)="startExam()">
+        <ion-button expand="block" class="btn-start" (click)="startExam()">
           Iniciar Examen
         </ion-button>
       </ion-card-content>

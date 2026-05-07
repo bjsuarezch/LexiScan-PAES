@@ -15,6 +15,7 @@ export class HomePage implements OnInit {
   dashboard: DashboardResponse | null = null;
   profile: IUserProfile | null = null;
   loading = false;
+  errorFrecuente: any = null;
 
   constructor(
     private router: Router,
@@ -41,6 +42,18 @@ export class HomePage implements OnInit {
       error: error => {
         console.error('Error al cargar dashboard:', error);
         this.loading = false;
+      }
+    });
+  }
+
+  loadErrorFrecuente(rut: string): void {
+    this.habilidadesService.getErrorFrecuente(rut).subscribe({
+      next: error => {
+        this.errorFrecuente = error;
+      },
+      error: error => {
+        console.error('Error al cargar error frecuente:', error);
+        this.errorFrecuente = null;
       }
     });
   }

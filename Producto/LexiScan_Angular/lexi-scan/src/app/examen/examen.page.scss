@@ -93,69 +93,68 @@ ion-content > .ion-padding {
     }
 
     .slider-wrapper {
-      flex: 1;
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 50px; // Altura suficiente para el círculo de 45px
 
-      .custom-slider {
-        width: 100%;
-        height: 6px;
-        border-radius: 3px;
-        background: linear-gradient(90deg, #ff9800 0%, #ffc107 50%, #999 100%);
-        outline: none;
-        -webkit-appearance: none;
-        appearance: none;
-        padding: 0;
-        margin: 0;
+  .custom-slider {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: #ddd;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    z-index: 1;
 
-        &::-webkit-slider-thumb {
-          -webkit-appearance: none;
-          appearance: none;
-          width: 45px;
-          height: 45px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8c 100%);
-          cursor: pointer;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: white;
-          font-weight: bold;
-          font-size: 1rem;
-        }
-
-        &::-moz-range-thumb {
-          width: 45px;
-          height: 45px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8c 100%);
-          cursor: pointer;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-          border: none;
-        }
-      }
-
-      .slider-value {
-        position: absolute;
-        top: -45px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 45px;
-        height: 45px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8c 100%);
-        color: white;
-        border-radius: 50%;
-        font-weight: bold;
-        font-size: 1.1rem;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-      }
+    // ESTILO PARA CHROME / SAFARI / EDGE
+    &::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 45px; // Tamaño grande
+      height: 45px;
+      border-radius: 50%;
+      background: #1e3a5f; // El azul que pediste
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     }
+
+    // ESTILO PARA FIREFOX
+    &::-moz-range-thumb {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      background: #1e3a5f;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+  }
+
+  .slider-value {
+    position: absolute;
+    pointer-events: none; // El toque pasa al slider de abajo
+    z-index: 2; // El número se dibuja encima del círculo azul
+    
+    // Posicionamiento dinámico
+    left: calc(var(--percent));
+    transform: translateX(-50%);
+    
+    // Dimensiones iguales al thumb para centrado perfecto
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    color: white; // Número blanco sobre fondo azul
+    font-weight: bold;
+    font-size: 1.1rem;
+  }
+}
   }
 }
 

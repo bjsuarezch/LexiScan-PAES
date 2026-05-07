@@ -168,15 +168,17 @@
     </ion-card>
 
     <!-- Challenge Card -->
-    <ion-card class="challenge-card">
+    <ion-card class="challenge-card" *ngIf="errorFrecuente">
       <ion-card-content>
         <div class="challenge-content">
           <div class="avatar">
             <ion-icon name="person-circle"></ion-icon>
           </div>
           <div class="challenge-text">
-            <p><strong>Tu debilidad hoy:</strong> Evaluar.</p>
-            <p class="challenge-question">¿Entrenamos?</p>
+            <p>
+              <strong>Tu debilidad hoy:</strong> {{
+              errorFrecuente.nombre_habilidad }}
+            </p>
           </div>
         </div>
       </ion-card-content>
