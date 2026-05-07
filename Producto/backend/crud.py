@@ -303,3 +303,34 @@ def get_error_frecuente(db: Session, rut: str) -> Optional[dict]:
         'respuesta_correcta': pregunta.respuesta_correcta if pregunta else '',
         'justificacion_cot': pregunta.justificacion_cot if pregunta else '',
     }
+
+
+def get_configuracion(db: Session, clave: str) -> Optional[str]:
+    config = db.query(models.Configuracion).filter(models.Configuracion.clave == clave).first()
+    return config.valor if config else None
+
+
+def set_configuracion(db: Session, clave: str, valor: str, descripcion: Optional[str] = None) -> models.Configuracion:
+    config = db.query(models.Configuracion).filter(models.Configuracion.clave == clave).first()
+    if config:
+        config.valor = valor
+        if descripcion:
+            config.descripcion = descripcion
+    else:
+        config = models.Configuracion(clave=clave, valor=valor, descripcion=descripcion)
+        db.add(config)
+    db.commit()
+    db.refresh(config)
+    return config
+
+
+def get_all_configuracion(db: Session) -> List[dict]:
+    configs = db.query(models.Configuracion).all()
+    return [
+        {
+            'clave': c.clave,
+            'valor': c.valor,
+            'descripcion': c.descripcion,
+        }
+        for c in configs
+    ]

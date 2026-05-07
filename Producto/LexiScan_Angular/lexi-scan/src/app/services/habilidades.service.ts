@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { DashboardResponse, HabilidadDetail, ExamenResponse, GeneratedHabilidadDetail, EvaluarRespuestasResponse } from '../models/backend.model';
+import { DashboardResponse, HabilidadDetail, ExamenResponse, GeneratedHabilidadDetail, EvaluarRespuestasResponse, ConfiguracionItem, ConfiguracionUpdate, GroqModelsResponse } from '../models/backend.model';
 import { ILogin } from '../models/auth.model';
 
 @Injectable({
@@ -43,5 +43,17 @@ export class HabilidadesService {
 
   getErrorFrecuente(rut: string): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/error-frecuente/${encodeURIComponent(rut)}`);
+  }
+
+  getConfiguracion(): Observable<ConfiguracionItem[]> {
+    return this.http.get<ConfiguracionItem[]>(`${this.baseUrl}/configuracion`);
+  }
+
+  setConfiguracion(config: ConfiguracionUpdate): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/configuracion`, config);
+  }
+
+  getGroqModels(): Observable<GroqModelsResponse> {
+    return this.http.get<GroqModelsResponse>(`${this.baseUrl}/groq-models`);
   }
 }

@@ -1,0 +1,65 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Configuración de API</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="closeModal()">
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form [formGroup]="configForm" (ngSubmit)="onSubmit()">
+    <!-- API Key Input -->
+    <ion-item>
+      <ion-label position="stacked">API Key de Groq</ion-label>
+      <ion-input
+        formControlName="apiKey"
+        placeholder="Ingresa tu API Key de Groq"
+        type="password"
+      ></ion-input>
+    </ion-item>
+    <ion-text
+      color="danger"
+      *ngIf="
+        configForm.get('apiKey')?.invalid && configForm.get('apiKey')?.touched
+      "
+    >
+      <p class="ion-padding-start">La API Key es requerida</p>
+    </ion-text>
+
+    <!-- Model Selection -->
+    <ion-item>
+      <ion-label position="stacked">Modelo</ion-label>
+      <ion-select formControlName="model" placeholder="Selecciona un modelo">
+        <ion-select-option
+          *ngFor="let model of availableModels"
+          [value]="model"
+        >
+          {{ model }}
+        </ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <!-- Buttons -->
+    <ion-button
+      expand="block"
+      type="submit"
+      [disabled]="configForm.invalid || loading"
+      class="ion-margin-top"
+    >
+      <ion-spinner *ngIf="loading" slot="start" name="crescent"></ion-spinner>
+      Guardar Configuración
+    </ion-button>
+
+    <ion-button
+      expand="block"
+      fill="outline"
+      (click)="closeModal()"
+      class="ion-margin-top"
+    >
+      Cancelar
+    </ion-button>
+  </form>
+</ion-content>

@@ -122,3 +122,30 @@ class ExamenResponse(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class ConfiguracionItem(BaseModel):
+    clave: str
+    valor: str
+    descripcion: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+
+
+class ConfiguracionUpdate(BaseModel):
+    clave: str
+    valor: str
+    descripcion: Optional[str] = None
+
+
+class GroqModel(BaseModel):
+    id: str
+    object: str
+    created: int
+    owned_by: str
+
+
+class GroqModelsResponse(BaseModel):
+    object: str
+    data: List[GroqModel]

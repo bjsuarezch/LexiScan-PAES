@@ -48,6 +48,30 @@ export interface EvaluacionResultado {
   feedback: string;
 }
 
+export interface ConfiguracionItem {
+  clave: string;
+  valor: string;
+  descripcion?: string;
+}
+
+export interface ConfiguracionUpdate {
+  clave: string;
+  valor: string;
+  descripcion?: string;
+}
+
+export interface GroqModel {
+  id: string;
+  object: string;
+  created: number;
+  owned_by: string;
+}
+
+export interface GroqModelsResponse {
+  object: string;
+  data: GroqModel[];
+}
+
 export interface EvaluarRespuestasResponse {
   resultados: EvaluacionResultado[];
   total_correct: number;

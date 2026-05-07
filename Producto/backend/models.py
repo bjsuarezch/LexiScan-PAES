@@ -144,3 +144,16 @@ class ErroresFavoritos(Base):
         UniqueConstraint('rut_usuario', 'id_pregunta', name='uix_usuario_pregunta'),
         CheckConstraint('veces_fallada > 0', name='veces_fallada_check'),
     )
+
+
+class Configuracion(Base):
+    __tablename__ = 'configuracion'
+
+    id_config = Column(Integer, primary_key=True, index=True)
+    clave = Column(String(100), nullable=False, unique=True)
+    valor = Column(String(500), nullable=False)
+    descripcion = Column(String(255), nullable=True)
+
+    __table_args__ = (
+        UniqueConstraint('clave', name='uix_clave_config'),
+    )

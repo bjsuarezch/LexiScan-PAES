@@ -80,4 +80,11 @@
   >
     Crear Cuenta
   </ion-button>
+
+  <!-- Botón flotante de configuración -->
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button (click)="openConfigModal()">
+      <ion-icon name="settings-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
 </ion-content>

@@ -169,3 +169,18 @@ VALUES (
         'sinclair',
         TRUE
     );
+
+-- Configuración inicial
+INSERT INTO
+    configuracion (clave, valor, descripcion)
+VALUES (
+        'GROQ_API_KEY',
+        '',
+        'API Key para Groq (debe configurarse por el usuario)'
+    ),
+    (
+        'GROQ_MODEL',
+        'llama-3.1-8b-instant',
+        'Modelo de Groq a utilizar para generación de contenido'
+    )
+ON CONFLICT (clave) DO NOTHING;

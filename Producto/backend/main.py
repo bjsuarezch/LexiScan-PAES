@@ -7,8 +7,13 @@ from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
+from pydantic import BaseModel
 
 import crud, database, models, schemas
+
+class ConfigAPI(BaseModel):
+    api_key: str
+    modelo: str
 
 load_dotenv()
 print(f"DEBUG: API KEY CARGADA: {os.getenv('GEMINI_API_KEY')[:5]}...") # Solo muestra los primeros 5 caracteres
@@ -51,8 +56,42 @@ GROQ_MODEL = "llama-3.1-8b-instant"
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 GEMINI_MODEL = "gemini-2.5-flash"
 GEMINI_URL = f"https://generativelanguage.googleapis.com/v1/models/{GEMINI_MODEL}:generateContent?key={GEMINI_API_KEY}"
-
 GEMINI_API_KEY_ENV = 'GEMINI_API_KEY'
+
+current_config = {
+    "api_key": os.getenv("GROQ_API_KEY", ""),
+    "modelo": "llama-3.1-70b-versatile"
+}
+
+@app.post("/configurar-ia")
+def configurar_ia(config: ConfigAPI):
+    """Permite a los compañeros setear su propia API Key y elegir modelo"""
+    if not config.api_key.startswith("gsk_"):
+        raise HTTPException(status_code=400, detail="API Key de Groq inválida")
+    
+    current_config["api_key"] = config.api_key
+    current_config["modelo"] = config.modelo
+    
+    return {"status": "Configuración actualizada", "modelo_activo": current_config["modelo"]}
+
+@app.get("/modelos-disponibles")
+def listar_modelos():
+    """Consulta a Groq los modelos que el compañero tiene permitidos con su llave"""
+    if not current_config["api_key"]:
+        raise HTTPException(status_code=400, detail="Primero debes configurar una API Key")
+        
+    url = "https://api.groq.com/openai/v1/models"
+    headers = {
+        "Authorization": f"Bearer {current_config['api_key']}",
+        "Content-Type": "application/json"
+    }
+    
+    response = requests.get(url, headers=headers)
+    if response.status_code != 200:
+        raise HTTPException(status_code=response.status_code, detail="No se pudieron obtener los modelos")
+        
+    return response.json()
+
 VALID_HABILIDADES = {
     'localizar': 'Localizar',
     'interpretar': 'Interpretar',
@@ -151,12 +190,14 @@ def build_evaluation_prompt(tipo_habilidad: str, preguntas: list[dict]) -> str:
     return '\n'.join(prompt_lines)
 
 
-def call_groq_feedback(tipo_habilidad: str, preguntas: list[dict]) -> dict:
-    if not GROQ_API_KEY:
+def call_groq_feedback(tipo_habilidad: str, preguntas: list[dict], db: Session) -> dict:
+    api_key = crud.get_configuracion(db, 'GROQ_API_KEY')
+    model = crud.get_configuracion(db, 'GROQ_MODEL') or 'llama-3.1-8b-instant'
+    if not api_key:
         raise HTTPException(status_code=500, detail='API KEY de Groq no configurada')
 
     payload = {
-        'model': GROQ_MODEL,
+        'model': model,
         'messages': [
             {'role': 'system', 'content': build_system_prompt()},
             {'role': 'user', 'content': build_evaluation_prompt(tipo_habilidad, preguntas)}
@@ -168,7 +209,7 @@ def call_groq_feedback(tipo_habilidad: str, preguntas: list[dict]) -> dict:
     response = requests.post(
         GROQ_URL,
         headers={
-            'Authorization': f'Bearer {GROQ_API_KEY}',
+            'Authorization': f'Bearer {api_key}',
             'Content-Type': 'application/json',
         },
         json=payload,
@@ -240,12 +281,14 @@ def call_groq_feedback(tipo_habilidad: str, preguntas: list[dict]) -> dict:
         raise HTTPException(status_code=502, detail="La IA respondió en un formato no soportado")
  """
  
-def call_gemini_api(habilidad: str) -> dict:
-    if not GROQ_API_KEY:
+def call_gemini_api(habilidad: str, db: Session) -> dict:
+    api_key = crud.get_configuracion(db, 'GROQ_API_KEY')
+    model = crud.get_configuracion(db, 'GROQ_MODEL') or 'llama-3.1-8b-instant'
+    if not api_key:
         raise HTTPException(status_code=500, detail='API KEY de Groq no configurada')
 
     payload = {
-        "model": GROQ_MODEL,
+        "model": model,
         "messages": [
             {"role": "system", "content": build_system_prompt()},
             {"role": "user", "content": build_user_prompt(habilidad)}
@@ -257,7 +300,7 @@ def call_gemini_api(habilidad: str) -> dict:
     response = requests.post(
         GROQ_URL,
         headers={
-            "Authorization": f"Bearer {GROQ_API_KEY}",
+            "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json"
         },
         json=payload,
@@ -335,12 +378,12 @@ def crear_examen(examen_request: schemas.ExamenRequest, db: Session = Depends(ge
 
 
 @app.post('/generar-preguntas', response_model=schemas.GenerarPreguntasResponse)
-def generar_preguntas(request: schemas.GenerarPreguntasRequest):
+def generar_preguntas(request: schemas.GenerarPreguntasRequest, db: Session = Depends(get_db)):
     habilidad_valida = normalize_habilidad_type(request.habilidad)
     if not habilidad_valida:
         raise HTTPException(status_code=400, detail='Tipo de habilidad inválido. Usa Localizar, Interpretar, Evaluar, Lectura Critica, Vocabulario o Tipos de Texto.')
 
-    generacion = call_gemini_api(habilidad_valida)
+    generacion = call_gemini_api(habilidad_valida, db)
 
     if not isinstance(generacion, dict) or 'preguntas' not in generacion:
         raise HTTPException(status_code=502, detail='Respuesta inválida de Gemini: no se encontró el formato esperado.')
@@ -375,7 +418,7 @@ def evaluar_preguntas(request: schemas.EvaluarRespuestasRequest, db: Session = D
                 'respuesta_correcta': pregunta.respuesta_correcta,
             }
             for pregunta in request.preguntas
-        ])
+        ], db)
     except HTTPException:
         feedback_map = {}
 
@@ -420,3 +463,32 @@ def error_frecuente(rut: str, db: Session = Depends(get_db)):
     if not data:
         return None
     return data
+
+
+@app.get('/configuracion')
+def get_configuracion(db: Session = Depends(get_db)):
+    return crud.get_all_configuracion(db)
+
+
+@app.post('/configuracion')
+def set_configuracion(config: schemas.ConfiguracionUpdate, db: Session = Depends(get_db)):
+    crud.set_configuracion(db, config.clave, config.valor, config.descripcion)
+    return {'message': 'Configuración actualizada correctamente.'}
+
+
+@app.get('/groq-models')
+def get_groq_models():
+    api_key = crud.get_configuracion(next(get_db()), 'GROQ_API_KEY')
+    if not api_key:
+        raise HTTPException(status_code=400, detail='API Key de Groq no configurada.')
+
+    url = 'https://api.groq.com/openai/v1/models'
+    headers = {
+        'Authorization': f'Bearer {api_key}',
+        'Content-Type': 'application/json',
+    }
+    response = requests.get(url, headers=headers)
+    if response.status_code != 200:
+        raise HTTPException(status_code=response.status_code, detail='Error al obtener modelos de Groq.')
+
+    return response.json()

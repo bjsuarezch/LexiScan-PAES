@@ -1,9 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { ModalController } from '@ionic/angular';
 import { ILogin, IUserProfile } from '../models/auth.model';
 import { HabilidadesService } from '../services/habilidades.service';
 import { ProfileService } from '../services/profile.service';
+import { ConfigModalComponent } from '../config-modal/config-modal.component';
 
 @Component({
   selector: 'app-tab1',
@@ -19,6 +21,7 @@ export class Tab1Page implements OnInit {
   constructor(
     private fb: FormBuilder,
     private router: Router,
+    private modalController: ModalController,
     private habilidadesService: HabilidadesService,
     private profileService: ProfileService,
   ) {
@@ -130,5 +133,13 @@ export class Tab1Page implements OnInit {
 
   goToCreateAccount(): void {
     this.router.navigate(['/tabs/tab2']);
+  }
+
+  async openConfigModal(): Promise<void> {
+    const modal = await this.modalController.create({
+      component: ConfigModalComponent,
+      componentProps: {}
+    });
+    return await modal.present();
   }
 }
