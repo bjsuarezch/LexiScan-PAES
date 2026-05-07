@@ -60,6 +60,23 @@ class HabilidadDetailResponse(BaseModel):
     preguntas: List[PreguntaItem]
 
 
+class GenerarPreguntasRequest(BaseModel):
+    habilidad: str
+
+
+class GeneratedPreguntaItem(BaseModel):
+    enunciado: str
+    alternativas: Dict[str, str]
+    respuesta_correcta: str
+    justificacion_cot: str
+
+
+class GenerarPreguntasResponse(BaseModel):
+    tipo_habilidad: str
+    texto_inedito: str
+    preguntas: List[GeneratedPreguntaItem]
+
+
 class ExamenRequest(BaseModel):
     rut: str
     cantidad_preguntas: int
