@@ -43,8 +43,8 @@ export class Tab3Page implements OnInit, OnDestroy {
       rut: ['', [Validators.required, this.rutValidator.bind(this)]],
       nombre: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
       email: ['', [Validators.required, Validators.email]],
-      telefono: ['', [Validators.required, this.phoneValidator.bind(this)]],
-      direccion: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(100)]],
+      telefono: ['', [this.phoneValidator.bind(this)]],
+      direccion: ['', [Validators.minLength(5), Validators.maxLength(100)]],
       ciudad: ['', [Validators.minLength(3), Validators.maxLength(50)]],
       codigoPostal: ['', [Validators.pattern(/^\d{1,10}$/)]]
     });

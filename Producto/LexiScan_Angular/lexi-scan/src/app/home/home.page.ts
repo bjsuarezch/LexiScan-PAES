@@ -55,6 +55,13 @@ export class HomePage implements OnInit {
     return 'maestria-baja';
   }
 
+  onLogout() {
+    // navigateRoot resetea el historial para que no se pueda volver atrás
+    // Usamos la ruta vacía porque tus Tabs están definidos en el path: ''
+    this.router.navigate(['/']); 
+  }
+
+
   onHabilidadesClick(): void {
     this.router.navigate(['/habilidades']);
   }

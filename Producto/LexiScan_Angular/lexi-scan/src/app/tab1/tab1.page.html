@@ -1,8 +1,6 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>
-      Login
-    </ion-title>
+    <ion-title> Login </ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -16,11 +14,8 @@
   <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
     <!-- RUT Input -->
     <ion-item>
-      <ion-label position="stacked">RUT</ion-label>
-      <ion-input 
-        formControlName="rut" 
-        placeholder="12.345.678-K"
-        type="text">
+      <ion-label position="stacked">RUT (sin puntos con guión)</ion-label>
+      <ion-input formControlName="rut" placeholder="12345678-K" type="text">
       </ion-input>
     </ion-item>
     <ion-text color="danger" *ngIf="getErrorMessage('rut')">
@@ -30,10 +25,11 @@
     <!-- Email Input -->
     <ion-item>
       <ion-label position="stacked">Email</ion-label>
-      <ion-input 
-        formControlName="email" 
+      <ion-input
+        formControlName="email"
         placeholder="ejemplo@correo.com"
-        type="email">
+        type="email"
+      >
       </ion-input>
     </ion-item>
     <ion-text color="danger" *ngIf="getErrorMessage('email')">
@@ -43,18 +39,14 @@
     <!-- Password Input -->
     <ion-item>
       <ion-label position="stacked">Contraseña</ion-label>
-      <ion-input 
-        formControlName="contrasena" 
+      <ion-input
+        formControlName="contrasena"
         [type]="showPassword ? 'text' : 'password'"
-        placeholder="Ingrese su contraseña">
+        placeholder="Ingrese su contraseña"
+      >
       </ion-input>
-      <ion-button 
-        fill="clear" 
-        slot="end"
-        (click)="togglePasswordVisibility()">
-        <ion-icon 
-          slot="icon-only" 
-          [name]="showPassword ? 'eye-off' : 'eye'">
+      <ion-button fill="clear" slot="end" (click)="togglePasswordVisibility()">
+        <ion-icon slot="icon-only" [name]="showPassword ? 'eye-off' : 'eye'">
         </ion-icon>
       </ion-button>
     </ion-item>
@@ -68,22 +60,24 @@
     </ion-text>
 
     <!-- Submit Button -->
-    <ion-button 
-      expand="block" 
+    <ion-button
+      expand="block"
       type="submit"
       class="ion-margin-top"
-      [disabled]="submitted && !loginForm.valid">
+      [disabled]="submitted && !loginForm.valid"
+    >
       Ingresar
     </ion-button>
   </form>
 
   <!-- Create Account Button -->
-  <ion-button 
-    expand="block" 
+  <ion-button
+    expand="block"
     color="secondary"
     type="button"
     (click)="goToCreateAccount()"
-    class="ion-margin-top">
+    class="ion-margin-top"
+  >
     Crear Cuenta
   </ion-button>
 </ion-content>

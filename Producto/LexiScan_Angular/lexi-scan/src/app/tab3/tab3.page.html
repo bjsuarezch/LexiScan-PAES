@@ -1,8 +1,6 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>
-      Mi Perfil
-    </ion-title>
+    <ion-title> Mi Perfil </ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -26,8 +24,12 @@
   </div>
 
   <!-- Profile Form -->
-  <form *ngIf="!isLoading" [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="profile-form">
-    
+  <form
+    *ngIf="!isLoading"
+    [formGroup]="profileForm"
+    (ngSubmit)="onSubmit()"
+    class="profile-form"
+  >
     <!-- View Mode - Profile Card -->
     <ion-card *ngIf="profileExists && !isEditing">
       <ion-card-header>
@@ -95,14 +97,11 @@
     <!-- Edit Mode - Form Fields -->
     <div *ngIf="isEditing">
       <!-- RUT Input -->
-      <ion-item>
-        <ion-label position="stacked">RUT</ion-label>
-        <ion-input 
-          formControlName="rut" 
-          placeholder="12.345.678-K"
-          type="text"
-          [readonly]="profileExists">
-        </ion-input>
+      <ion-item lines="inset">
+        <ion-label>
+          <p>RUT (Ineditable)</p>
+          <h3>{{ profileForm.get('rut')?.value }}</h3>
+        </ion-label>
       </ion-item>
       <ion-text color="danger" *ngIf="getErrorMessage('rut')">
         <p class="ion-padding-start">{{ getErrorMessage('rut') }}</p>
@@ -111,10 +110,11 @@
       <!-- Nombre Input -->
       <ion-item>
         <ion-label position="stacked">Nombre Completo</ion-label>
-        <ion-input 
-          formControlName="nombre" 
+        <ion-input
+          formControlName="nombre"
           placeholder="Nombre completo"
-          type="text">
+          type="text"
+        >
         </ion-input>
       </ion-item>
       <ion-text color="danger" *ngIf="getErrorMessage('nombre')">
@@ -124,10 +124,11 @@
       <!-- Email Input -->
       <ion-item>
         <ion-label position="stacked">Correo Electrónico</ion-label>
-        <ion-input 
-          formControlName="email" 
+        <ion-input
+          formControlName="email"
           placeholder="ejemplo@correo.com"
-          type="email">
+          type="email"
+        >
         </ion-input>
       </ion-item>
       <ion-text color="danger" *ngIf="getErrorMessage('email')">
@@ -137,10 +138,11 @@
       <!-- Teléfono Input -->
       <ion-item>
         <ion-label position="stacked">Teléfono</ion-label>
-        <ion-input 
-          formControlName="telefono" 
+        <ion-input
+          formControlName="telefono"
           placeholder="+56912345678 o 912345678"
-          type="tel">
+          type="tel"
+        >
         </ion-input>
       </ion-item>
       <ion-text color="danger" *ngIf="getErrorMessage('telefono')">
@@ -150,10 +152,11 @@
       <!-- Dirección Input -->
       <ion-item>
         <ion-label position="stacked">Dirección</ion-label>
-        <ion-input 
-          formControlName="direccion" 
+        <ion-input
+          formControlName="direccion"
           placeholder="Calle y número de residencia"
-          type="text">
+          type="text"
+        >
         </ion-input>
       </ion-item>
       <ion-text color="danger" *ngIf="getErrorMessage('direccion')">
@@ -163,10 +166,11 @@
       <!-- Ciudad Input -->
       <ion-item>
         <ion-label position="stacked">Ciudad</ion-label>
-        <ion-input 
-          formControlName="ciudad" 
+        <ion-input
+          formControlName="ciudad"
           placeholder="Ciudad (opcional)"
-          type="text">
+          type="text"
+        >
         </ion-input>
       </ion-item>
       <ion-text color="danger" *ngIf="getErrorMessage('ciudad')">
@@ -176,10 +180,11 @@
       <!-- Código Postal Input -->
       <ion-item>
         <ion-label position="stacked">Código Postal</ion-label>
-        <ion-input 
-          formControlName="codigoPostal" 
+        <ion-input
+          formControlName="codigoPostal"
           placeholder="Código postal (opcional)"
-          type="number">
+          type="number"
+        >
         </ion-input>
       </ion-item>
       <ion-text color="danger" *ngIf="getErrorMessage('codigoPostal')">
@@ -188,67 +193,74 @@
 
       <!-- Form Status -->
       <ion-text *ngIf="submitted && !profileForm.valid" color="warning">
-        <p class="ion-padding">Por favor corrija los errores en el formulario</p>
+        <p class="ion-padding">
+          Por favor corrija los errores en el formulario
+        </p>
       </ion-text>
     </div>
 
     <!-- Action Buttons -->
     <div class="button-group">
       <!-- Edit Button (View Mode) -->
-      <ion-button 
+      <ion-button
         *ngIf="profileExists && !isEditing"
-        expand="block" 
+        expand="block"
         type="button"
         (click)="toggleEdit()"
-        class="ion-margin-top">
+        class="ion-margin-top"
+      >
         <ion-icon name="pencil" slot="start"></ion-icon>
         Editar Perfil
       </ion-button>
 
       <!-- Save Button (Edit Mode) -->
-      <ion-button 
+      <ion-button
         *ngIf="isEditing"
-        expand="block" 
+        expand="block"
         type="submit"
         class="ion-margin-top"
-        [disabled]="submitted && !profileForm.valid">
+        [disabled]="submitted && !profileForm.valid"
+      >
         <ion-icon name="checkmark" slot="start"></ion-icon>
         Guardar Cambios
       </ion-button>
 
       <!-- Cancel Button (Edit Mode) -->
-      <ion-button 
+      <ion-button
         *ngIf="isEditing"
-        expand="block" 
+        expand="block"
         fill="outline"
         type="button"
         (click)="cancelEdit()"
-        class="ion-margin-top">
+        class="ion-margin-top"
+      >
         <ion-icon name="close" slot="start"></ion-icon>
         Cancelar
       </ion-button>
 
       <!-- Delete Button (View Mode) -->
-      <ion-button 
+      <ion-button
         *ngIf="profileExists && !isEditing"
-        expand="block" 
+        expand="block"
         color="danger"
         fill="outline"
         type="button"
         (click)="deleteProfile()"
-        class="ion-margin-top">
+        class="ion-margin-top"
+      >
         <ion-icon name="trash" slot="start"></ion-icon>
         Eliminar Perfil
       </ion-button>
 
       <!-- Clear Button (Edit Mode - New Profile) -->
-      <ion-button 
+      <ion-button
         *ngIf="isEditing && !profileExists"
-        expand="block" 
+        expand="block"
         fill="outline"
         type="button"
         (click)="resetForm()"
-        class="ion-margin-top">
+        class="ion-margin-top"
+      >
         <ion-icon name="refresh" slot="start"></ion-icon>
         Limpiar
       </ion-button>
