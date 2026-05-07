@@ -31,6 +31,7 @@ export class HabilidadesPage implements OnInit {
   totalQuestions = 0;
   xpGanada = 0;
   submitting = false;
+  isSubmitted = false;
   evaluationError: string | null = null;
 
   constructor(
@@ -77,6 +78,7 @@ export class HabilidadesPage implements OnInit {
     this.totalQuestions = 0;
     this.xpGanada = 0;
     this.evaluationError = null;
+    this.isSubmitted = false;
 
     this.habilidadesService.generarPreguntas(skill).subscribe({
       next: data => {
@@ -91,11 +93,13 @@ export class HabilidadesPage implements OnInit {
   }
 
   canSubmit(): boolean {
-    return Boolean(this.selectedHabilidad) &&
+    return !this.isSubmitted && Boolean(this.selectedHabilidad) &&
       (this.selectedHabilidad?.preguntas.every((_, index) => !!this.selectedAnswers[index]) ?? false);
   }
 
   submitAnswers(): void {
+    if (this.isSubmitted) return;
+
     if (!this.selectedHabilidad || !this.profile?.rut) {
       return;
     }
@@ -112,6 +116,7 @@ export class HabilidadesPage implements OnInit {
         alternativas: pregunta.alternativas,
         respuesta_usuario: this.selectedAnswers[index] || '',
         respuesta_correcta: pregunta.respuesta_correcta,
+        justificacion: pregunta.justificacion_cot,
       })),
     };
 
@@ -122,6 +127,11 @@ export class HabilidadesPage implements OnInit {
         this.totalQuestions = result.total_preguntas;
         this.xpGanada = result.xp_ganada;
         this.submitting = false;
+        this.isSubmitted = true;
+
+        if (this.profile?.rut) {
+          this.loadHabilidades(this.profile.rut);
+        }
       },
       error: error => {
         console.error('Error al evaluar respuestas:', error);

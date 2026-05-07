@@ -14,6 +14,12 @@ import crud, database, models, schemas
 class ConfigAPI(BaseModel):
     api_key: str
     modelo: str
+    
+class PreguntaEvaluacion(BaseModel):
+    enunciado: str
+    respuesta_usuario: str
+    respuesta_correcta: str
+    justificacion: str  # <--- Agregado este campo
 
 load_dotenv()
 print(f"DEBUG: API KEY CARGADA: {os.getenv('GEMINI_API_KEY')[:5]}...") # Solo muestra los primeros 5 caracteres
@@ -128,8 +134,13 @@ def build_system_prompt() -> str:
     )
 
 def build_user_prompt(habilidad: str) -> str:
+    num_preguntas = 4
+    if habilidad == "Tipos_de_Texto" or habilidad == "Tipos de Texto":
+        num_preguntas = 1
     return (
         f"Genera un ejercicio completo para la habilidad de PAES '{habilidad}'. "
+        f"CANTIDAD DE PREGUNTAS A GENERAR: {num_preguntas}.\n\n"
+        f"Genera exactamente {num_preguntas} pregunta(s) de selección múltiple.\n"
         "Devuelve únicamente un JSON válido con esta estructura exacta: "
         "{"
         "  \"tipo_habilidad\": \"string\", "
@@ -431,7 +442,7 @@ def evaluar_preguntas(request: schemas.EvaluarRespuestasRequest, db: Session = D
         if correcta:
             total_correct += 1
 
-        feedback = feedback_map.get(index, 'Revisa la justificación pedagógica y vuelve a intentarlo si es necesario.')
+        feedback = feedback_map.get(index+1, 'Revisa la justificación pedagógica y vuelve a intentarlo si es necesario.')
         resultados.append({
             'index': index,
             'enunciado': pregunta.enunciado,
