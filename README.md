@@ -222,6 +222,32 @@ El frontend estará disponible en: **http://localhost:4200**
 
 ---
 
+### **Paso 7: Configuración de la IA (Groq Cloud)**
+
+Para que el sistema de generación de preguntas funcione, cada integrante del equipo debe configurar su propia clave de acceso.
+
+Obtener API Key:
+
+        Regístrate en Groq Cloud Console.
+
+        Haz clic en "Create API Key", dale un nombre (ej: LexiScan-Dev) y copia la llave generada (empieza con gsk_).
+
+Configurar en el Programa:
+
+        Abre el frontend en tu navegador (http://localhost:4200).
+
+        En la pantalla de Login, busca el icono de engranaje (⚙️) en la parte inferior.
+
+        Se abrirá un panel de configuración donde deberás:
+
+            Ingresar la API Key: Pega la llave gsk_ que obtuviste.
+
+            Seleccionar Modelo: Elige el modelo recomendado (ej: llama-3.1-70b-versatile).
+
+        Haz clic en Guardar Configuración.
+
+---
+
 ## 📁 Estructura del Proyecto
 
 ```
