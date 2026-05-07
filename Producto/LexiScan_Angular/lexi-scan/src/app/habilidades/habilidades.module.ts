@@ -7,14 +7,15 @@ import { IonicModule } from '@ionic/angular';
 import { HabilidadesPageRoutingModule } from './habilidades-routing.module';
 
 import { HabilidadesPage } from './habilidades.page';
+import { RadarChartComponent } from '../components/radar-chart/radar-chart.component';
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
     IonicModule,
-    HabilidadesPageRoutingModule
+    HabilidadesPageRoutingModule,
   ],
-  declarations: [HabilidadesPage]
+  declarations: [HabilidadesPage, RadarChartComponent],
 })
-export class HabilidadesPageModule { }
+export class HabilidadesPageModule {}

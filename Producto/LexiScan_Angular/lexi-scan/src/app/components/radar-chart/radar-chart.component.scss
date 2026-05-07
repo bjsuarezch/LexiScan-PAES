@@ -1,0 +1,26 @@
+.radar-container {
+  width: 100%;
+  max-width: 250px;
+  margin: 0 auto;
+  
+  .radar-chart {
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(0 0 5px rgba(0,0,0,0.2));
+
+    path {
+      transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    circle {
+      transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .radar-label {
+      fill: white;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+  }
+}

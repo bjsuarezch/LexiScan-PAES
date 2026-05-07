@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { DashboardResponse, HabilidadDetail, ExamenResponse, GeneratedHabilidadDetail, EvaluarRespuestasResponse, ConfiguracionItem, ConfiguracionUpdate, GroqModelsResponse } from '../models/backend.model';
 import { ILogin } from '../models/auth.model';
@@ -10,6 +10,8 @@ import { ILogin } from '../models/auth.model';
 })
 export class HabilidadesService {
   private readonly baseUrl = environment.apiUrl;
+  private dashboardSubject = new BehaviorSubject<DashboardResponse | null>(null);
+  dashboard$ = this.dashboardSubject.asObservable();
 
   constructor(private http: HttpClient) {}
 
@@ -22,7 +24,9 @@ export class HabilidadesService {
   }
 
   getDashboard(rut: string): Observable<DashboardResponse> {
-    return this.http.get<DashboardResponse>(`${this.baseUrl}/dashboard/${rut}`);
+    return this.http.get<DashboardResponse>(`${this.baseUrl}/dashboard/${rut}`).pipe(
+      tap(data => this.dashboardSubject.next(data))
+      );
   }
 
   getHabilidadDetail(rut: string, habilidad: string): Observable<HabilidadDetail> {

@@ -4,6 +4,7 @@ import { ProfileService } from '../services/profile.service';
 import { HabilidadesService } from '../services/habilidades.service';
 import { DashboardResponse, HabilidadData, GeneratedHabilidadDetail } from '../models/backend.model';
 import { IUserProfile } from '../models/auth.model';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 interface EvaluacionResultado {
   index: number;
@@ -130,7 +131,8 @@ export class HabilidadesPage implements OnInit {
         this.isSubmitted = true;
 
         if (this.profile?.rut) {
-          this.loadHabilidades(this.profile.rut);
+          this.loadHabilidades(this.profile.rut),
+          this.habilidadesService.getDashboard(this.profile.rut).subscribe();
         }
       },
       error: error => {
