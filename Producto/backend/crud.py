@@ -176,6 +176,38 @@ def update_user_racha(db: Session, user: models.Usuario) -> None:
     db.commit()
 
 
+def update_user_skill_results(db: Session, rut: str, habilidad: str, correct_count: int, total_questions: int) -> int:
+    if total_questions <= 0:
+        return 0
+
+    user = get_user_by_rut(db, rut)
+    if not user:
+        raise ValueError('Usuario no encontrado')
+
+    habilidad_record = (
+        db.query(models.HistorialHabilidades)
+        .filter(models.HistorialHabilidades.rut_usuario == rut)
+        .filter(models.HistorialHabilidades.nombre_habilidad == habilidad)
+        .first()
+    )
+    if not habilidad_record:
+        raise ValueError('Habilidad no encontrada')
+
+    xp_ganada = correct_count * 10
+    user.xp_total += xp_ganada
+
+    porcentaje_aciertos = correct_count / total_questions
+    incremento = int(round(porcentaje_aciertos * 15))
+    habilidad_record.nivel_maestria = min(100.0, float(habilidad_record.nivel_maestria) + incremento)
+    habilidad_record.ultima_actualizacion = datetime.now(timezone.utc)
+
+    db.add(user)
+    db.add(habilidad_record)
+    db.commit()
+
+    return xp_ganada
+
+
 def create_exam_session(db: Session, rut: str, cantidad_preguntas: int) -> Optional[dict]:
     if cantidad_preguntas < 10 or cantidad_preguntas > 65:
         raise ValueError('Cantidad de preguntas debe ser entre 10 y 65')

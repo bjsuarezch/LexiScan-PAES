@@ -20,10 +20,41 @@ export interface PreguntaItem {
   justificacion_cot: string;
 }
 
+export interface GeneratedPreguntaItem {
+  enunciado: string;
+  alternativas: Record<string, string>;
+  respuesta_correcta: string;
+  justificacion_cot: string;
+}
+
 export interface HabilidadDetail {
   nombre_habilidad: string;
   texto_inedito: string;
   preguntas: PreguntaItem[];
+}
+
+export interface GeneratedHabilidadDetail {
+  tipo_habilidad: string;
+  texto_inedito: string;
+  preguntas: GeneratedPreguntaItem[];
+}
+
+export interface EvaluacionResultado {
+  index: number;
+  enunciado: string;
+  respuesta_usuario: string;
+  respuesta_correcta: string;
+  correcta: boolean;
+  feedback: string;
+}
+
+export interface EvaluarRespuestasResponse {
+  resultados: EvaluacionResultado[];
+  total_correct: number;
+  total_preguntas: number;
+  puntaje: number;
+  xp_ganada: number;
+  mensaje: string;
 }
 
 export interface ExamenResponse {

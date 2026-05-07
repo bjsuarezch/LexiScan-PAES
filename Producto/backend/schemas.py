@@ -71,6 +71,37 @@ class GeneratedPreguntaItem(BaseModel):
     justificacion_cot: str
 
 
+class EvaluarPreguntaUsuario(BaseModel):
+    enunciado: str
+    alternativas: Dict[str, str]
+    respuesta_usuario: str
+    respuesta_correcta: str
+
+
+class EvaluarRespuestasRequest(BaseModel):
+    rut: str
+    tipo_habilidad: str
+    preguntas: List[EvaluarPreguntaUsuario]
+
+
+class EvaluarResultadoItem(BaseModel):
+    index: int
+    enunciado: str
+    respuesta_usuario: str
+    respuesta_correcta: str
+    correcta: bool
+    feedback: str
+
+
+class EvaluarRespuestasResponse(BaseModel):
+    resultados: List[EvaluarResultadoItem]
+    total_correct: int
+    total_preguntas: int
+    puntaje: int
+    xp_ganada: int
+    mensaje: str
+
+
 class GenerarPreguntasResponse(BaseModel):
     tipo_habilidad: str
     texto_inedito: str

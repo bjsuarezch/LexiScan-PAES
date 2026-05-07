@@ -2,8 +2,17 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ProfileService } from '../services/profile.service';
 import { HabilidadesService } from '../services/habilidades.service';
-import { DashboardResponse, HabilidadData, HabilidadDetail } from '../models/backend.model';
+import { DashboardResponse, HabilidadData, GeneratedHabilidadDetail } from '../models/backend.model';
 import { IUserProfile } from '../models/auth.model';
+
+interface EvaluacionResultado {
+  index: number;
+  enunciado: string;
+  respuesta_usuario: string;
+  respuesta_correcta: string;
+  correcta: boolean;
+  feedback: string;
+}
 
 @Component({
   selector: 'app-habilidades',
@@ -11,10 +20,18 @@ import { IUserProfile } from '../models/auth.model';
   styleUrls: ['habilidades.page.scss'],
   standalone: false,
 })
+
 export class HabilidadesPage implements OnInit {
   habilidades: HabilidadData[] = [];
-  selectedHabilidad: HabilidadDetail | null = null;
+  selectedHabilidad: GeneratedHabilidadDetail | null = null;
   profile: IUserProfile | null = null;
+  selectedAnswers: Record<number, string> = {};
+  evaluationResults: EvaluacionResultado[] = [];
+  totalCorrect = 0;
+  totalQuestions = 0;
+  xpGanada = 0;
+  submitting = false;
+  evaluationError: string | null = null;
 
   constructor(
     private router: Router,
@@ -53,18 +70,63 @@ export class HabilidadesPage implements OnInit {
   }
 
   selectSkill(skill: string): void {
-    if (!this.profile?.rut) {
+    this.selectedHabilidad = null;
+    this.selectedAnswers = {};
+    this.evaluationResults = [];
+    this.totalCorrect = 0;
+    this.totalQuestions = 0;
+    this.xpGanada = 0;
+    this.evaluationError = null;
+
+    this.habilidadesService.generarPreguntas(skill).subscribe({
+      next: data => {
+        this.selectedHabilidad = data;
+        this.totalQuestions = data.preguntas.length;
+      },
+      error: error => {
+        console.error('Error al generar preguntas:', error);
+        alert('No se pudo generar las preguntas. Inténtalo de nuevo.');
+      }
+    });
+  }
+
+  canSubmit(): boolean {
+    return Boolean(this.selectedHabilidad) &&
+      (this.selectedHabilidad?.preguntas.every((_, index) => !!this.selectedAnswers[index]) ?? false);
+  }
+
+  submitAnswers(): void {
+    if (!this.selectedHabilidad || !this.profile?.rut) {
       return;
     }
 
-    this.selectedHabilidad = null;
-    this.habilidadesService.getHabilidadDetail(this.profile.rut, skill).subscribe({
-      next: data => {
-        this.selectedHabilidad = data;
+    this.submitting = true;
+    this.evaluationError = null;
+    this.evaluationResults = [];
+
+    const payload = {
+      rut: this.profile.rut,
+      tipo_habilidad: this.selectedHabilidad.tipo_habilidad,
+      preguntas: this.selectedHabilidad.preguntas.map((pregunta, index) => ({
+        enunciado: pregunta.enunciado,
+        alternativas: pregunta.alternativas,
+        respuesta_usuario: this.selectedAnswers[index] || '',
+        respuesta_correcta: pregunta.respuesta_correcta,
+      })),
+    };
+
+    this.habilidadesService.evaluarRespuestas(payload).subscribe({
+      next: result => {
+        this.evaluationResults = result.resultados;
+        this.totalCorrect = result.total_correct;
+        this.totalQuestions = result.total_preguntas;
+        this.xpGanada = result.xp_ganada;
+        this.submitting = false;
       },
       error: error => {
-        console.error('Error al cargar detalle de habilidad:', error);
-        alert('No se pudo cargar los detalles de la habilidad.');
+        console.error('Error al evaluar respuestas:', error);
+        this.evaluationError = 'No se pudo evaluar tus respuestas. Intenta de nuevo más tarde.';
+        this.submitting = false;
       }
     });
   }

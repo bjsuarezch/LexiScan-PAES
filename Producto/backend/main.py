@@ -11,6 +11,7 @@ from sqlalchemy.sql import text
 import crud, database, models, schemas
 
 load_dotenv()
+print(f"DEBUG: API KEY CARGADA: {os.getenv('GEMINI_API_KEY')[:5]}...") # Solo muestra los primeros 5 caracteres
 
 models.Base.metadata.create_all(bind=database.engine)
 
@@ -43,9 +44,14 @@ def get_db():
     finally:
         db.close()
 
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
+GROQ_MODEL = "llama-3.1-8b-instant"
+
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
-GEMINI_MODEL = 'gemini-1.0'
+GEMINI_MODEL = "gemini-2.5-flash"
+GEMINI_URL = f"https://generativelanguage.googleapis.com/v1/models/{GEMINI_MODEL}:generateContent?key={GEMINI_API_KEY}"
+
 GEMINI_API_KEY_ENV = 'GEMINI_API_KEY'
 VALID_HABILIDADES = {
     'localizar': 'Localizar',
@@ -54,6 +60,15 @@ VALID_HABILIDADES = {
     'lectura critica': 'Lectura Crítica',
     'vocabulario': 'Vocabulario',
     'tipos de texto': 'Tipos de Texto',
+}
+
+DB_HABILIDADES = {
+    'Localizar': 'Localizar',
+    'Interpretar': 'Interpretar',
+    'Evaluar': 'Evaluar',
+    'Lectura Crítica': 'Lectura_Critica',
+    'Vocabulario': 'Vocabulario',
+    'Tipos de Texto': 'Tipos_de_Texto',
 }
 
 
@@ -73,20 +88,26 @@ def build_system_prompt() -> str:
         'Tu función es diseñar material de evaluación riguroso, claro y útil para estudiantes que se preparan para la PAES.'
     )
 
-
 def build_user_prompt(habilidad: str) -> str:
     return (
         f"Genera un ejercicio completo para la habilidad de PAES '{habilidad}'. "
-        "Incluye un texto inédito y luego 3 preguntas de selección múltiple, cada una con 4 alternativas (A, B, C, D). "
-        "Marca una única respuesta correcta por pregunta y agrega una justificación pedagógica clara en la clave \"justificacion_cot\". "
-        "El texto debe ser original y apropiado para la PAES chilena. "
-        "Devuelve únicamente un JSON válido con las siguientes claves: \"tipo_habilidad\", \"texto_inedito\", \"preguntas\". "
-        "Cada pregunta debe tener: \"enunciado\", \"alternativas\" (objeto con A, B, C, D), \"respuesta_correcta\", \"justificacion_cot\". "
-        "No incluyas texto explicativo fuera del JSON. No uses listas numeradas en el objeto JSON."
+        "Devuelve únicamente un JSON válido con esta estructura exacta: "
+        "{"
+        "  \"tipo_habilidad\": \"string\", "
+        "  \"texto_inedito\": \"string\", "
+        "  \"preguntas\": [ "  # <--- IMPORTANTE: Usar corchetes aquí
+        "    { \"enunciado\": \"...\", \"alternativas\": {\"A\": \"...\", \"B\": \"...\", \"C\": \"...\", \"D\": \"...\"}, \"respuesta_correcta\": \"A\", \"justificacion_cot\": \"...\" }"
+        "  ]"
+        "}"
     )
 
 
-def parse_gemini_output(raw_text: str) -> dict:
+
+def parse_gemini_output(raw_text: str | dict | list) -> dict:
+    if isinstance(raw_text, dict):
+        return raw_text
+    if isinstance(raw_text, list):
+        return {'resultados': raw_text}
     try:
         return json.loads(raw_text)
     except json.JSONDecodeError:
@@ -100,46 +121,164 @@ def parse_gemini_output(raw_text: str) -> dict:
         raise
 
 
-def call_gemini_api(habilidad: str) -> dict:
-    if not GEMINI_API_KEY:
-        raise HTTPException(status_code=500, detail='La API KEY de Gemini no está configurada en el .env')
+def normalize_habilidad_db_name(value: str) -> str:
+    if not value:
+        return ''
+    return DB_HABILIDADES.get(value.strip(), '')
 
-    # Nuevo formato de payload para Gemini 1.5
+
+def build_evaluation_prompt(tipo_habilidad: str, preguntas: list[dict]) -> str:
+    prompt_lines = [
+        'Eres la Profesora Sinclair, una correctora experta en la PAES chilena.',
+        'Evalúa las respuestas del estudiante con un tono pedagógico, claro y preciso.',
+        'Para cada pregunta, determina si la respuesta es correcta o incorrecta y explica por qué lo es.',
+        'Devuelve únicamente un JSON válido con las claves: resultados, total_correct, total_preguntas, puntaje, xp_ganada, mensaje.',
+        'Cada elemento de resultados debe incluir: pregunta_index, enunciado, respuesta_usuario, respuesta_correcta, correcta y feedback.',
+        'No agregues texto adicional fuera del JSON.',
+        f"Habilidad: {tipo_habilidad}",
+        'Preguntas:'
+    ]
+
+    for index, pregunta in enumerate(preguntas):
+        prompt_lines.append(f"Pregunta {index + 1}: {pregunta['enunciado']}")
+        prompt_lines.append('Alternativas:')
+        for key, option in pregunta['alternativas'].items():
+            prompt_lines.append(f"  {key}: {option}")
+        prompt_lines.append(f"Respuesta del estudiante: {pregunta['respuesta_usuario']}")
+        prompt_lines.append(f"Respuesta correcta: {pregunta['respuesta_correcta']}")
+        prompt_lines.append('')
+
+    return '\n'.join(prompt_lines)
+
+
+def call_groq_feedback(tipo_habilidad: str, preguntas: list[dict]) -> dict:
+    if not GROQ_API_KEY:
+        raise HTTPException(status_code=500, detail='API KEY de Groq no configurada')
+
+    payload = {
+        'model': GROQ_MODEL,
+        'messages': [
+            {'role': 'system', 'content': build_system_prompt()},
+            {'role': 'user', 'content': build_evaluation_prompt(tipo_habilidad, preguntas)}
+        ],
+        'temperature': 0.2,
+        'response_format': {'type': 'json_object'},
+    }
+
+    response = requests.post(
+        GROQ_URL,
+        headers={
+            'Authorization': f'Bearer {GROQ_API_KEY}',
+            'Content-Type': 'application/json',
+        },
+        json=payload,
+        timeout=30,
+    )
+
+    if response.status_code != 200:
+        print(f'Error de Groq: {response.text}')
+        raise HTTPException(status_code=502, detail='Error en la comunicación con Groq')
+
+    data = response.json()
+    try:
+        raw_output = data['choices'][0]['message']['content']
+    except (KeyError, IndexError):
+        print(f'Respuesta inesperada de Groq: {data}')
+        raise HTTPException(status_code=502, detail='Formato de respuesta inválido de Groq')
+
+    parsed = parse_gemini_output(raw_output)
+    resultados = parsed.get('resultados')
+    if not isinstance(resultados, list):
+        raise HTTPException(status_code=502, detail='Formato inválido de feedback de Groq')
+
+    feedback_map = {}
+    for item in resultados:
+        if isinstance(item, dict) and 'pregunta_index' in item and 'feedback' in item:
+            try:
+                feedback_map[int(item['pregunta_index'])] = str(item['feedback'])
+            except (ValueError, TypeError):
+                continue
+    return feedback_map
+
+
+""" def call_gemini_api(habilidad: str) -> dict:
+    if not GEMINI_API_KEY:
+        raise HTTPException(status_code=500, detail='API KEY no configurada')
+
+    
     payload = {
         "contents": [{
             "parts": [{
                 "text": f"{build_system_prompt()}\n\n{build_user_prompt(habilidad)}"
             }]
         }],
-        "generationConfig": {
+        "generation_config": {
             "temperature": 0.2,
-            "maxOutputTokens": 1200,
-            "responseMimeType": "application/json" # Esto obliga a Gemini a responder en JSON puro
+            "max_output_tokens": 1200
         }
     }
 
+    response = requests.post(
+        GEMINI_URL,
+        headers={'Content-Type': 'application/json'},
+        json=payload,
+        timeout=30
+    )
+
+    if response.status_code != 200:
+        print(f"Error de Google: {response.text}")
+        raise HTTPException(status_code=502, detail="Error en la comunicación con la IA")
+
+    data = response.json()
+    
+    # Navegamos por la estructura de respuesta de Gemini 2.5
     try:
-        response = requests.post(
-            GEMINI_URL,
-            headers={'Content-Type': 'application/json'},
-            json=payload,
-            timeout=30
-        )
-        
-        if response.status_code != 200:
-            raise HTTPException(status_code=502, detail=f'Error en Gemini API: {response.status_code} {response.text}')
-
-        data = response.json()
-        
-        # Extraer el texto de la nueva estructura de respuesta
         raw_output = data['candidates'][0]['content']['parts'][0]['text']
-        
         return parse_gemini_output(raw_output)
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error interno al llamar a la IA: {str(e)}")
+    except (KeyError, IndexError) as e:
+        print(f"Estructura inesperada: {data}")
+        raise HTTPException(status_code=502, detail="La IA respondió en un formato no soportado")
+ """
+ 
+def call_gemini_api(habilidad: str) -> dict:
+    if not GROQ_API_KEY:
+        raise HTTPException(status_code=500, detail='API KEY de Groq no configurada')
 
+    payload = {
+        "model": GROQ_MODEL,
+        "messages": [
+            {"role": "system", "content": build_system_prompt()},
+            {"role": "user", "content": build_user_prompt(habilidad)}
+        ],
+        "temperature": 0.2,
+        "response_format": {"type": "json_object"} # Esto obliga a Groq a dar JSON
+    }
 
+    response = requests.post(
+        GROQ_URL,
+        headers={
+            "Authorization": f"Bearer {GROQ_API_KEY}",
+            "Content-Type": "application/json"
+        },
+        json=payload,
+        timeout=30
+    )
+
+    if response.status_code != 200:
+        print(f"Error de Groq: {response.text}")
+        raise HTTPException(status_code=502, detail="Error en la comunicación con Groq")
+
+    data = response.json()
+    
+    try:
+        # Groq sigue el formato de OpenAI: choices[0].message.content
+        raw_output = data['choices'][0]['message']['content']
+        return parse_gemini_output(raw_output)
+    except (KeyError, IndexError) as e:
+        print(f"Respuesta inesperada: {data}")
+        raise HTTPException(status_code=502, detail="Formato de respuesta inválido")
+    
+    
 @app.post('/register', response_model=schemas.UserResponse)
 def register(user_create: schemas.UserCreate, db: Session = Depends(get_db)):
     existing_rut = crud.get_user_by_rut(db, user_create.rut)
@@ -208,6 +347,71 @@ def generar_preguntas(request: schemas.GenerarPreguntasRequest):
 
     generacion['tipo_habilidad'] = habilidad_valida
     return generacion
+
+
+@app.post('/evaluar-preguntas', response_model=schemas.EvaluarRespuestasResponse)
+def evaluar_preguntas(request: schemas.EvaluarRespuestasRequest, db: Session = Depends(get_db)):
+    if not request.rut:
+        raise HTTPException(status_code=400, detail='El RUT es obligatorio para evaluar respuestas.')
+
+    habilidad_valida = normalize_habilidad_type(request.tipo_habilidad)
+    if not habilidad_valida:
+        raise HTTPException(status_code=400, detail='Tipo de habilidad inválido para evaluación.')
+
+    habilidad_db = normalize_habilidad_db_name(habilidad_valida)
+    if not habilidad_db:
+        raise HTTPException(status_code=400, detail='No se reconoce la habilidad para la base de datos.')
+
+    if not request.preguntas or len(request.preguntas) == 0:
+        raise HTTPException(status_code=400, detail='Debe enviar al menos una pregunta para evaluar.')
+
+    feedback_map = {}
+    try:
+        feedback_map = call_groq_feedback(habilidad_valida, [
+            {
+                'enunciado': pregunta.enunciado,
+                'alternativas': pregunta.alternativas,
+                'respuesta_usuario': pregunta.respuesta_usuario,
+                'respuesta_correcta': pregunta.respuesta_correcta,
+            }
+            for pregunta in request.preguntas
+        ])
+    except HTTPException:
+        feedback_map = {}
+
+    resultados = []
+    total_correct = 0
+    for index, pregunta in enumerate(request.preguntas):
+        respuesta_usuario = pregunta.respuesta_usuario.strip().upper()
+        respuesta_correcta = pregunta.respuesta_correcta.strip().upper()
+        correcta = respuesta_usuario == respuesta_correcta
+        if correcta:
+            total_correct += 1
+
+        feedback = feedback_map.get(index, 'Revisa la justificación pedagógica y vuelve a intentarlo si es necesario.')
+        resultados.append({
+            'index': index,
+            'enunciado': pregunta.enunciado,
+            'respuesta_usuario': respuesta_usuario,
+            'respuesta_correcta': respuesta_correcta,
+            'correcta': correcta,
+            'feedback': feedback,
+        })
+
+    xp_ganada = 0
+    try:
+        xp_ganada = crud.update_user_skill_results(db, request.rut, habilidad_db, total_correct, len(request.preguntas))
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+    return {
+        'resultados': resultados,
+        'total_correct': total_correct,
+        'total_preguntas': len(request.preguntas),
+        'puntaje': total_correct,
+        'xp_ganada': xp_ganada,
+        'mensaje': 'Evaluación almacenada correctamente.',
+    }
 
 
 @app.get('/error-frecuente/{rut}')

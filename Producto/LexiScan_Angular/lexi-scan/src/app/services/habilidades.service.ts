@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { DashboardResponse, HabilidadDetail, ExamenResponse } from '../models/backend.model';
+import { DashboardResponse, HabilidadDetail, ExamenResponse, GeneratedHabilidadDetail, EvaluarRespuestasResponse } from '../models/backend.model';
 import { ILogin } from '../models/auth.model';
 
 @Injectable({
@@ -27,6 +27,14 @@ export class HabilidadesService {
 
   getHabilidadDetail(rut: string, habilidad: string): Observable<HabilidadDetail> {
     return this.http.get<HabilidadDetail>(`${this.baseUrl}/habilidades/${encodeURIComponent(habilidad)}?rut=${encodeURIComponent(rut)}`);
+  }
+
+  generarPreguntas(habilidad: string): Observable<GeneratedHabilidadDetail> {
+    return this.http.post<GeneratedHabilidadDetail>(`${this.baseUrl}/generar-preguntas`, { habilidad });
+  }
+
+  evaluarRespuestas(payload: { rut: string; tipo_habilidad: string; preguntas: Array<{ enunciado: string; alternativas: Record<string, string>; respuesta_usuario: string; respuesta_correcta: string; }> }): Observable<EvaluarRespuestasResponse> {
+    return this.http.post<EvaluarRespuestasResponse>(`${this.baseUrl}/evaluar-preguntas`, payload);
   }
 
   crearExamen(rut: string, cantidad_preguntas: number): Observable<ExamenResponse> {
