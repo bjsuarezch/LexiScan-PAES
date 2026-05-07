@@ -2,12 +2,15 @@ import os
 import json
 
 import requests
+from dotenv import load_dotenv  # <--- NUEVO
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
 
 import crud, database, models, schemas
+
+load_dotenv()
 
 models.Base.metadata.create_all(bind=database.engine)
 
@@ -40,9 +43,9 @@ def get_db():
     finally:
         db.close()
 
-
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
 GEMINI_MODEL = 'gemini-1.0'
-GEMINI_URL = f'https://gemini.googleapis.com/v1/models/{GEMINI_MODEL}:generateText'
 GEMINI_API_KEY_ENV = 'GEMINI_API_KEY'
 VALID_HABILIDADES = {
     'localizar': 'Localizar',
@@ -98,44 +101,43 @@ def parse_gemini_output(raw_text: str) -> dict:
 
 
 def call_gemini_api(habilidad: str) -> dict:
-    api_key = os.getenv(GEMINI_API_KEY_ENV)
-    if not api_key:
-        raise HTTPException(status_code=500, detail=f'La variable de entorno {GEMINI_API_KEY_ENV} no está configurada')
+    if not GEMINI_API_KEY:
+        raise HTTPException(status_code=500, detail='La API KEY de Gemini no está configurada en el .env')
 
+    # Nuevo formato de payload para Gemini 1.5
     payload = {
-        'temperature': 0.2,
-        'maxOutputTokens': 1200,
-        'prompt': {
-            'messages': [
-                {'role': 'system', 'content': build_system_prompt()},
-                {'role': 'user', 'content': build_user_prompt(habilidad)},
-            ]
-        },
+        "contents": [{
+            "parts": [{
+                "text": f"{build_system_prompt()}\n\n{build_user_prompt(habilidad)}"
+            }]
+        }],
+        "generationConfig": {
+            "temperature": 0.2,
+            "maxOutputTokens": 1200,
+            "responseMimeType": "application/json" # Esto obliga a Gemini a responder en JSON puro
+        }
     }
 
-    response = requests.post(
-        GEMINI_URL,
-        headers={
-            'Authorization': f'Bearer {api_key}',
-            'Content-Type': 'application/json',
-        },
-        json=payload,
-        timeout=30,
-    )
+    try:
+        response = requests.post(
+            GEMINI_URL,
+            headers={'Content-Type': 'application/json'},
+            json=payload,
+            timeout=30
+        )
+        
+        if response.status_code != 200:
+            raise HTTPException(status_code=502, detail=f'Error en Gemini API: {response.status_code} {response.text}')
 
-    if response.status_code != 200:
-        raise HTTPException(status_code=502, detail=f'Error en Gemini API: {response.status_code} {response.text}')
-
-    data = response.json()
-    candidate = data.get('candidates')
-    if not candidate or len(candidate) == 0:
-        raise HTTPException(status_code=502, detail='Respuesta inválida de Gemini: candidato no encontrado')
-
-    raw_output = candidate[0].get('output', '')
-    if not raw_output:
-        raise HTTPException(status_code=502, detail='Respuesta inválida de Gemini: salida vacía')
-
-    return parse_gemini_output(raw_output)
+        data = response.json()
+        
+        # Extraer el texto de la nueva estructura de respuesta
+        raw_output = data['candidates'][0]['content']['parts'][0]['text']
+        
+        return parse_gemini_output(raw_output)
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error interno al llamar a la IA: {str(e)}")
 
 
 @app.post('/register', response_model=schemas.UserResponse)
