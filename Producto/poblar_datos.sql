@@ -16,12 +16,13 @@ VALUES (
         '12345678-9',
         'Benjamín Pérez',
         'benjamin@lexiscan.cl',
-        '07480fb9e85b9396af06f006cf1c95024af2531c65fb505cfbd0add1e2f31573',
+        '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewfLkE0qQcKvKd2', -- bcrypt hash for 'Test1234'
         420,
         7,
         TRUE,
         NOW()
-    ) ON CONFLICT (rut) DO NOTHING;
+    )
+ON CONFLICT (rut) DO NOTHING;
 
 INSERT INTO
     economia_monedas (
@@ -35,7 +36,8 @@ VALUES (
         320,
         1120,
         NOW()
-    ) ON CONFLICT (rut_usuario) DO NOTHING;
+    )
+ON CONFLICT (rut_usuario) DO NOTHING;
 
 INSERT INTO
     historial_habilidades (
@@ -86,7 +88,8 @@ VALUES (
         'Tipos_de_Texto',
         54.00,
         NOW()
-    ) ON CONFLICT DO NOTHING;
+    )
+ON CONFLICT DO NOTHING;
 
 INSERT INTO
     preguntas_ia (

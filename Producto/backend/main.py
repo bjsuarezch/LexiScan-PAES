@@ -9,7 +9,8 @@ models.Base.metadata.create_all(bind=database.engine)
 app = FastAPI(title='LexiScan API', version='0.1.0')
 
 origins = [
-    "http://localhost:4200", # El puerto de tu Angular
+    "http://localhost:4200", 
+    "http://localhost:8100",
     "http://127.0.0.1:4200",
 ]
 
@@ -21,11 +22,16 @@ app.add_middleware(
     allow_headers=['*'],
 )
 
+def fix_sequences(db: Session):
+    # Esto busca el valor máximo y actualiza el contador de la secuencia
+    db.execute(text("SELECT setval('historial_habilidades_id_progreso_seq', COALESCE((SELECT MAX(id_progreso) FROM historial_habilidades), 1))"))
+    db.commit()
 
 def get_db():
     db = database.SessionLocal()
     try:
         yield db
+        fix_sequences(db)
     finally:
         db.close()
 

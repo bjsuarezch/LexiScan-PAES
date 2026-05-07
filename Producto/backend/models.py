@@ -29,14 +29,14 @@ class Usuario(Base):
     password_hash = Column(String(255), nullable=False)
     xp_total = Column(Integer, nullable=False, default=0)
     racha_actual = Column(Integer, nullable=False, default=0)
-    fecha_registro = Column(DateTime, nullable=False, default=datetime.utcnow)
+    fecha_registro = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
     activo = Column(Boolean, nullable=False, default=True)
-    ultimo_acceso = Column(DateTime, nullable=True)
+    ultimo_acceso = Column(DateTime(timezone=True), nullable=True)
 
     habilidades = relationship('HistorialHabilidades', back_populates='usuario', cascade='all, delete')
     wallet = relationship('EconomiaMonedas', back_populates='usuario', uselist=False, cascade='all, delete')
 
-class HabilidadEnum(enum.Enum):
+class HabilidadLectora(enum.Enum):
     Localizar = "Localizar"
     Interpretar = "Interpretar"
     Evaluar = "Evaluar"
@@ -49,9 +49,9 @@ class HistorialHabilidades(Base):
 
     id_progreso = Column(Integer, primary_key=True, index=True)
     rut_usuario = Column(String(12), ForeignKey('usuarios.rut', ondelete='CASCADE'), nullable=False)
-    nombre_habilidad = Column(String(50), nullable=False)
+    nombre_habilidad = Column(Enum(HabilidadLectora, name="habilidad_lectora"), nullable=False)
     nivel_maestria = Column(Numeric(5, 2), nullable=False, default=0.00)
-    ultima_actualizacion = Column(DateTime, nullable=False, default=datetime.utcnow)
+    ultima_actualizacion = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
 
     usuario = relationship('Usuario', back_populates='habilidades')
     preguntas = relationship('PreguntaIA', back_populates='habilidad', cascade='all, delete')
@@ -68,7 +68,7 @@ class EconomiaMonedas(Base):
     rut_usuario = Column(String(12), ForeignKey('usuarios.rut', ondelete='CASCADE'), primary_key=True)
     saldo_monedas = Column(Integer, nullable=False, default=0)
     total_acumulado = Column(Integer, nullable=False, default=0)
-    ultima_transaccion = Column(DateTime, nullable=True)
+    ultima_transaccion = Column(DateTime(timezone=True), nullable=True)
 
     usuario = relationship('Usuario', back_populates='wallet')
 
@@ -84,7 +84,7 @@ class PreguntaIA(Base):
     respuesta_correcta = Column(String(1), nullable=False)
     justificacion_cot = Column(Text, nullable=False)
     modelo_ia = Column(String(60), nullable=False, default='sinclair')
-    fecha_generacion = Column(DateTime, nullable=False, default=datetime.utcnow)
+    fecha_generacion = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
     activa = Column(Boolean, nullable=False, default=True)
 
     habilidad = relationship('HistorialHabilidades', back_populates='preguntas')
@@ -104,8 +104,8 @@ class SesionExamen(Base):
     puntaje_maximo = Column(Integer, nullable=True)
     tiempo_total = Column(Integer, nullable=True)
     es_impulsivo = Column(Boolean, nullable=False, default=False)
-    fecha_inicio = Column(DateTime, nullable=False, default=datetime.utcnow)
-    fecha_fin = Column(DateTime, nullable=True)
+    fecha_inicio = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
+    fecha_fin = Column(DateTime(timezone=True), nullable=True)
     completado = Column(Boolean, nullable=False, default=False)
 
     preguntas = relationship('SesionPreguntas', back_populates='sesion', cascade='all, delete')

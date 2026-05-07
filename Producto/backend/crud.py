@@ -1,11 +1,12 @@
 import hashlib
-from datetime import date, datetime, timedelta
-from typing import List, Optional
+from datetime import date, datetime, timedelta, timezone
+import bcrypt
 
+from typing import Optional, List
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-import models
+import models, schemas
 
 SKILLS = [
     'Localizar',
@@ -27,11 +28,11 @@ DISPLAY_NAMES = {
 
 
 def hash_password(password: str) -> str:
-    return hashlib.sha256(password.encode('utf-8')).hexdigest()
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
 
 def verify_password(password: str, stored_hash: str) -> bool:
-    return hash_password(password) == stored_hash
+    return bcrypt.checkpw(password.encode('utf-8'), stored_hash.encode('utf-8'))
 
 
 def normalize_habilidad_name(value: str) -> str:
@@ -65,7 +66,7 @@ def create_user(db: Session, rut: str, nombre_completo: str, email: str, contras
             rut_usuario=rut,
             nombre_habilidad=skill,
             nivel_maestria=0.0,
-            ultima_actualizacion=datetime.utcnow(),
+            ultima_actualizacion=datetime.now(timezone.utc),
         )
         db.add(habilidad)
 
@@ -73,7 +74,7 @@ def create_user(db: Session, rut: str, nombre_completo: str, email: str, contras
         rut_usuario=rut,
         saldo_monedas=0,
         total_acumulado=0,
-        ultima_transaccion=datetime.utcnow(),
+        ultima_transaccion=datetime.now(timezone.utc),
     )
     db.add(economia)
 
@@ -170,7 +171,7 @@ def update_user_racha(db: Session, user: models.Usuario) -> None:
     else:
         user.racha_actual = 1
 
-    user.ultimo_acceso = datetime.utcnow()
+    user.ultimo_acceso = datetime.now(timezone.utc)
     db.add(user)
     db.commit()
 
