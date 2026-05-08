@@ -1,0 +1,60 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/examen"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Simulacro PAES</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="finishExam()" [disabled]="loading">
+        <ion-icon name="checkmark-circle"></ion-icon>
+        Terminar Examen
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div class="exam-container" *ngIf="examData">
+    <h2>Responde todas las preguntas</h2>
+    <p>Tiempo estimado: {{ examData.estimated_time }} minutos</p>
+
+    <ion-card
+      *ngFor="let pregunta of examData.preguntas; let i = index"
+      class="question-card"
+    >
+      <ion-card-content>
+        <h3>Pregunta {{ i + 1 }}</h3>
+        <p class="question-text">{{ pregunta.enunciado }}</p>
+
+        <ion-radio-group
+          [(ngModel)]="answers[pregunta.id_pregunta]"
+          name="question-{{ pregunta.id_pregunta }}"
+        >
+          <ion-item
+            *ngFor="let alt of getAlternativesArray(pregunta.alternativas)"
+            lines="none"
+          >
+            <ion-label>{{ alt.key }}. {{ alt.value }}</ion-label>
+            <ion-radio slot="start" [value]="alt.key"></ion-radio>
+          </ion-item>
+        </ion-radio-group>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-button
+      expand="block"
+      color="primary"
+      (click)="finishExam()"
+      [disabled]="loading"
+      class="finish-btn"
+    >
+      <ion-icon name="checkmark-circle" slot="start"></ion-icon>
+      Terminar Examen
+    </ion-button>
+  </div>
+
+  <div *ngIf="loading" class="loading-container">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Evaluando examen...</p>
+  </div>
+</ion-content>

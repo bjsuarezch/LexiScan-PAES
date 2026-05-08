@@ -22,6 +22,7 @@ export class GymPage implements OnInit {
   evaluationSubmitted = false;
   isCorrect = false;
   feedback = '';
+  trainingStarted = false;
 
   constructor(
     private router: Router,
@@ -35,7 +36,8 @@ export class GymPage implements OnInit {
       if (profile?.rut) {
         this.loadDashboard(profile.rut);
         this.loadErrorFrecuente(profile.rut);
-        this.loadErroresFrecuentes(profile.rut);
+        // Removed loadErroresFrecuentes here
+        this.errorActual = null;
       }
     });
   }
@@ -85,7 +87,10 @@ export class GymPage implements OnInit {
 
   startTraining(): void {
     console.log('Starting training');
-    // Aquí se puede navegar a una página de entrenamiento
+    this.trainingStarted = true;
+    if (this.profile?.rut) {
+      this.loadErroresFrecuentes(this.profile.rut);
+    }
   }
 
   submitErrorAnswer(): void {
@@ -97,6 +102,30 @@ export class GymPage implements OnInit {
 
     if (this.isCorrect) {
       this.feedback = '¡Excelente! ¡Resolviste este error! 🎉';
+      // Resolve the error
+      this.habilidadesService
+        .resolveError(this.errorActual.id_error)
+        .subscribe({
+          next: () => {
+            // Remove from list
+            this.erroresFrecuentes = this.erroresFrecuentes.filter(
+              (e) => e.id_error !== this.errorActual.id_error,
+            );
+            // Set next or null
+            if (this.erroresFrecuentes.length > 0) {
+              this.errorActual = this.erroresFrecuentes[0];
+            } else {
+              this.errorActual = null;
+            }
+            this.selectedAnswer = '';
+            this.evaluationSubmitted = false;
+            this.feedback = '';
+          },
+          error: (err) => {
+            console.error('Error resolving error:', err);
+            // Still show feedback but don't update
+          },
+        });
     } else {
       this.feedback = `Respuesta incorrecta. La respuesta correcta es: ${this.errorActual.pregunta.respuesta_correcta}. ${this.errorActual.pregunta.justificacion_cot}`;
     }

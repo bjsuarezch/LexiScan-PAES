@@ -4,29 +4,56 @@ import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 const routes: Routes = [
   {
     path: 'home',
-    loadChildren: () => import('./home/home.module').then(m => m.HomePageModule)
+    loadChildren: () =>
+      import('./home/home.module').then((m) => m.HomePageModule),
   },
   {
     path: 'habilidades',
-    loadChildren: () => import('./habilidades/habilidades.module').then(m => m.HabilidadesPageModule)
+    loadChildren: () =>
+      import('./habilidades/habilidades.module').then(
+        (m) => m.HabilidadesPageModule,
+      ),
   },
   {
     path: 'gym',
-    loadChildren: () => import('./gym/gym.module').then(m => m.GymPageModule)
+    loadChildren: () => import('./gym/gym.module').then((m) => m.GymPageModule),
   },
   {
     path: 'examen',
-    loadChildren: () => import('./examen/examen.module').then(m => m.ExamenPageModule)
+    loadChildren: () =>
+      import('./examen/examen.module').then((m) => m.ExamenPageModule),
+  },
+  {
+    path: 'examen-simulacro',
+    loadChildren: () =>
+      import('./examen-simulacro/examen-simulacro.module').then(
+        (m) => m.ExamenSimulacroPageModule,
+      ),
+  },
+  {
+    path: 'examen-resultados',
+    loadChildren: () =>
+      import('./examen-resultados/examen-resultados.module').then(
+        (m) => m.ExamenResultadosPageModule,
+      ),
+  },
+  {
+    path: 'examen-simulacro',
+    loadChildren: () =>
+      import('./examen-simulacro/examen-simulacro.module').then(
+        (m) => m.ExamenSimulacroPageModule,
+      ),
   },
   {
     path: '',
-    loadChildren: () => import('./tabs/tabs.module').then(m => m.TabsPageModule)
-  }
+    loadChildren: () =>
+      import('./tabs/tabs.module').then((m) => m.TabsPageModule),
+  },
 ];
 @NgModule({
   imports: [
-    RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules })
+    RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules }),
   ],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
 export class AppRoutingModule {}

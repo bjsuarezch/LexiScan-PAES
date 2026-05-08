@@ -89,6 +89,20 @@ export class HabilidadesService {
     });
   }
 
+  evaluarExamen(idExamen: number, respuestas: any[]): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/evaluar-examen`, {
+      id_examen: idExamen,
+      respuestas,
+    });
+  }
+
+  guardarResultadosExamen(rut: string, idExamen: number): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/guardar-resultados-examen`, {
+      rut,
+      id_examen: idExamen,
+    });
+  }
+
   getErrorFrecuente(rut: string): Observable<any> {
     return this.http.get<any>(
       `${this.baseUrl}/error-frecuente/${encodeURIComponent(rut)}`,
@@ -98,6 +112,13 @@ export class HabilidadesService {
   getErroresFrecuentes(rut: string): Observable<any[]> {
     return this.http.get<any[]>(
       `${this.baseUrl}/errores-frecuentes/${encodeURIComponent(rut)}`,
+    );
+  }
+
+  resolveError(errorId: number): Observable<any> {
+    return this.http.put<any>(
+      `${this.baseUrl}/errores-frecuentes/${errorId}/resolver`,
+      {},
     );
   }
 

@@ -70,15 +70,18 @@ current_config = {
 }
 
 @app.post("/configurar-ia")
-def configurar_ia(config: ConfigAPI):
-    """Permite a los compañeros setear su propia API Key y elegir modelo"""
+def configurar_ia(config: ConfigAPI, db: Session = Depends(get_db)):
     if not config.api_key.startswith("gsk_"):
         raise HTTPException(status_code=400, detail="API Key de Groq inválida")
     
     current_config["api_key"] = config.api_key
     current_config["modelo"] = config.modelo
+
+    # Opcional: Guardar en BD para que crud.get_configuracion funcione
+    crud.set_configuracion(db, 'GROQ_API_KEY', config.api_key)
+    crud.set_configuracion(db, 'GROQ_MODEL', config.modelo)
     
-    return {"status": "Configuración actualizada", "modelo_activo": current_config["modelo"]}
+    return {"status": "Configuración actualizada"}
 
 @app.get("/modelos-disponibles")
 def listar_modelos():
@@ -214,6 +217,7 @@ def call_groq_feedback(tipo_habilidad: str, preguntas: list[dict], db: Session) 
             {'role': 'user', 'content': build_evaluation_prompt(tipo_habilidad, preguntas)}
         ],
         'temperature': 0.2,
+        'max_tokens': 6000,
         'response_format': {'type': 'json_object'},
     }
 
@@ -223,6 +227,8 @@ def call_groq_feedback(tipo_habilidad: str, preguntas: list[dict], db: Session) 
             'Authorization': f'Bearer {api_key}',
             'Content-Type': 'application/json',
         },
+        # Justo antes del json.loads() o parse_gemini_output()
+        
         json=payload,
         timeout=30,
     )
@@ -237,6 +243,9 @@ def call_groq_feedback(tipo_habilidad: str, preguntas: list[dict], db: Session) 
     except (KeyError, IndexError):
         print(f'Respuesta inesperada de Groq: {data}')
         raise HTTPException(status_code=502, detail='Formato de respuesta inválido de Groq')
+
+    
+
 
     parsed = parse_gemini_output(raw_output)
     resultados = parsed.get('resultados')
@@ -253,45 +262,6 @@ def call_groq_feedback(tipo_habilidad: str, preguntas: list[dict], db: Session) 
     return feedback_map
 
 
-""" def call_gemini_api(habilidad: str) -> dict:
-    if not GEMINI_API_KEY:
-        raise HTTPException(status_code=500, detail='API KEY no configurada')
-
-    
-    payload = {
-        "contents": [{
-            "parts": [{
-                "text": f"{build_system_prompt()}\n\n{build_user_prompt(habilidad)}"
-            }]
-        }],
-        "generation_config": {
-            "temperature": 0.2,
-            "max_output_tokens": 1200
-        }
-    }
-
-    response = requests.post(
-        GEMINI_URL,
-        headers={'Content-Type': 'application/json'},
-        json=payload,
-        timeout=30
-    )
-
-    if response.status_code != 200:
-        print(f"Error de Google: {response.text}")
-        raise HTTPException(status_code=502, detail="Error en la comunicación con la IA")
-
-    data = response.json()
-    
-    # Navegamos por la estructura de respuesta de Gemini 2.5
-    try:
-        raw_output = data['candidates'][0]['content']['parts'][0]['text']
-        return parse_gemini_output(raw_output)
-    except (KeyError, IndexError) as e:
-        print(f"Estructura inesperada: {data}")
-        raise HTTPException(status_code=502, detail="La IA respondió en un formato no soportado")
- """
- 
 def call_gemini_api(habilidad: str, db: Session) -> dict:
     api_key = crud.get_configuracion(db, 'GROQ_API_KEY')
     model = crud.get_configuracion(db, 'GROQ_MODEL') or 'llama-3.1-8b-instant'
@@ -376,16 +346,45 @@ def habilidad_detail(habilidad: str, rut: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail='Habilidad no encontrada')
     return data
 
-
 @app.post('/examen', response_model=schemas.ExamenResponse)
 def crear_examen(examen_request: schemas.ExamenRequest, db: Session = Depends(get_db)):
+
+    print(f"Recibido: {examen_request.dict()}") # Debug para ver si entra
+    # 1. Verificar si la API Key está configurada (usando tu current_config)
+    api_key = current_config.get("api_key")
+    if not api_key:
+        raise HTTPException(status_code=400, detail="API key not configured. Por favor, configura la IA primero.")
+
+    # 2. Crear la sesión en la DB (RUT y metadatos) y obtener preguntas del banco
     try:
-        data = crud.create_exam_session(db, examen_request.rut, examen_request.cantidad_preguntas)
+        examen_session = crud.create_exam_session(db, examen_request.rut, examen_request.cantidad_preguntas)
+    except ValueError as exc:
+
+        raise HTTPException(status_code=400, detail="Hola "+str(exc))
+
+    if not examen_session:
+        raise HTTPException(status_code=404, detail='Usuario no encontrado')
+
+    # 3. Las preguntas ya están incluidas en examen_session desde create_exam_session
+    return examen_session
+
+
+@app.post('/evaluar-examen', response_model=schemas.EvaluarExamenResponse)
+def evaluar_examen(eval_request: schemas.EvaluarExamenRequest, db: Session = Depends(get_db)):
+    try:
+        result = crud.evaluate_exam_session(db, eval_request.id_examen, eval_request.respuestas)
+        return result
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
-    if not data:
-        raise HTTPException(status_code=404, detail='Usuario no encontrado')
-    return data
+
+
+@app.post('/guardar-resultados-examen')
+def guardar_resultados_examen(request: schemas.GuardarResultadosExamenRequest, db: Session = Depends(get_db)):
+    try:
+        result = crud.save_exam_results(db, request.rut, request.id_examen)
+        return result
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
 
 
 @app.post('/generar-preguntas', response_model=schemas.GenerarPreguntasResponse)
@@ -541,6 +540,20 @@ def errores_frecuentes(rut: str, db: Session = Depends(get_db)):
         ]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f'Error al obtener errores frecuentes: {str(e)}')
+
+
+@app.put('/errores-frecuentes/{error_id}/resolver')
+def resolver_error(error_id: int, db: Session = Depends(get_db)):
+    """Marca un error como resuelto."""
+    try:
+        error = db.query(models.ErroresFavoritos).filter(models.ErroresFavoritos.id_error == error_id).first()
+        if not error:
+            raise HTTPException(status_code=404, detail="Error no encontrado")
+        error.resuelta = True
+        db.commit()
+        return {"message": "Error resuelto"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f'Error al resolver error: {str(e)}')
 
 
 @app.get('/configuracion')

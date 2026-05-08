@@ -49,6 +49,21 @@ class PreguntaItem(BaseModel):
     alternativas: Dict[str, str]
     respuesta_correcta: str
     justificacion_cot: str
+    texto_inedito: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+
+
+class BancoPreguntaItem(BaseModel):
+    id_pregunta: int
+    id_habilidad: int
+    texto_inedito: str
+    enunciado: str
+    alternativas: Dict[str, str]
+    respuesta_correcta: str
+    justificacion_cot: str
+    dificultad: str
 
     class Config:
         orm_mode = True
@@ -98,16 +113,6 @@ class EvaluarResultadoItem(BaseModel):
 class EvaluarRespuestasResponse(BaseModel):
     resultados: List[EvaluarResultadoItem]
     total_correct: int
-    total_preguntas: int
-    puntaje: int
-    xp_ganada: int
-    mensaje: str
-
-
-class GenerarPreguntasResponse(BaseModel):
-    tipo_habilidad: str
-    texto_inedito: str
-    preguntas: List[GeneratedPreguntaItem]
 
 
 class ExamenRequest(BaseModel):
@@ -122,8 +127,45 @@ class ExamenResponse(BaseModel):
     estimated_time: int
     preguntas: List[PreguntaItem]
 
-    class Config:
-        orm_mode = True
+
+class RespuestaExamenItem(BaseModel):
+    id_pregunta: int
+    respuesta_dada: Optional[str]
+
+
+class EvaluarExamenRequest(BaseModel):
+    id_examen: int
+    respuestas: List[RespuestaExamenItem]
+
+
+class RendimientoHabilidad(BaseModel):
+    nombre_habilidad: str
+    correctas: int
+    total: int
+    porcentaje: float
+
+
+class EvaluarExamenResponse(BaseModel):
+    id_examen: int
+    total_correctas: int
+    total_preguntas: int
+    porcentaje: float
+    rendimiento_habilidades: List[RendimientoHabilidad]
+
+
+class GuardarResultadosExamenRequest(BaseModel):
+    rut: str
+    id_examen: int
+    total_preguntas: int
+    puntaje: int
+    xp_ganada: int
+    mensaje: str
+
+
+class GenerarPreguntasResponse(BaseModel):
+    tipo_habilidad: str
+    texto_inedito: str
+    preguntas: List[GeneratedPreguntaItem]
 
 
 class ConfiguracionItem(BaseModel):

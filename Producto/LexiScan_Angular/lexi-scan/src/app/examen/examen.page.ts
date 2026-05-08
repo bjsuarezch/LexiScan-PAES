@@ -26,7 +26,7 @@ export class ExamenPage implements OnInit {
 
   ngOnInit() {
     this.calculateTime();
-    this.profileService.getProfile().subscribe(profile => {
+    this.profileService.getProfile().subscribe((profile) => {
       this.profile = profile;
     });
   }
@@ -47,17 +47,23 @@ export class ExamenPage implements OnInit {
     }
 
     this.loading = true;
-    this.habilidadesService.crearExamen(this.profile.rut, this.questionCount).subscribe({
-      next: response => {
-        this.examResult = response;
-        this.estimatedTime = response.estimated_time;
-        this.loading = false;
-      },
-      error: error => {
-        console.error('Error al crear examen:', error);
-        this.loading = false;
-        alert('No se pudo iniciar el examen. Intenta nuevamente.');
-      }
-    });
+    this.habilidadesService
+      .crearExamen(this.profile.rut, this.questionCount)
+      .subscribe({
+        next: (response) => {
+          this.examResult = response;
+          this.estimatedTime = response.estimated_time;
+          this.loading = false;
+          // Navigate to exam simulation page
+          this.router.navigate(['/examen-simulacro'], {
+            state: { examData: response },
+          });
+        },
+        error: (error) => {
+          console.error('Error al crear examen:', error);
+          this.loading = false;
+          alert('No se pudo iniciar el examen. Intenta nuevamente.');
+        },
+      });
   }
 }

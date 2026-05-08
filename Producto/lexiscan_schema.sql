@@ -112,6 +112,41 @@ CREATE INDEX idx_preguntas_habilidad ON preguntas_ia (id_habilidad);
 CREATE INDEX idx_preguntas_activa ON preguntas_ia (activa);
 
 -- ============================================================
+-- 3.5. TABLA: banco_preguntas
+-- ============================================================
+
+CREATE TABLE banco_preguntas (
+    id_pregunta SERIAL PRIMARY KEY,
+    id_habilidad INTEGER NOT NULL REFERENCES historial_habilidades (id_progreso),
+    texto_inedito TEXT NOT NULL, -- pasaje generado por LLM
+    enunciado VARCHAR(500) NOT NULL,
+    alternativas JSONB NOT NULL, -- {"A":"...","B":"...","C":"...","D":"..."}
+    respuesta_correcta CHAR(1) NOT NULL CHECK (
+        respuesta_correcta IN ('A', 'B', 'C', 'D')
+    ),
+    justificacion_cot TEXT NOT NULL, -- feedback pedagógico Chain-of-Thought
+    dificultad VARCHAR(20) NOT NULL DEFAULT 'medio' CHECK (
+        dificultad IN ('facil', 'medio', 'dificil')
+    ),
+    fecha_creacion TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    activa BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+COMMENT ON TABLE banco_preguntas IS 'Banco de preguntas pre-generadas para exámenes.';
+
+COMMENT ON COLUMN banco_preguntas.alternativas IS 'JSONB con claves A,B,C,D y texto de cada alternativa.';
+
+COMMENT ON COLUMN banco_preguntas.justificacion_cot IS 'Retroalimentación pedagógica via Chain-of-Thought.';
+
+COMMENT ON COLUMN banco_preguntas.dificultad IS 'Nivel de dificultad de la pregunta.';
+
+CREATE INDEX idx_banco_habilidad ON banco_preguntas (id_habilidad);
+
+CREATE INDEX idx_banco_dificultad ON banco_preguntas (dificultad);
+
+CREATE INDEX idx_banco_activa ON banco_preguntas (activa);
+
+-- ============================================================
 -- 4. TABLA: sesiones_examen
 -- ============================================================
 
@@ -142,13 +177,13 @@ CREATE INDEX idx_sesion_fecha ON sesiones_examen (fecha_inicio DESC);
 
 -- ============================================================
 -- 5. TABLA PIVOTE: sesion_preguntas
---    Relaciona SesionExamen ↔ PreguntaIA con la respuesta dada
+--    Relaciona SesionExamen ↔ BancoPreguntas con la respuesta dada
 -- ============================================================
 
 CREATE TABLE sesion_preguntas (
     id_sesion_pregunta SERIAL PRIMARY KEY,
     id_examen INTEGER NOT NULL REFERENCES sesiones_examen (id_examen) ON DELETE CASCADE,
-    id_pregunta INTEGER NOT NULL REFERENCES preguntas_ia (id_pregunta),
+    id_pregunta INTEGER NOT NULL REFERENCES banco_preguntas (id_pregunta),
     respuesta_dada CHAR(1) CHECK (
         respuesta_dada IN ('A', 'B', 'C', 'D')
     ),
@@ -197,7 +232,7 @@ CREATE INDEX idx_trans_fecha ON transacciones_monedas (fecha DESC);
 CREATE TABLE errores_favoritos (
     id_error SERIAL PRIMARY KEY,
     rut_usuario VARCHAR(12) NOT NULL REFERENCES usuarios (rut) ON DELETE CASCADE,
-    id_pregunta INTEGER NOT NULL REFERENCES preguntas_ia (id_pregunta),
+    id_pregunta INTEGER NOT NULL REFERENCES banco_preguntas (id_pregunta),
     id_habilidad INTEGER NOT NULL REFERENCES historial_habilidades (id_progreso),
     veces_fallada INTEGER NOT NULL DEFAULT 1 CHECK (veces_fallada > 0),
     resuelta BOOLEAN NOT NULL DEFAULT FALSE,
@@ -252,7 +287,7 @@ BEGIN
             / NULLIF(COUNT(*), 0)
         , 2)
         FROM sesion_preguntas sp
-        JOIN preguntas_ia p ON p.id_pregunta = sp.id_pregunta
+        JOIN banco_preguntas p ON p.id_pregunta = sp.id_pregunta
         WHERE p.id_habilidad = h.id_progreso
           AND h.rut_usuario = (
               SELECT rut_usuario FROM sesiones_examen WHERE id_examen = NEW.id_examen
@@ -260,7 +295,7 @@ BEGIN
     ),
     ultima_actualizacion = NOW()
     WHERE h.id_progreso = (
-        SELECT id_habilidad FROM preguntas_ia WHERE id_pregunta = NEW.id_pregunta
+        SELECT id_habilidad FROM banco_preguntas WHERE id_pregunta = NEW.id_pregunta
     );
     RETURN NEW;
 END;
@@ -282,7 +317,7 @@ DECLARE
 BEGIN
     IF NEW.es_correcta = FALSE THEN
         SELECT rut_usuario INTO v_rut FROM sesiones_examen WHERE id_examen = NEW.id_examen;
-        SELECT id_habilidad INTO v_habilidad FROM preguntas_ia WHERE id_pregunta = NEW.id_pregunta;
+        SELECT id_habilidad INTO v_habilidad FROM banco_preguntas WHERE id_pregunta = NEW.id_pregunta;
 
         INSERT INTO errores_favoritos (rut_usuario, id_pregunta, id_habilidad, veces_fallada)
         VALUES (v_rut, NEW.id_pregunta, v_habilidad, 1)

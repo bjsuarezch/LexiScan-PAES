@@ -142,7 +142,7 @@
     </ion-button>
 
     <!-- Coaching Card - Error Favorito Detallado -->
-    <ion-card class="coaching-card" *ngIf="errorActual">
+    <ion-card class="coaching-card" *ngIf="trainingStarted">
       <ion-card-content>
         <div class="coaching-header">
           <ion-icon name="bulb"></ion-icon>
@@ -150,7 +150,7 @@
         </div>
 
         <!-- Error Info -->
-        <div class="error-info">
+        <div class="error-info" *ngIf="errorActual">
           <p class="error-label">
             <strong>Habilidad:</strong> {{ errorActual.habilidad?.nombre ||
             'Desconocida' }}
@@ -161,13 +161,13 @@
         </div>
 
         <!-- Question -->
-        <div class="question-section">
+        <div class="question-section" *ngIf="errorActual">
           <h3>Pregunta:</h3>
           <p class="question-text">{{ errorActual.pregunta?.enunciado }}</p>
         </div>
 
         <!-- Alternatives -->
-        <div class="alternatives-section">
+        <div class="alternatives-section" *ngIf="errorActual">
           <h4>Selecciona tu respuesta:</h4>
           <ion-radio-group
             [(ngModel)]="selectedAnswer"
@@ -181,7 +181,7 @@
         </div>
 
         <!-- Buttons -->
-        <div class="button-group" *ngIf="!evaluationSubmitted">
+        <div class="button-group" *ngIf="errorActual && !evaluationSubmitted">
           <ion-button
             expand="block"
             color="primary"
@@ -193,7 +193,7 @@
         </div>
 
         <!-- Results -->
-        <div class="result-section" *ngIf="evaluationSubmitted">
+        <div class="result-section" *ngIf="errorActual && evaluationSubmitted">
           <ion-card
             [ngClass]="isCorrect ? 'result-correct' : 'result-incorrect'"
           >

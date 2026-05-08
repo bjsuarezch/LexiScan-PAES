@@ -1,0 +1,30 @@
+.exam-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.question-card {
+  margin-bottom: 20px;
+}
+
+.question-text {
+  font-weight: 500;
+  margin-bottom: 15px;
+}
+
+.finish-btn {
+  margin-top: 30px;
+  margin-bottom: 50px;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+}
+
+.loading-container p {
+  margin-top: 10px;
+}
