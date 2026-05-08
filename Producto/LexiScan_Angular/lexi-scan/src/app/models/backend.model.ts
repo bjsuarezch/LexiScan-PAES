@@ -25,6 +25,7 @@ export interface GeneratedPreguntaItem {
   alternativas: Record<string, string>;
   respuesta_correcta: string;
   justificacion_cot: string;
+  texto_inedito?: string;
 }
 
 export interface HabilidadDetail {

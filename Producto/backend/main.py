@@ -435,6 +435,12 @@ def evaluar_preguntas(request: schemas.EvaluarRespuestasRequest, db: Session = D
 
     resultados = []
     total_correct = 0
+    
+    # Obtener el registro de habilidad del usuario para guardar errores
+    habilidad_record = crud.get_user_habilidad_record(db, request.rut, habilidad_db)
+    if not habilidad_record:
+        raise HTTPException(status_code=400, detail='Usuario no tiene registro en esta habilidad.')
+    
     for index, pregunta in enumerate(request.preguntas):
         respuesta_usuario = pregunta.respuesta_usuario.strip().upper()
         respuesta_correcta = pregunta.respuesta_correcta.strip().upper()
@@ -451,6 +457,32 @@ def evaluar_preguntas(request: schemas.EvaluarRespuestasRequest, db: Session = D
             'correcta': correcta,
             'feedback': feedback,
         })
+        
+        # Guardar la pregunta generada y registrar error si es incorrecto
+        if not correcta:
+            try:
+                # Guardar pregunta generada
+                pregunta_guardada = crud.save_generated_question(
+                    db,
+                    id_habilidad=habilidad_record.id_progreso,
+                    texto_inedito=getattr(pregunta, 'texto_inedito', ''),
+                    enunciado=pregunta.enunciado,
+                    alternativas=pregunta.alternativas,
+                    respuesta_correcta=pregunta.respuesta_correcta,
+                    justificacion_cot=getattr(pregunta, 'justificacion', ''),
+                    modelo_ia='Groq'
+                )
+                
+                # Registrar error
+                crud.register_error(
+                    db,
+                    rut_usuario=request.rut,
+                    id_pregunta=pregunta_guardada.id_pregunta,
+                    id_habilidad=habilidad_record.id_progreso
+                )
+            except Exception as e:
+                print(f"Error registrando fallo en pregunta {index}: {str(e)}")
+                # No interrumpir evaluación si falla el registro de error
 
     xp_ganada = 0
     try:
@@ -474,6 +506,41 @@ def error_frecuente(rut: str, db: Session = Depends(get_db)):
     if not data:
         return None
     return data
+
+
+@app.get('/errores-frecuentes/{rut}')
+def errores_frecuentes(rut: str, db: Session = Depends(get_db)):
+    """Obtiene todos los errores frecuentes del usuario, ordenados por veces fallada (descendente)."""
+    try:
+        errores = db.query(models.ErroresFavoritos).filter(
+            models.ErroresFavoritos.rut_usuario == rut,
+            models.ErroresFavoritos.resuelta == False
+        ).order_by(models.ErroresFavoritos.veces_fallada.desc()).all()
+        
+        return [
+            {
+                'id_error': error.id_error,
+                'rut_usuario': error.rut_usuario,
+                'id_pregunta': error.id_pregunta,
+                'id_habilidad': error.id_habilidad,
+                'veces_fallada': error.veces_fallada,
+                'fecha_registro': error.fecha_registro.isoformat() if error.fecha_registro else None,
+                'pregunta': {
+                    'enunciado': error.pregunta.enunciado if error.pregunta else None,
+                    'alternativas': error.pregunta.alternativas if error.pregunta else None,
+                    'respuesta_correcta': error.pregunta.respuesta_correcta if error.pregunta else None,
+                    'justificacion_cot': error.pregunta.justificacion_cot if error.pregunta else None,
+                    'texto_inedito': error.pregunta.texto_inedito if error.pregunta else None,
+                } if error.pregunta else None,
+                'habilidad': {
+                    'nombre': error.habilidad.nombre_habilidad if error.habilidad else None,
+                    'nivel_maestria': error.habilidad.nivel_maestria if error.habilidad else None,
+                } if error.habilidad else None,
+            }
+            for error in errores
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f'Error al obtener errores frecuentes: {str(e)}')
 
 
 @app.get('/configuracion')

@@ -149,29 +149,174 @@ ion-content > .ion-padding {
 
   ion-card-content {
     padding: 20px;
+    color: rgba(255, 255, 255, 0.95);
 
-    .coaching-content {
+    .coaching-header {
       display: flex;
       align-items: center;
-      gap: 15px;
+      gap: 10px;
+      margin-bottom: 20px;
 
-      .avatar {
-        flex-shrink: 0;
-
-        ion-icon {
-          font-size: 2.5rem;
-          color: rgba(255, 255, 255, 0.8);
-        }
+      ion-icon {
+        font-size: 1.5rem;
+        color: #ffc107;
       }
 
-      .coaching-text {
-        flex: 1;
+      .coaching-title {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #fff;
+      }
+    }
 
-        p {
-          margin: 0;
-          color: rgba(255, 255, 255, 0.9);
-          font-size: 0.95rem;
+    .error-info {
+      background: rgba(255, 255, 255, 0.05);
+      border-left: 3px solid #ff9800;
+      padding: 12px;
+      border-radius: 4px;
+      margin-bottom: 15px;
+
+      .error-label {
+        margin: 8px 0;
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.8);
+
+        strong {
+          color: #ffeb3b;
         }
+      }
+    }
+
+    .question-section {
+      margin: 20px 0;
+
+      h3 {
+        margin: 10px 0 8px 0;
+        font-size: 0.95rem;
+        color: #fff;
+        font-weight: 600;
+      }
+
+      .question-text {
+        margin: 10px 0;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        color: rgba(255, 255, 255, 0.9);
+      }
+    }
+
+    .alternatives-section {
+      margin: 20px 0;
+
+      h4 {
+        margin: 10px 0 12px 0;
+        font-size: 0.9rem;
+        color: #fff;
+        font-weight: 600;
+      }
+
+      ion-radio-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      ion-item {
+        --background: rgba(255, 255, 255, 0.05);
+        border-radius: 6px;
+        margin-bottom: 4px;
+        --color: rgba(255, 255, 255, 0.9);
+
+        ion-label {
+          font-size: 0.9rem;
+          padding: 8px 0;
+        }
+
+        ion-radio {
+          --color: #4caf50;
+          --color-checked: #4caf50;
+        }
+      }
+    }
+
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 15px;
+
+      ion-button {
+        --border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.9rem;
+
+        &:first-child {
+          --background: #4caf50;
+          --background-activated: #388e3c;
+        }
+      }
+    }
+
+    .result-section {
+      margin-top: 20px;
+
+      ion-card {
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+        &.result-correct {
+          --background: rgba(76, 175, 80, 0.15);
+          border: 1px solid rgba(76, 175, 80, 0.5);
+
+          ion-card-content {
+            padding: 15px;
+
+            .result-text-correct {
+              margin: 0;
+              color: #4caf50;
+              font-weight: 600;
+              text-align: center;
+            }
+          }
+        }
+
+        &.result-incorrect {
+          --background: rgba(244, 67, 54, 0.15);
+          border: 1px solid rgba(244, 67, 54, 0.5);
+
+          ion-card-content {
+            padding: 15px;
+
+            .result-text-incorrect {
+              margin: 0;
+              color: #ff9800;
+              font-weight: 600;
+              text-align: center;
+              line-height: 1.4;
+            }
+          }
+        }
+      }
+    }
+
+    .no-errors {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 30px 20px;
+      text-align: center;
+
+      ion-icon {
+        font-size: 2.5rem;
+        color: #4caf50;
+      }
+
+      p {
+        margin: 0;
+        font-size: 1rem;
+        color: rgba(255, 255, 255, 0.9);
       }
     }
   }

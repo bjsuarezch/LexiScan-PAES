@@ -76,7 +76,7 @@ class EconomiaMonedas(Base):
 class PreguntaIA(Base):
     __tablename__ = 'preguntas_ia'
 
-    id_pregunta = Column(Integer, primary_key=True, index=True)
+    id_pregunta = Column(Integer, primary_key=True, index=True, autoincrement=True)
     id_habilidad = Column(Integer, ForeignKey('historial_habilidades.id_progreso'), nullable=False)
     texto_inedito = Column(Text, nullable=False)
     enunciado = Column(String(500), nullable=False)

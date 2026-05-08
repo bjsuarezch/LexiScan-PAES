@@ -16,6 +16,12 @@ export class GymPage implements OnInit {
   profile: IUserProfile | null = null;
   loading = false;
   errorFrecuente: any = null;
+  erroresFrecuentes: any[] = [];
+  errorActual: any = null;
+  selectedAnswer: string = '';
+  evaluationSubmitted = false;
+  isCorrect = false;
+  feedback = '';
 
   constructor(
     private router: Router,
@@ -24,11 +30,12 @@ export class GymPage implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.profileService.getProfile().subscribe(profile => {
+    this.profileService.getProfile().subscribe((profile) => {
       this.profile = profile;
       if (profile?.rut) {
         this.loadDashboard(profile.rut);
         this.loadErrorFrecuente(profile.rut);
+        this.loadErroresFrecuentes(profile.rut);
       }
     });
   }
@@ -36,26 +43,43 @@ export class GymPage implements OnInit {
   loadDashboard(rut: string): void {
     this.loading = true;
     this.habilidadesService.getDashboard(rut).subscribe({
-      next: dashboard => {
+      next: (dashboard) => {
         this.dashboard = dashboard;
         this.loading = false;
       },
-      error: error => {
+      error: (error) => {
         console.error('Error al cargar dashboard:', error);
         this.loading = false;
-      }
+      },
     });
   }
 
   loadErrorFrecuente(rut: string): void {
     this.habilidadesService.getErrorFrecuente(rut).subscribe({
-      next: error => {
+      next: (error) => {
         this.errorFrecuente = error;
       },
-      error: error => {
+      error: (error) => {
         console.error('Error al cargar error frecuente:', error);
         this.errorFrecuente = null;
-      }
+      },
+    });
+  }
+
+  loadErroresFrecuentes(rut: string): void {
+    this.habilidadesService.getErroresFrecuentes(rut).subscribe({
+      next: (errores) => {
+        this.erroresFrecuentes = errores;
+        if (errores.length > 0) {
+          this.errorActual = errores[0];
+          this.selectedAnswer = '';
+          this.evaluationSubmitted = false;
+        }
+      },
+      error: (error) => {
+        console.error('Error al cargar errores frecuentes:', error);
+        this.erroresFrecuentes = [];
+      },
     });
   }
 
@@ -64,25 +88,78 @@ export class GymPage implements OnInit {
     // Aquí se puede navegar a una página de entrenamiento
   }
 
+  submitErrorAnswer(): void {
+    if (!this.selectedAnswer || !this.errorActual) return;
+
+    this.evaluationSubmitted = true;
+    this.isCorrect =
+      this.selectedAnswer === this.errorActual.pregunta.respuesta_correcta;
+
+    if (this.isCorrect) {
+      this.feedback = '¡Excelente! ¡Resolviste este error! 🎉';
+    } else {
+      this.feedback = `Respuesta incorrecta. La respuesta correcta es: ${this.errorActual.pregunta.respuesta_correcta}. ${this.errorActual.pregunta.justificacion_cot}`;
+    }
+  }
+
+  loadNextError(): void {
+    if (!this.errorActual || this.erroresFrecuentes.length <= 1) return;
+
+    const currentIndex = this.erroresFrecuentes.findIndex(
+      (e) => e.id_error === this.errorActual.id_error,
+    );
+    const nextIndex = (currentIndex + 1) % this.erroresFrecuentes.length;
+    this.errorActual = this.erroresFrecuentes[nextIndex];
+    this.selectedAnswer = '';
+    this.evaluationSubmitted = false;
+    this.feedback = '';
+  }
+
+  resetErrorAnswer(): void {
+    this.selectedAnswer = '';
+    this.evaluationSubmitted = false;
+    this.feedback = '';
+  }
+
+  getAlternativesArray(): Array<{ key: string; value: string }> {
+    if (!this.errorActual?.pregunta?.alternativas) return [];
+
+    return Object.entries(this.errorActual.pregunta.alternativas)
+      .map(([key, value]) => ({
+        key,
+        value: value as string,
+      }))
+      .sort((a, b) => a.key.localeCompare(b.key));
+  }
+
   getRadarPoints(): string {
     if (!this.dashboard?.habilidades) return '';
 
     const center = { x: 100, y: 100 };
     const vertices: { [key: string]: { x: number; y: number } } = {
-      'Interpretar': { x: 100, y: 30 },
-      'Vocabulario': { x: 150, y: 55 },
-      'Tipos_de_Texto': { x: 150, y: 130 },
-      'Localizar': { x: 100, y: 170 },
-      'Lectura_Critica': { x: 50, y: 130 },
-      'Evaluar': { x: 50, y: 55 },
+      Interpretar: { x: 100, y: 30 },
+      Vocabulario: { x: 150, y: 55 },
+      Tipos_de_Texto: { x: 150, y: 130 },
+      Localizar: { x: 100, y: 170 },
+      Lectura_Critica: { x: 50, y: 130 },
+      Evaluar: { x: 50, y: 55 },
     };
 
-    const order = ['Interpretar', 'Vocabulario', 'Tipos_de_Texto', 'Localizar', 'Lectura_Critica', 'Evaluar'];
+    const order = [
+      'Interpretar',
+      'Vocabulario',
+      'Tipos_de_Texto',
+      'Localizar',
+      'Lectura_Critica',
+      'Evaluar',
+    ];
     const points: string[] = [];
 
     for (const skill of order) {
       const vertex = vertices[skill];
-      const habilidad = this.dashboard.habilidades.find(h => h.nombre_habilidad === skill);
+      const habilidad = this.dashboard.habilidades.find(
+        (h) => h.nombre_habilidad === skill,
+      );
       const percent = habilidad ? habilidad.nivel_maestria / 100 : 0;
       const x = center.x + (vertex.x - center.x) * percent;
       const y = center.y + (vertex.y - center.y) * percent;

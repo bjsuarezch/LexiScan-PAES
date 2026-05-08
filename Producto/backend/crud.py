@@ -334,3 +334,75 @@ def get_all_configuracion(db: Session) -> List[dict]:
         }
         for c in configs
     ]
+
+
+def save_generated_question(
+    db: Session,
+    id_habilidad: int,
+    texto_inedito: str,
+    enunciado: str,
+    alternativas: dict,
+    respuesta_correcta: str,
+    justificacion_cot: str,
+    modelo_ia: str = 'Groq'
+) -> models.PreguntaIA:
+    """Guarda una pregunta generada por IA en la base de datos."""
+    pregunta = models.PreguntaIA(
+        id_habilidad=id_habilidad,
+        texto_inedito=texto_inedito,
+        enunciado=enunciado,
+        alternativas=alternativas,
+        respuesta_correcta=respuesta_correcta,
+        justificacion_cot=justificacion_cot,
+        modelo_ia=modelo_ia,
+        activa=True
+    )
+    db.add(pregunta)
+    db.commit()
+    db.refresh(pregunta)
+    return pregunta
+
+
+def register_error(
+    db: Session,
+    rut_usuario: str,
+    id_pregunta: int,
+    id_habilidad: int,
+) -> models.ErroresFavoritos:
+    """Registra un error en la tabla errores_favoritos. Si ya existe, incrementa veces_fallada."""
+    # Buscar si ya existe un error para este usuario y pregunta
+    error_existente = db.query(models.ErroresFavoritos).filter(
+        models.ErroresFavoritos.rut_usuario == rut_usuario,
+        models.ErroresFavoritos.id_pregunta == id_pregunta
+    ).first()
+    
+    if error_existente:
+        # Incrementar veces_fallada y actualizar fecha_registro
+        error_existente.veces_fallada += 1
+        error_existente.fecha_registro = datetime.now(timezone.utc)
+        error_existente.resuelta = False  # Reiniciar si vuelve a fallar
+        db.commit()
+        db.refresh(error_existente)
+        return error_existente
+    else:
+        # Crear nuevo error
+        nuevo_error = models.ErroresFavoritos(
+            rut_usuario=rut_usuario,
+            id_pregunta=id_pregunta,
+            id_habilidad=id_habilidad,
+            veces_fallada=1,
+            resuelta=False,
+            fecha_registro=datetime.now(timezone.utc)
+        )
+        db.add(nuevo_error)
+        db.commit()
+        db.refresh(nuevo_error)
+        return nuevo_error
+
+
+def get_user_habilidad_record(db: Session, rut: str, nombre_habilidad: str) -> Optional[models.HistorialHabilidades]:
+    """Obtiene el registro de historial_habilidades para un usuario y habilidad específica."""
+    return db.query(models.HistorialHabilidades).filter(
+        models.HistorialHabilidades.rut_usuario == rut,
+        models.HistorialHabilidades.nombre_habilidad == nombre_habilidad
+    ).first()

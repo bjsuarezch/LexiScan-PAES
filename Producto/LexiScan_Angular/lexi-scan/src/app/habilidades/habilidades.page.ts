@@ -2,7 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ProfileService } from '../services/profile.service';
 import { HabilidadesService } from '../services/habilidades.service';
-import { DashboardResponse, HabilidadData, GeneratedHabilidadDetail } from '../models/backend.model';
+import {
+  DashboardResponse,
+  HabilidadData,
+  GeneratedHabilidadDetail,
+} from '../models/backend.model';
 import { IUserProfile } from '../models/auth.model';
 import { BehaviorSubject, Observable } from 'rxjs';
 
@@ -21,7 +25,6 @@ interface EvaluacionResultado {
   styleUrls: ['habilidades.page.scss'],
   standalone: false,
 })
-
 export class HabilidadesPage implements OnInit {
   habilidades: HabilidadData[] = [];
   selectedHabilidad: GeneratedHabilidadDetail | null = null;
@@ -42,7 +45,7 @@ export class HabilidadesPage implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.profileService.getProfile().subscribe(profile => {
+    this.profileService.getProfile().subscribe((profile) => {
       this.profile = profile;
       if (profile?.rut) {
         this.loadHabilidades(profile.rut);
@@ -52,12 +55,12 @@ export class HabilidadesPage implements OnInit {
 
   loadHabilidades(rut: string) {
     this.habilidadesService.getDashboard(rut).subscribe({
-      next: data => {
+      next: (data) => {
         this.habilidades = data.habilidades;
       },
-      error: error => {
+      error: (error) => {
         console.error('Error al cargar habilidades:', error);
-      }
+      },
     });
   }
 
@@ -82,20 +85,26 @@ export class HabilidadesPage implements OnInit {
     this.isSubmitted = false;
 
     this.habilidadesService.generarPreguntas(skill).subscribe({
-      next: data => {
+      next: (data) => {
         this.selectedHabilidad = data;
         this.totalQuestions = data.preguntas.length;
       },
-      error: error => {
+      error: (error) => {
         console.error('Error al generar preguntas:', error);
         alert('No se pudo generar las preguntas. Inténtalo de nuevo.');
-      }
+      },
     });
   }
 
   canSubmit(): boolean {
-    return !this.isSubmitted && Boolean(this.selectedHabilidad) &&
-      (this.selectedHabilidad?.preguntas.every((_, index) => !!this.selectedAnswers[index]) ?? false);
+    return (
+      !this.isSubmitted &&
+      Boolean(this.selectedHabilidad) &&
+      (this.selectedHabilidad?.preguntas.every(
+        (_, index) => !!this.selectedAnswers[index],
+      ) ??
+        false)
+    );
   }
 
   submitAnswers(): void {
@@ -111,18 +120,20 @@ export class HabilidadesPage implements OnInit {
 
     const payload = {
       rut: this.profile.rut,
-      tipo_habilidad: this.selectedHabilidad.tipo_habilidad,
-      preguntas: this.selectedHabilidad.preguntas.map((pregunta, index) => ({
+      tipo_habilidad: this.selectedHabilidad!.tipo_habilidad,
+      preguntas: this.selectedHabilidad!.preguntas.map((pregunta, index) => ({
         enunciado: pregunta.enunciado,
         alternativas: pregunta.alternativas,
         respuesta_usuario: this.selectedAnswers[index] || '',
         respuesta_correcta: pregunta.respuesta_correcta,
         justificacion: pregunta.justificacion_cot,
+        texto_inedito:
+          pregunta.texto_inedito || this.selectedHabilidad?.texto_inedito,
       })),
     };
 
     this.habilidadesService.evaluarRespuestas(payload).subscribe({
-      next: result => {
+      next: (result) => {
         this.evaluationResults = result.resultados;
         this.totalCorrect = result.total_correct;
         this.totalQuestions = result.total_preguntas;
@@ -131,15 +142,16 @@ export class HabilidadesPage implements OnInit {
         this.isSubmitted = true;
 
         if (this.profile?.rut) {
-          this.loadHabilidades(this.profile.rut),
-          this.habilidadesService.getDashboard(this.profile.rut).subscribe();
+          (this.loadHabilidades(this.profile.rut),
+            this.habilidadesService.getDashboard(this.profile.rut).subscribe());
         }
       },
-      error: error => {
+      error: (error) => {
         console.error('Error al evaluar respuestas:', error);
-        this.evaluationError = 'No se pudo evaluar tus respuestas. Intenta de nuevo más tarde.';
+        this.evaluationError =
+          'No se pudo evaluar tus respuestas. Intenta de nuevo más tarde.';
         this.submitting = false;
-      }
+      },
     });
   }
 
@@ -148,20 +160,29 @@ export class HabilidadesPage implements OnInit {
 
     const center = { x: 100, y: 100 };
     const vertices: { [key: string]: { x: number; y: number } } = {
-      'Interpretar': { x: 100, y: 30 },
-      'Vocabulario': { x: 160, y: 65 },
-      'Tipos_de_Texto': { x: 160, y: 135 },
-      'Localizar': { x: 100, y: 170 },
-      'Lectura_Critica': { x: 40, y: 135 },
-      'Evaluar': { x: 40, y: 65 },
+      Interpretar: { x: 100, y: 30 },
+      Vocabulario: { x: 160, y: 65 },
+      Tipos_de_Texto: { x: 160, y: 135 },
+      Localizar: { x: 100, y: 170 },
+      Lectura_Critica: { x: 40, y: 135 },
+      Evaluar: { x: 40, y: 65 },
     };
 
-    const order = ['Interpretar', 'Vocabulario', 'Tipos_de_Texto', 'Localizar', 'Lectura_Critica', 'Evaluar'];
+    const order = [
+      'Interpretar',
+      'Vocabulario',
+      'Tipos_de_Texto',
+      'Localizar',
+      'Lectura_Critica',
+      'Evaluar',
+    ];
     const points: string[] = [];
 
     for (const skill of order) {
       const vertex = vertices[skill];
-      const habilidad = this.habilidades.find(h => h.nombre_habilidad === skill);
+      const habilidad = this.habilidades.find(
+        (h) => h.nombre_habilidad === skill,
+      );
       const percent = habilidad ? habilidad.nivel_maestria / 100 : 0;
       const x = center.x + (vertex.x - center.x) * percent;
       const y = center.y + (vertex.y - center.y) * percent;

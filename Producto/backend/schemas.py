@@ -76,6 +76,8 @@ class EvaluarPreguntaUsuario(BaseModel):
     alternativas: Dict[str, str]
     respuesta_usuario: str
     respuesta_correcta: str
+    texto_inedito: Optional[str] = None
+    justificacion: Optional[str] = None
 
 
 class EvaluarRespuestasRequest(BaseModel):
