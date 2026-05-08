@@ -152,6 +152,7 @@ ion-content > .ion-padding {
 
     .radar-chart {
       display: block;
+      overflow: visible;
       
       path {
         stroke: rgba(255,255,255,0.2);

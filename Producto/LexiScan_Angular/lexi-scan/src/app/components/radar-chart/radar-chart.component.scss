@@ -1,9 +1,10 @@
 .radar-container {
   width: 100%;
-  max-width: 250px;
+  max-width: 300px;
   margin: 0 auto;
   
   .radar-chart {
+    overflow: visible;
     width: 100%;
     height: auto;
     filter: drop-shadow(0 0 5px rgba(0,0,0,0.2));
