@@ -94,25 +94,6 @@ class PreguntaIA(Base):
     )
 
 
-class BancoPreguntas(Base):
-    __tablename__ = 'banco_preguntas'
-
-    id_pregunta = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    id_habilidad = Column(Integer, ForeignKey('historial_habilidades.id_progreso'), nullable=False)
-    texto_inedito = Column(Text, nullable=False)
-    enunciado = Column(String(500), nullable=False)
-    alternativas = Column(JSON, nullable=False)
-    respuesta_correcta = Column(String(1), nullable=False)
-    justificacion_cot = Column(Text, nullable=False)
-    dificultad = Column(Enum('facil', 'medio', 'dificil', name='dificultad_enum'), nullable=False, default='medio')
-    fecha_creacion = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
-    activa = Column(Boolean, nullable=False, default=True)
-
-    habilidad = relationship('HistorialHabilidades')
-
-    __table_args__ = (
-        CheckConstraint("respuesta_correcta IN ('A','B','C','D')", name='banco_respuesta_check'),
-    )
 
 
 class SesionExamen(Base):
@@ -137,7 +118,7 @@ class SesionPreguntas(Base):
 
     id_sesion_pregunta = Column(Integer, primary_key=True, index=True)
     id_examen = Column(Integer, ForeignKey('sesiones_examen.id_examen', ondelete='CASCADE'), nullable=False)
-    id_pregunta = Column(Integer, ForeignKey('banco_preguntas.id_pregunta'), nullable=False)
+    id_pregunta = Column(Integer, ForeignKey('preguntas_ia.id_pregunta'), nullable=False)
     respuesta_dada = Column(String(1), nullable=True)
     es_correcta = Column(Boolean, nullable=True)
     tiempo_respuesta = Column(Integer, nullable=True)
@@ -150,7 +131,7 @@ class ErroresFavoritos(Base):
 
     id_error = Column(Integer, primary_key=True, index=True)
     rut_usuario = Column(String(12), ForeignKey('usuarios.rut', ondelete='CASCADE'), nullable=False)
-    id_pregunta = Column(Integer, ForeignKey('banco_preguntas.id_pregunta'), nullable=False)
+    id_pregunta = Column(Integer, ForeignKey('preguntas_ia.id_pregunta'), nullable=False)
     id_habilidad = Column(Integer, ForeignKey('historial_habilidades.id_progreso'), nullable=False)
     veces_fallada = Column(Integer, nullable=False, default=1)
     resuelta = Column(Boolean, nullable=False, default=False)
@@ -158,7 +139,7 @@ class ErroresFavoritos(Base):
     fecha_resolucion = Column(DateTime(timezone=True), nullable=True)
 
     usuario = relationship('Usuario')
-    pregunta = relationship('BancoPreguntas')
+    pregunta = relationship('PreguntaIA')
     habilidad = relationship('HistorialHabilidades')
 
     __table_args__ = (

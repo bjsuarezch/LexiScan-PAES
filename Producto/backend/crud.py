@@ -50,11 +50,11 @@ def get_user_by_email(db: Session, email: str) -> Optional[models.Usuario]:
     return db.query(models.Usuario).filter(models.Usuario.email == email).first()
 
 
-def get_random_questions(db: Session, cantidad: int, id_habilidad: Optional[int] = None) -> List[models.BancoPreguntas]:
+def get_random_questions(db: Session, cantidad: int, id_habilidad: Optional[int] = None) -> List[models.PreguntaIA]:
     """Obtiene preguntas aleatorias del banco de preguntas."""
-    query = db.query(models.BancoPreguntas).filter(models.BancoPreguntas.activa == True)
+    query = db.query(models.PreguntaIA).filter(models.PreguntaIA.activa == True)
     if id_habilidad:
-        query = query.filter(models.BancoPreguntas.id_habilidad == id_habilidad)
+        query = query.filter(models.PreguntaIA.id_habilidad == id_habilidad)
     return query.order_by(func.random()).limit(cantidad).all()
 
 
@@ -537,7 +537,7 @@ def evaluate_exam_session(db: Session, id_examen: int, respuestas: List[dict]) -
             continue
 
         # Obtener la pregunta completa
-        pregunta = db.query(models.BancoPreguntas).filter(models.BancoPreguntas.id_pregunta == id_pregunta).first()
+        pregunta = db.query(models.PreguntaIA).filter(models.PreguntaIA.id_pregunta == id_pregunta).first()
         if not pregunta:
             continue
 
@@ -605,8 +605,8 @@ def save_exam_results(db: Session, rut: str, id_examen: int) -> dict:
     ).all()
 
     for pregunta_sesion in preguntas_examen:
-        pregunta = db.query(models.BancoPreguntas).filter(
-            models.BancoPreguntas.id_pregunta == pregunta_sesion.id_pregunta
+        pregunta = db.query(models.PreguntaIA).filter(
+            models.PreguntaIA.id_pregunta == pregunta_sesion.id_pregunta
         ).first()
         if not pregunta:
             continue
@@ -648,12 +648,12 @@ def save_exam_results(db: Session, rut: str, id_examen: int) -> dict:
     return {"message": "Resultados guardados exitosamente"}
 
 
-def get_random_questions(db: Session, cantidad: int, id_habilidad: Optional[int] = None) -> List[models.BancoPreguntas]:
+def get_random_questions(db: Session, cantidad: int, id_habilidad: Optional[int] = None) -> List[models.PreguntaIA]:
     """Obtiene preguntas aleatorias del banco de preguntas."""
     from sqlalchemy.sql import func
 
-    query = db.query(models.BancoPreguntas)
+    query = db.query(models.PreguntaIA)
     if id_habilidad:
-        query = query.filter(models.BancoPreguntas.id_habilidad == id_habilidad)
+        query = query.filter(models.PreguntaIA.id_habilidad == id_habilidad)
 
     return query.order_by(func.random()).limit(cantidad).all()

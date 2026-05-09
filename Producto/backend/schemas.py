@@ -55,19 +55,6 @@ class PreguntaItem(BaseModel):
         from_attributes = True
 
 
-class BancoPreguntaItem(BaseModel):
-    id_pregunta: int
-    id_habilidad: int
-    texto_inedito: str
-    enunciado: str
-    alternativas: Dict[str, str]
-    respuesta_correcta: str
-    justificacion_cot: str
-    dificultad: str
-
-    class Config:
-        from_attributes = True
-
 
 class HabilidadDetailResponse(BaseModel):
     nombre_habilidad: str
