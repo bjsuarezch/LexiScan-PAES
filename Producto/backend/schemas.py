@@ -26,7 +26,7 @@ class UserResponse(BaseModel):
     ultimo_acceso: Optional[datetime] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class HabilidadData(BaseModel):
@@ -52,7 +52,7 @@ class PreguntaItem(BaseModel):
     texto_inedito: Optional[str] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class BancoPreguntaItem(BaseModel):
@@ -66,7 +66,7 @@ class BancoPreguntaItem(BaseModel):
     dificultad: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class HabilidadDetailResponse(BaseModel):
@@ -174,7 +174,7 @@ class ConfiguracionItem(BaseModel):
     descripcion: Optional[str] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class ConfiguracionUpdate(BaseModel):

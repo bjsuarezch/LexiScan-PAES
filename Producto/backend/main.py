@@ -1,5 +1,6 @@
 import os
 import json
+from pathlib import Path
 
 import requests
 from dotenv import load_dotenv  # <--- NUEVO
@@ -21,8 +22,27 @@ class PreguntaEvaluacion(BaseModel):
     respuesta_correcta: str
     justificacion: str  # <--- Agregado este campo
 
-load_dotenv()
-print(f"DEBUG: API KEY CARGADA: {os.getenv('GEMINI_API_KEY')[:5]}...") # Solo muestra los primeros 5 caracteres
+# 1. Definir la ruta absoluta al archivo .env
+BASE_DIR = Path(__file__).resolve().parent
+env_path = BASE_DIR / ".env"
+
+# 2. Intentar cargar el archivo y verificar si tuvo éxito
+if env_path.exists():
+    load_dotenv(dotenv_path=env_path)
+    print(f"--- DEBUG: Archivo .env encontrado en: {env_path} ---")
+else:
+    print(f"--- ERROR: No se encontró el archivo .env en: {env_path} ---")
+
+# 3. Obtener la variable
+api_key = os.getenv('GEMINI_API_KEY')
+
+# 4. Verificación de seguridad antes de imprimir/usar
+if api_key is not None:
+    print(f"DEBUG: API KEY CARGADA: {api_key[:5]}...")
+else:
+    print("DEBUG: La variable GEMINI_API_KEY es None.")
+    # Listar todas las variables cargadas para ver si hay errores de tipeo
+    print(f"Variables de entorno actuales: {list(os.environ.keys())[-5:]}")
 
 models.Base.metadata.create_all(bind=database.engine)
 
@@ -131,7 +151,7 @@ def normalize_habilidad_type(value: str) -> str:
 
 def build_system_prompt() -> str:
     return (
-        'Eres la Profesora Sinclair, una docente experta en la PAES chilena. ' 
+        'Eres la Profesora Sinclair, una docente experta en la PAES de Competencia Lectora chilena. ' 
         'Respondes con un tono pedagógico, cercano y profesional, cuidando la precisión académica. '
         'Tu función es diseñar material de evaluación riguroso, claro y útil para estudiantes que se preparan para la PAES.'
     )
@@ -141,9 +161,10 @@ def build_user_prompt(habilidad: str) -> str:
     if habilidad == "Tipos_de_Texto" or habilidad == "Tipos de Texto":
         num_preguntas = 1
     return (
-        f"Genera un ejercicio completo para la habilidad de PAES '{habilidad}'. "
+        f"Genera un ejercicio completo para la habilidad de Comprension Lectora PAES  '{habilidad}'. "
+        "Tu tarea es generar un texto inédito de al menos 2 párrafos.\n\n"
         f"CANTIDAD DE PREGUNTAS A GENERAR: {num_preguntas}.\n\n"
-        f"Genera exactamente {num_preguntas} pregunta(s) de selección múltiple.\n"
+        f"basándote exclusivamente en ese texto inedito y en la habilidad a evaluar, genera exactamente {num_preguntas} pregunta(s) de selección múltiple.\n"
         "Devuelve únicamente un JSON válido con esta estructura exacta: "
         "{"
         "  \"tipo_habilidad\": \"string\", "
@@ -152,6 +173,8 @@ def build_user_prompt(habilidad: str) -> str:
         "    { \"enunciado\": \"...\", \"alternativas\": {\"A\": \"...\", \"B\": \"...\", \"C\": \"...\", \"D\": \"...\"}, \"respuesta_correcta\": \"A\", \"justificacion_cot\": \"...\" }"
         "  ]"
         "}"
+        "REGLA DE ORO: El campo 'texto_inedito' DEBE contener el relato o artículo informativo completo."
+        "No puede ser una instrucción. Las preguntas deben ser imposibles de responder sin leer el texto inédito. "
     )
 
 
@@ -206,7 +229,7 @@ def build_evaluation_prompt(tipo_habilidad: str, preguntas: list[dict]) -> str:
 
 def call_groq_feedback(tipo_habilidad: str, preguntas: list[dict], db: Session) -> dict:
     api_key = crud.get_configuracion(db, 'GROQ_API_KEY')
-    model = crud.get_configuracion(db, 'GROQ_MODEL') or 'llama-3.1-8b-instant'
+    model = crud.get_configuracion(db, 'GROQ_MODEL')
     if not api_key:
         raise HTTPException(status_code=500, detail='API KEY de Groq no configurada')
 

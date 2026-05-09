@@ -22,6 +22,8 @@ export class ConfigModalComponent implements OnInit {
   availableModels: string[] = [];
   loading = false;
 
+  private readonly MODELO_RECOMENDADO = 'llama-3.1-70b-versatile';
+
   constructor(
     private modalController: ModalController,
     private fb: FormBuilder,
@@ -37,7 +39,7 @@ export class ConfigModalComponent implements OnInit {
   initializeForm(): void {
     this.configForm = this.fb.group({
       apiKey: ['', [Validators.required]],
-      model: ['llama-3.1-8b-instant', [Validators.required]]
+      model: [this.MODELO_RECOMENDADO, [Validators.required]]
     });
   }
 
@@ -50,7 +52,9 @@ export class ConfigModalComponent implements OnInit {
 
         this.configForm.patchValue({
           apiKey: apiKeyConfig?.valor || '',
-          model: modelConfig?.valor || 'llama-3.1-8b-instant'
+          model: (modelConfig?.valor && modelConfig.valor.includes('8b')) 
+                 ? this.MODELO_RECOMENDADO 
+                 : (modelConfig?.valor || this.MODELO_RECOMENDADO)
         });
       }
     } catch (error) {
@@ -62,15 +66,11 @@ export class ConfigModalComponent implements OnInit {
     try {
       const response = await this.habilidadesService.getGroqModels().toPromise();
       if (response && response.data) {
-        this.availableModels = response.data.map((model: any) => model.id);
+        this.availableModels = response.data
+          .map((model: any) => model.id)
+          .filter((id: string) => !id.toLowerCase().includes('8b'));
       } else {
-        // Modelos por defecto si falla la carga
-        this.availableModels = [
-          'llama-3.1-8b-instant',
-          'llama3-8b-8192',
-          'mixtral-8x7b-32768',
-          'gemma-7b-it'
-        ];
+        this.setDefaultModels();
       }
     } catch (error) {
       console.error('Error loading models:', error);
@@ -82,6 +82,13 @@ export class ConfigModalComponent implements OnInit {
         'gemma-7b-it'
       ];
     }
+  }
+
+  private setDefaultModels(): void {
+    this.availableModels = [
+      this.MODELO_RECOMENDADO,
+      'mixtral-8x7b-32768' // Aunque dice 8x7b, es un modelo de 45B-56B de alta calidad
+    ];
   }
 
   async onSubmit(): Promise<void> {
