@@ -146,6 +146,10 @@ source venv/bin/activate
 # Instalar dependencias
 pip install -r requirements.txt
 pip install pydantic[email]
+
+# Crear archivo .env
+[System.IO.File]::WriteAllLines("$(Get-Location)\.env", "GEMINI_API_KEY=tu_clave_real_aqui")
+
 ```
 
 **Dependencias del Backend:**
