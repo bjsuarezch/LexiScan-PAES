@@ -64,6 +64,33 @@ export class ExamenSimulacroPage implements OnInit {
     await alert.present();
   }
 
+  groupedQuestions: any[] = [];
+
+  // Función para organizar preguntas por su texto
+  organizeQuestions() {
+    const groups: { [key: string]: any } = {};
+    let globalCounter = 1;
+
+    this.examData?.preguntas.forEach((pregunta: any) => {
+      const texto = pregunta.texto_inedito || 'Sin texto de contexto';
+
+      if (!groups[texto]) {
+        groups[texto] = {
+          texto: texto,
+          preguntas: [],
+        };
+      }
+
+      // Añadimos un índice global para que las preguntas sigan numeradas del 1 al 20
+      groups[texto].preguntas.push({
+        ...pregunta,
+        globalIndex: globalCounter++,
+      });
+    });
+
+    this.groupedQuestions = Object.values(groups);
+  }
+
   submitExam() {
     if (!this.examData) return;
 

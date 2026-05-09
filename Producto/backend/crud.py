@@ -268,6 +268,7 @@ def create_exam_session(db: Session, rut: str, cantidad_preguntas: int) -> Optio
                 'alternativas': pregunta.alternativas,
                 'respuesta_correcta': pregunta.respuesta_correcta,
                 'justificacion_cot': pregunta.justificacion_cot,
+                'texto_inedito': pregunta.texto_inedito,
             }
             for pregunta in pool_questions
         ],

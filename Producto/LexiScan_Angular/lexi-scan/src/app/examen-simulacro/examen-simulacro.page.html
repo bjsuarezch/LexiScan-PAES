@@ -15,46 +15,58 @@
 
 <ion-content [fullscreen]="true" class="ion-padding">
   <div class="exam-container" *ngIf="examData">
-    <h2>Responde todas las preguntas</h2>
-    <p>Tiempo estimado: {{ examData.estimated_time }} minutos</p>
+    <div class="exam-header ion-margin-bottom">
+      <h2>Responde todas las preguntas</h2>
+      <ion-badge color="secondary"
+        >Tiempo estimado: {{ examData.estimated_time }} min</ion-badge
+      >
+    </div>
 
-    <ion-card
-      *ngFor="let pregunta of examData.preguntas; let i = index"
-      class="question-card"
-    >
-      <ion-card-content>
-        <h3>Pregunta {{ i + 1 }}</h3>
-        <p class="question-text">{{ pregunta.enunciado }}</p>
+    <!-- Agrupamos por texto para no repetirlo -->
+    <div *ngFor="let grupo of groupedQuestions">
+      <!-- Sección del Texto Contextual -->
+      <ion-card class="text-context-card">
+        <ion-card-header>
+          <ion-card-subtitle>Lectura Contextual</ion-card-subtitle>
+          <ion-card-title>Lee atentamente:</ion-card-title>
+        </ion-card-header>
+        <ion-card-content class="text-content">
+          {{ grupo.texto }}
+        </ion-card-content>
+      </ion-card>
 
-        <ion-radio-group
-          [(ngModel)]="answers[pregunta.id_pregunta]"
-          name="question-{{ pregunta.id_pregunta }}"
-        >
-          <ion-item
-            *ngFor="let alt of getAlternativesArray(pregunta.alternativas)"
-            lines="none"
-          >
-            <ion-label>{{ alt.key }}. {{ alt.value }}</ion-label>
-            <ion-radio slot="start" [value]="alt.key"></ion-radio>
-          </ion-item>
-        </ion-radio-group>
-      </ion-card-content>
-    </ion-card>
+      <!-- Preguntas asociadas a ese texto específico -->
+      <ion-card
+        *ngFor="let pregunta of grupo.preguntas; let i = index"
+        class="question-card"
+      >
+        <ion-card-content>
+          <h3 class="question-number">Pregunta {{ pregunta.globalIndex }}</h3>
+          <p class="question-text">{{ pregunta.enunciado }}</p>
+
+          <ion-radio-group [(ngModel)]="answers[pregunta.id_pregunta]">
+            <ion-item
+              *ngFor="let alt of getAlternativesArray(pregunta.alternativas)"
+              lines="none"
+              class="alt-item"
+            >
+              <ion-radio slot="start" [value]="alt.key"></ion-radio>
+              <ion-label class="ion-text-wrap"
+                >{{ alt.key }}. {{ alt.value }}</ion-label
+              >
+            </ion-item>
+          </ion-radio-group>
+        </ion-card-content>
+      </ion-card>
+    </div>
 
     <ion-button
       expand="block"
-      color="primary"
       (click)="finishExam()"
       [disabled]="loading"
       class="finish-btn"
     >
-      <ion-icon name="checkmark-circle" slot="start"></ion-icon>
-      Terminar Examen
+      Finalizar y Evaluar
     </ion-button>
-  </div>
-
-  <div *ngIf="loading" class="loading-container">
-    <ion-spinner name="crescent"></ion-spinner>
-    <p>Evaluando examen...</p>
   </div>
 </ion-content>
