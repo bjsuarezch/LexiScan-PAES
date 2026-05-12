@@ -67,6 +67,7 @@ class GenerarPreguntasRequest(BaseModel):
 
 
 class GeneratedPreguntaItem(BaseModel):
+    id_pregunta: int
     enunciado: str
     alternativas: Dict[str, str]
     respuesta_correcta: str
@@ -74,6 +75,7 @@ class GeneratedPreguntaItem(BaseModel):
 
 
 class EvaluarPreguntaUsuario(BaseModel):
+    id_pregunta: int
     enunciado: str
     alternativas: Dict[str, str]
     respuesta_usuario: str

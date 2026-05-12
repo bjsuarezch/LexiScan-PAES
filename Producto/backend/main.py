@@ -148,6 +148,11 @@ def normalize_habilidad_type(value: str) -> str:
     normalized = normalized.replace('-', ' ').replace('_', ' ').strip()
     return VALID_HABILIDADES.get(normalized, '')
 
+def normalize_habilidad_db_name(value: str) -> str:
+    if not value:
+        return ''
+    return DB_HABILIDADES.get(value, '')
+
 
 def build_system_prompt() -> str:
     return (
@@ -197,10 +202,7 @@ def parse_gemini_output(raw_text: str | dict | list) -> dict:
         raise
 
 
-def normalize_habilidad_db_name(value: str) -> str:
-    if not value:
-        return ''
-    return DB_HABILIDADES.get(value.strip(), '')
+
 
 
 def build_evaluation_prompt(tipo_habilidad: str, preguntas: list[dict]) -> str:
@@ -374,7 +376,7 @@ def crear_examen(examen_request: schemas.ExamenRequest, db: Session = Depends(ge
 
     print(f"Recibido: {examen_request.dict()}") # Debug para ver si entra
     # 1. Verificar si la API Key está configurada (usando tu current_config)
-    api_key = current_config.get("api_key")
+    api_key = crud.get_configuracion(db, 'GROQ_API_KEY')
     if not api_key:
         raise HTTPException(status_code=400, detail="API key not configured. Por favor, configura la IA primero.")
 
@@ -414,13 +416,51 @@ def guardar_resultados_examen(request: schemas.GuardarResultadosExamenRequest, d
 def generar_preguntas(request: schemas.GenerarPreguntasRequest, db: Session = Depends(get_db)):
     habilidad_valida = normalize_habilidad_type(request.habilidad)
     if not habilidad_valida:
-        raise HTTPException(status_code=400, detail='Tipo de habilidad inválido. Usa Localizar, Interpretar, Evaluar, Lectura Critica, Vocabulario o Tipos de Texto.')
+        raise HTTPException(status_code=400, detail='Tipo de habilidad inválido.')
 
+    habilidad_db_name = normalize_habilidad_db_name(habilidad_valida)
+    if not habilidad_db_name:
+        raise HTTPException(status_code=400, detail='Habilidad no reconocida.')
+
+    # 1. Llamada a la IA para generar el contenido
     generacion = call_gemini_api(habilidad_valida, db)
 
     if not isinstance(generacion, dict) or 'preguntas' not in generacion:
-        raise HTTPException(status_code=502, detail='Respuesta inválida de Gemini: no se encontró el formato esperado.')
+        raise HTTPException(status_code=502, detail='Respuesta inválida de la IA: formato inesperado.')
 
+    # 2. Obtener el registro de la habilidad para vincular las preguntas (id_progreso)
+    # Asumiendo que tienes una función para obtener la habilidad por nombre
+    habilidad_db = crud.get_habilidad_by_nombre(db, habilidad_db_name)
+    if not habilidad_db:
+        raise HTTPException(status_code=404, detail="Habilidad no encontrada en el sistema.")
+
+    # 3. Guardar cada pregunta generada en el banco de preguntas
+    preguntas_guardadas_ids = []
+    
+    try:
+        texto_inedito = generacion.get('texto_inedito', 'Sin texto de contexto')
+        
+        for pregunta_data in generacion['preguntas']:
+            # Usamos la función save_generated_question que guarda en banco_preguntas
+            nueva_pregunta = crud.save_generated_question(
+                db,
+                id_habilidad=habilidad_db.id_progreso,
+                texto_inedito=texto_inedito,
+                enunciado=pregunta_data['enunciado'],
+                alternativas=pregunta_data['alternativas'],
+                respuesta_correcta=pregunta_data['respuesta_correcta'],
+                justificacion_cot=pregunta_data.get('justificacion_cot', ''),
+                modelo_ia=crud.get_configuracion(db, 'GROQ_MODEL') # O el modelo que estés usando
+            )
+            # Añadimos el ID generado al objeto para que el frontend lo conozca
+            pregunta_data['id_pregunta'] = nueva_pregunta.id_pregunta
+            
+        db.commit() # Confirmamos todos los guardados
+    except Exception as e:
+        db.rollback()
+        print(f"Error al persistir preguntas en la DB: {str(e)}")
+        # Opcional: podrías lanzar una excepción o simplemente devolver las preguntas sin IDs
+    
     generacion['tipo_habilidad'] = habilidad_valida
     return generacion
 
@@ -483,28 +523,22 @@ def evaluar_preguntas(request: schemas.EvaluarRespuestasRequest, db: Session = D
         # Guardar la pregunta generada y registrar error si es incorrecto
         if not correcta:
             try:
-                # Guardar pregunta generada
-                pregunta_guardada = crud.save_generated_question(
-                    db,
-                    id_habilidad=habilidad_record.id_progreso,
-                    texto_inedito=getattr(pregunta, 'texto_inedito', ''),
-                    enunciado=pregunta.enunciado,
-                    alternativas=pregunta.alternativas,
-                    respuesta_correcta=pregunta.respuesta_correcta,
-                    justificacion_cot=getattr(pregunta, 'justificacion', ''),
-                    modelo_ia='Groq'
-                )
+                id_banco = pregunta['id_pregunta'] if isinstance(pregunta, dict) else pregunta.id_pregunta
+
+                # 1. Clonar el contenido a la tabla del GYM (preguntas_ia)
+                pregunta_gym = crud.clonar_pregunta_a_preguntas_ia(db, id_banco)
                 
-                # Registrar error
+                # 2. Registrar la relación del error (quién falló y cuántas veces)
+                # Aquí usamos la nueva ID generada en preguntas_ia
                 crud.register_error(
                     db,
                     rut_usuario=request.rut,
-                    id_pregunta=pregunta_guardada.id_pregunta,
+                    id_pregunta=pregunta_gym.id_pregunta, 
                     id_habilidad=habilidad_record.id_progreso
                 )
             except Exception as e:
+                db.rollback()
                 print(f"Error registrando fallo en pregunta {index}: {str(e)}")
-                # No interrumpir evaluación si falla el registro de error
 
     xp_ganada = 0
     try:

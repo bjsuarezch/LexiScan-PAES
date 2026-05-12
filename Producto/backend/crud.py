@@ -50,11 +50,11 @@ def get_user_by_email(db: Session, email: str) -> Optional[models.Usuario]:
     return db.query(models.Usuario).filter(models.Usuario.email == email).first()
 
 
-def get_random_questions(db: Session, cantidad: int, id_habilidad: Optional[int] = None) -> List[models.PreguntaIA]:
+def get_random_questions(db: Session, cantidad: int, id_habilidad: Optional[int] = None) -> List[models.BancoPreguntas]:
     """Obtiene preguntas aleatorias del banco de preguntas."""
-    query = db.query(models.PreguntaIA).filter(models.PreguntaIA.activa == True)
+    query = db.query(models.BancoPreguntas).filter(models.BancoPreguntas.activa == True)
     if id_habilidad:
-        query = query.filter(models.PreguntaIA.id_habilidad == id_habilidad)
+        query = query.filter(models.BancoPreguntas.id_habilidad == id_habilidad)
     return query.order_by(func.random()).limit(cantidad).all()
 
 
@@ -132,6 +132,14 @@ def get_dashboard_data(db: Session, rut: str) -> Optional[dict]:
         'habilidades': [build_display_habilidad(h) for h in habilidades],
     }
 
+def get_habilidad_by_nombre(db: Session, nombre_habilidad: str):
+    """
+    Busca una habilidad en el historial por su nombre para obtener su ID.
+    """
+    return db.query(models.HistorialHabilidades).filter(
+        models.HistorialHabilidades.nombre_habilidad == nombre_habilidad
+    ).first()
+
 
 def get_habilidad_content(db: Session, rut: str, habilidad: str) -> Optional[dict]:
     normalized = normalize_habilidad_name(habilidad)
@@ -149,9 +157,9 @@ def get_habilidad_content(db: Session, rut: str, habilidad: str) -> Optional[dic
     if not habilidad_record:
         return None
 
-    preguntas = db.query(models.PreguntaIA).filter(
-        models.PreguntaIA.id_habilidad == habilidad_record.id_progreso,
-        models.PreguntaIA.activa == True,
+    preguntas = db.query(models.BancoPreguntas).filter(
+        models.BancoPreguntas.id_habilidad == habilidad_record.id_progreso,
+        models.BancoPreguntas.activa == True,
     ).all()
 
     return {
@@ -296,8 +304,8 @@ def get_error_frecuente(db: Session, rut: str) -> Optional[dict]:
     ).first()
     
     # Obtener datos de la pregunta
-    pregunta = db.query(models.PreguntaIA).filter(
-        models.PreguntaIA.id_pregunta == error.id_pregunta
+    pregunta = db.query(models.BancoPreguntas).filter(
+        models.BancoPreguntas.id_pregunta == error.id_pregunta
     ).first()
     
     return {
@@ -341,6 +349,32 @@ def get_all_configuracion(db: Session) -> List[dict]:
         for c in configs
     ]
 
+def clonar_pregunta_a_preguntas_ia(
+    db: Session, id_pregunta_banco: int) -> models.PreguntaIA:
+    """Clona una pregunta del banco a la tabla de errores_favoritos para el usuario."""
+    original = db.query(models.BancoPreguntas).filter(
+        models.BancoPreguntas.id_pregunta == id_pregunta_banco
+    ).first()
+
+    if not original:
+        raise ValueError(f"No se encontró la pregunta con ID {id_pregunta_banco} en el banco.")
+
+    # 2. Crear la copia para la tabla de errores (PreguntasIA)
+    # IMPORTANTE: Solo los campos de contenido, sin rut ni contadores.
+    copia_gym = models.PreguntaIA(
+        id_habilidad=original.id_habilidad,
+        texto_inedito=original.texto_inedito,
+        enunciado=original.enunciado,
+        alternativas=original.alternativas,
+        respuesta_correcta=original.respuesta_correcta,
+        justificacion_cot=original.justificacion_cot,
+        modelo_ia='Clonado del Banco'
+    )
+    
+    db.add(copia_gym)
+    db.commit()
+    db.refresh(copia_gym)
+    return copia_gym
 
 def save_generated_question(
     db: Session,
@@ -351,16 +385,16 @@ def save_generated_question(
     respuesta_correcta: str,
     justificacion_cot: str,
     modelo_ia: str = 'Groq'
-) -> models.PreguntaIA:
-    """Guarda una pregunta generada por IA en la base de datos."""
-    pregunta = models.PreguntaIA(
+) -> models.BancoPreguntas:
+    """Guarda una pregunta generada por IA en el banco de preguntas."""
+    pregunta = models.BancoPreguntas(
         id_habilidad=id_habilidad,
         texto_inedito=texto_inedito,
         enunciado=enunciado,
         alternativas=alternativas,
         respuesta_correcta=respuesta_correcta,
         justificacion_cot=justificacion_cot,
-        modelo_ia=modelo_ia,
+        dificultad='medio',
         activa=True
     )
     db.add(pregunta)
@@ -537,7 +571,7 @@ def evaluate_exam_session(db: Session, id_examen: int, respuestas: List[dict]) -
             continue
 
         # Obtener la pregunta completa
-        pregunta = db.query(models.PreguntaIA).filter(models.PreguntaIA.id_pregunta == id_pregunta).first()
+        pregunta = db.query(models.BancoPreguntas).filter(models.BancoPreguntas.id_pregunta == id_pregunta).first()
         if not pregunta:
             continue
 
@@ -605,8 +639,8 @@ def save_exam_results(db: Session, rut: str, id_examen: int) -> dict:
     ).all()
 
     for pregunta_sesion in preguntas_examen:
-        pregunta = db.query(models.PreguntaIA).filter(
-            models.PreguntaIA.id_pregunta == pregunta_sesion.id_pregunta
+        pregunta = db.query(models.BancoPreguntas).filter(
+            models.BancoPreguntas.id_pregunta == pregunta_sesion.id_pregunta
         ).first()
         if not pregunta:
             continue
@@ -648,12 +682,12 @@ def save_exam_results(db: Session, rut: str, id_examen: int) -> dict:
     return {"message": "Resultados guardados exitosamente"}
 
 
-def get_random_questions(db: Session, cantidad: int, id_habilidad: Optional[int] = None) -> List[models.PreguntaIA]:
+def get_random_questions(db: Session, cantidad: int, id_habilidad: Optional[int] = None) -> List[models.BancoPreguntas]:
     """Obtiene preguntas aleatorias del banco de preguntas."""
     from sqlalchemy.sql import func
 
-    query = db.query(models.PreguntaIA)
+    query = db.query(models.BancoPreguntas)
     if id_habilidad:
-        query = query.filter(models.PreguntaIA.id_habilidad == id_habilidad)
+        query = query.filter(models.BancoPreguntas.id_habilidad == id_habilidad)
 
     return query.order_by(func.random()).limit(cantidad).all()

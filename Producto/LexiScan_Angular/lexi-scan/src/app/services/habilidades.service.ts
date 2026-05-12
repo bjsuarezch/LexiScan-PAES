@@ -65,6 +65,7 @@ export class HabilidadesService {
     rut: string;
     tipo_habilidad: string;
     preguntas: Array<{
+      id_pregunta: number;
       enunciado: string;
       alternativas: Record<string, string>;
       respuesta_usuario: string;

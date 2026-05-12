@@ -122,6 +122,7 @@ export class HabilidadesPage implements OnInit {
       rut: this.profile.rut,
       tipo_habilidad: this.selectedHabilidad!.tipo_habilidad,
       preguntas: this.selectedHabilidad!.preguntas.map((pregunta, index) => ({
+        id_pregunta: pregunta.id_pregunta,
         enunciado: pregunta.enunciado,
         alternativas: pregunta.alternativas,
         respuesta_usuario: this.selectedAnswers[index] || '',

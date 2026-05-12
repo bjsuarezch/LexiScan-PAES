@@ -22,6 +22,7 @@ export interface PreguntaItem {
 }
 
 export interface GeneratedPreguntaItem {
+  id_pregunta: number;
   enunciado: string;
   alternativas: Record<string, string>;
   respuesta_correcta: string;
