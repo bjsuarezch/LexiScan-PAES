@@ -352,6 +352,15 @@ def get_all_configuracion(db: Session) -> List[dict]:
 def clonar_pregunta_a_preguntas_ia(
     db: Session, id_pregunta_banco: int) -> models.PreguntaIA:
     """Clona una pregunta del banco a la tabla de errores_favoritos para el usuario."""
+    # 1. ¿Ya la habíamos clonado antes?
+    existente = db.query(models.PreguntaIA).filter(
+        models.PreguntaIA.id_pregunta_origen == id_pregunta_banco
+    ).first()
+    
+    if existente:
+        return existente # Si ya existe, no la duplicamos, solo la retornamos
+    
+    # 2. Si no existe, buscamos en el banco y clonamos
     original = db.query(models.BancoPreguntas).filter(
         models.BancoPreguntas.id_pregunta == id_pregunta_banco
     ).first()
@@ -359,16 +368,17 @@ def clonar_pregunta_a_preguntas_ia(
     if not original:
         raise ValueError(f"No se encontró la pregunta con ID {id_pregunta_banco} en el banco.")
 
-    # 2. Crear la copia para la tabla de errores (PreguntasIA)
+    # 3. Crear la copia para la tabla de errores (PreguntasIA)
     # IMPORTANTE: Solo los campos de contenido, sin rut ni contadores.
     copia_gym = models.PreguntaIA(
+        id_pregunta_origen=id_pregunta_banco, # Guardamos el rastro del ID original
         id_habilidad=original.id_habilidad,
         texto_inedito=original.texto_inedito,
         enunciado=original.enunciado,
         alternativas=original.alternativas,
         respuesta_correcta=original.respuesta_correcta,
         justificacion_cot=original.justificacion_cot,
-        modelo_ia='Clonado del Banco'
+        modelo_ia='Clonado'
     )
     
     db.add(copia_gym)
@@ -562,8 +572,8 @@ def evaluate_exam_session(db: Session, id_examen: int, respuestas: List[dict]) -
     rendimiento_habilidades = {}
 
     for resp in respuestas:
-        id_pregunta = resp['id_pregunta']
-        respuesta_dada = resp['respuesta_dada']
+        id_pregunta = resp.id_pregunta
+        respuesta_dada = resp.respuesta_dada
 
         # Encontrar la pregunta en la sesión
         pregunta_sesion = next((p for p in preguntas_examen if p.id_pregunta == id_pregunta), None)
@@ -597,7 +607,17 @@ def evaluate_exam_session(db: Session, id_examen: int, respuestas: List[dict]) -
 
         # Registrar error si incorrecta
         if not correcta:
-            register_error(db, examen.rut_usuario, id_pregunta, pregunta.id_habilidad)
+            # 1. PASO OBLIGATORIO: Clonar del Banco a Preguntas_IA
+            # Esto asegura que la ID exista en la tabla donde errores_favoritos mira.
+            pregunta_clonada = clonar_pregunta_a_preguntas_ia(db, id_pregunta)
+
+            # 2. Ahora sí registramos el error usando la ID del clon
+            register_error(
+                db, 
+                rut_usuario=examen.rut_usuario, 
+                id_pregunta=pregunta_clonada.id_pregunta, # Usamos la ID de la tabla IA
+                id_habilidad=pregunta.id_habilidad
+            )
 
     # Calcular porcentajes
     rendimiento_list = []
@@ -651,7 +671,7 @@ def save_exam_results(db: Session, rut: str, id_examen: int) -> dict:
         if not habilidad:
             continue
 
-        nombre_habilidad = normalize_habilidad_name(habilidad.nombre_habilidad)
+        nombre_habilidad = normalize_habilidad_name(str(habilidad.nombre_habilidad))
         if nombre_habilidad not in rendimiento_examen:
             rendimiento_examen[nombre_habilidad] = {'correctas': 0, 'total': 0}
 
@@ -671,9 +691,9 @@ def save_exam_results(db: Session, rut: str, id_examen: int) -> dict:
 
     # Calcular promedio: (progreso_actual + rendimiento_examen) / 2
     for hab in habilidades_usuario:
-        nombre_norm = normalize_habilidad_name(hab.nombre_habilidad)
+        nombre_norm = normalize_habilidad_name(str(hab.nombre_habilidad))
         rendimiento_examen_pct = porcentajes_examen.get(nombre_norm, 0)
-        nuevo_progreso = (hab.nivel_maestria + rendimiento_examen_pct) / 2
+        nuevo_progreso = (float(hab.nivel_maestria) + rendimiento_examen_pct) / 2
         hab.nivel_maestria = min(100.0, nuevo_progreso)
         hab.ultima_actualizacion = datetime.now(timezone.utc)
 

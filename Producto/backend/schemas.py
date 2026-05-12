@@ -145,10 +145,10 @@ class EvaluarExamenResponse(BaseModel):
 class GuardarResultadosExamenRequest(BaseModel):
     rut: str
     id_examen: int
-    total_preguntas: int
-    puntaje: int
-    xp_ganada: int
-    mensaje: str
+    #total_preguntas: int
+    #puntaje: int
+    #xp_ganada: int
+    #mensaje: str
 
 
 class GenerarPreguntasResponse(BaseModel):

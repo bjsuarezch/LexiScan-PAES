@@ -25,6 +25,10 @@ export class ExamenSimulacroPage implements OnInit {
     const navigation = this.router.getCurrentNavigation();
     if (navigation?.extras?.state) {
       this.examData = navigation.extras.state['examData'];
+
+      if (this.examData) {
+        this.organizeQuestions();
+      }
     }
     if (!this.examData) {
       this.router.navigate(['/examen']);
