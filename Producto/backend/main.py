@@ -11,6 +11,8 @@ from sqlalchemy.sql import text
 from pydantic import BaseModel
 
 import crud, database, models, schemas
+from services.recomendaciones import generar_respuesta_recomendaciones
+from services.impulsividad import calcular_umbral_tiempo_minimo
 
 class ConfigAPI(BaseModel):
     api_key: str
@@ -640,3 +642,108 @@ def get_groq_models():
         raise HTTPException(status_code=response.status_code, detail='Error al obtener modelos de Groq.')
 
     return response.json()
+
+
+# ============================================================================
+# NUEVOS ENDPOINTS PARA CU10 (RECOMENDACIONES) Y CU8 (IMPULSIVIDAD)
+# ============================================================================
+
+
+@app.get(
+    '/usuarios/{rut}/recomendaciones',
+    response_model=schemas.RecomendacionesResponse,
+    summary='Obtener recomendaciones personalizadas',
+    tags=['Recomendaciones (CU10)'],
+)
+async def obtener_recomendaciones(
+    rut: str,
+    db: Session = Depends(get_db),
+):
+    """
+    **CU10: Recomendaciones Personalizadas**
+
+    Obtiene análisis de habilidades débiles y errores frecuentes del usuario.
+    
+    Lógica:
+    1. Identifica las 2 habilidades con menor nivel_maestria
+    2. Consulta los 3 errores más frecuentes en esas habilidades
+    3. Retorna sugerencias para que el usuario pratique en el Módulo GYM
+    
+    Args:
+        rut: RUT del usuario (e.g., '12345678-9')
+    
+    Returns:
+        RecomendacionesResponse con:
+        - habilidades_debiles: Top 2 habilidades débiles
+        - errores_frecuentes: Top 3 errores más fallados
+        - proxima_practica_sugerida: Texto sugerencia
+    
+    Raises:
+        404: Usuario no encontrado
+        500: Error en base de datos
+    
+    Latencia: < 2 segundos
+    """
+    try:
+        resultado = await generar_respuesta_recomendaciones(rut, db)
+        return resultado
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f'Error al obtener recomendaciones: {str(e)}')
+
+
+@app.get(
+    '/preguntas/{id_pregunta}/umbral-impulsividad',
+    response_model=schemas.UmbralImpulsividadResponse,
+    summary='Calcular umbral de impulsividad',
+    tags=['Impulsividad (CU8)'],
+)
+async def obtener_umbral_impulsividad(
+    id_pregunta: int,
+    db: Session = Depends(get_db),
+):
+    """
+    **CU8: Alerta de Impulsividad**
+
+    Calcula el umbral mínimo de tiempo de lectura para una pregunta.
+    
+    Lógica:
+    1. Consulta la pregunta por ID
+    2. Extrae texto_inedito y cuenta palabras
+    3. Calcula: umbral = max(2, round(palabras / 15, 1))
+    4. Retorna información para bloquear botón 'Responder' en el frontend
+    
+    Args:
+        id_pregunta: ID de la pregunta en tabla preguntas_ia
+    
+    Returns:
+        UmbralImpulsividadResponse con:
+        - num_palabras: Cantidad de palabras en el texto
+        - umbral_segundos: Segundos mínimos antes de permitir responder
+        - mensaje_usuario: Texto a mostrar al usuario
+    
+    Raises:
+        404: Pregunta no encontrada o no activa
+        500: Error en base de datos
+    
+    Latencia: < 500 ms
+    
+    Ejemplo:
+        GET /preguntas/42/umbral-impulsividad
+        
+        Response 200:
+        {
+            "id_pregunta": 42,
+            "num_palabras": 87,
+            "umbral_segundos": 5.8,
+            "mensaje_usuario": "Lee detenidamente. Espera 5.8 segundos antes de responder."
+        }
+    """
+    try:
+        resultado = await calcular_umbral_tiempo_minimo(id_pregunta, db)
+        return resultado
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f'Error al calcular umbral de impulsividad: {str(e)}')

@@ -182,3 +182,64 @@ class GroqModel(BaseModel):
 class GroqModelsResponse(BaseModel):
     object: str
     data: List[GroqModel]
+
+
+# ============================================================================
+# NUEVOS ESQUEMAS PARA CU10 (RECOMENDACIONES) Y CU8 (IMPULSIVIDAD)
+# ============================================================================
+
+
+class HabilidadDebolItem(BaseModel):
+    """Representa una habilidad débil del usuario."""
+    nombre: str = Field(..., description="Nombre de la habilidad (ej: 'Evaluar', 'Vocabulario')")
+    nivel_maestria: float = Field(..., ge=0, le=100, description="Nivel de maestría 0-100")
+    sugerencia: str = Field(..., description="Sugerencia personalizada para mejorar")
+
+
+class ErrorFrecuenteItem(BaseModel):
+    """Representa un error frecuente del usuario."""
+    id_pregunta: int = Field(..., description="ID de la pregunta donde falla")
+    enunciado: str = Field(..., description="Texto de la pregunta")
+    veces_fallada: int = Field(..., ge=1, description="Cantidad de veces que ha fallado")
+
+
+class RecomendacionesResponse(BaseModel):
+    """
+    Respuesta del endpoint GET /usuarios/{rut}/recomendaciones (CU10).
+    
+    Contiene análisis de habilidades débiles y errores frecuentes.
+    Sirve para que el frontend del Módulo GYM sugiera qué practicar.
+    """
+    rut: str = Field(..., description="RUT del usuario")
+    habilidades_debiles: List[HabilidadDebolItem] = Field(
+        ..., max_items=2, description="Máximo 2 habilidades con menor nivel_maestria"
+    )
+    errores_frecuentes: List[ErrorFrecuenteItem] = Field(
+        ..., max_items=3, description="Máximo 3 errores más frecuentes en esas habilidades"
+    )
+    proxima_practica_sugerida: str = Field(
+        ..., description="Texto descriptivo sugiriendo qué habilidad practicar primero"
+    )
+
+    class Config:
+        from_attributes = True
+
+
+class UmbralImpulsividadResponse(BaseModel):
+    """
+    Respuesta del endpoint GET /preguntas/{id_pregunta}/umbral-impulsividad (CU8).
+    
+    Contiene el umbral de tiempo mínimo de lectura para evitar impulsividad.
+    El frontend debe bloquear el botón 'Responder' por este tiempo.
+    """
+    id_pregunta: int = Field(..., description="ID de la pregunta")
+    num_palabras: int = Field(..., ge=0, description="Cantidad de palabras en texto_inedito")
+    umbral_segundos: float = Field(
+        ..., ge=2.0, description="Segundos mínimos a esperar antes de responder (mín: 2)"
+    )
+    mensaje_usuario: str = Field(
+        ..., description="Mensaje descriptivo para mostrar al usuario (ej: 'Lee detenidamente...')"
+    )
+
+    class Config:
+        from_attributes = True
