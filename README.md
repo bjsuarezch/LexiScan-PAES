@@ -160,7 +160,6 @@ pip install -r requirements.txt
 Crea un archivo `.env` en `Producto/backend/` con:
 
 ```ini
-DATABASE_URL=postgresql://user_lexiscan:password123@localhost:5432/lexiscan_db
 GROQ_API_KEY=tu_clave_groq_aqui
 GEMINI_API_KEY=tu_clave_gemini_aqui
 ```
