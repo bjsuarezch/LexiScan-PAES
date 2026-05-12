@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LexiScan PAES – Diagrama de Clases</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.0/mermaid.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --border: #1e2d45;
+    --accent: #00d4ff;
+    --accent2: #7c3aed;
+    --accent3: #10b981;
+    --text: #e2e8f0;
+    --muted: #64748b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    padding: 40px 24px 60px;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.025) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrapper {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 44px;
+    animation: fadeDown 0.6s ease both;
+  }
+
+  .badge {
+    display: inline-block;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--accent2);
+    border: 1px solid var(--accent2);
+    padding: 4px 14px;
+    border-radius: 2px;
+    margin-bottom: 14px;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 800;
+    letter-spacing: -1px;
+    background: linear-gradient(135deg, #fff 30%, var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .subtitle {
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 13px;
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 1px;
+  }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 36px;
+    animation: fadeDown 0.7s ease 0.1s both;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+  }
+
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+
+  /* Diagram container */
+  .diagram-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 32px 24px;
+    overflow-x: auto;
+    animation: fadeUp 0.7s ease 0.2s both;
+  }
+
+  .mermaid {
+    display: flex;
+    justify-content: center;
+    min-width: 800px;
+  }
+
+  /* Relations table */
+  .relations {
+    margin-top: 36px;
+    animation: fadeUp 0.7s ease 0.35s both;
+  }
+
+  .section-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 10px;
+    margin-bottom: 18px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  th {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 8px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  td {
+    padding: 10px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    vertical-align: top;
+  }
+
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .rel-badge {
+    display: inline-block;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 2px;
+    margin-right: 6px;
+  }
+
+  .rel-1-n  { background: rgba(0,212,255,0.15);  color: var(--accent);  border: 1px solid var(--accent); }
+  .rel-1-1  { background: rgba(124,58,237,0.15); color: #a78bfa;        border: 1px solid #a78bfa; }
+  .rel-n-n  { background: rgba(16,185,129,0.15); color: var(--accent3); border: 1px solid var(--accent3); }
+
+  /* Endpoints table */
+  .endpoints {
+    margin-top: 36px;
+    animation: fadeUp 0.7s ease 0.45s both;
+  }
+
+  .ep-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+  }
+
+  .ep-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    padding: 14px 16px;
+  }
+
+  .ep-class {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent2);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .ep-class::before {
+    content: '';
+    display: block;
+    width: 6px; height: 6px;
+    background: var(--accent2);
+    border-radius: 50%;
+  }
+
+  .ep-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .ep-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+  }
+
+  .method-badge {
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 2px;
+    min-width: 40px;
+    text-align: center;
+  }
+  .get    { background: rgba(16,185,129,0.2);  color: #34d399; }
+  .post   { background: rgba(245,158,11,0.2);  color: #fbbf24; }
+  .put    { background: rgba(0,212,255,0.2);   color: var(--accent); }
+  .patch  { background: rgba(124,58,237,0.2);  color: #a78bfa; }
+  .delete { background: rgba(239,68,68,0.2);   color: #f87171; }
+
+  .ep-path { color: var(--muted); }
+
+  footer {
+    margin-top: 48px;
+    text-align: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  @keyframes fadeDown {
+    from { opacity:0; transform:translateY(-16px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(16px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <header>
+    <div class="badge">Diagrama de Clases</div>
+    <h1>LexiScan PAES</h1>
+    <p class="subtitle">Modelo de Datos · FastAPI + PostgreSQL · SQLAlchemy ORM</p>
+  </header>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#00d4ff"></div>Usuario / Auth</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#7c3aed"></div>Habilidades DEMRE</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div>IA Sinclair</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>Examen / GYM</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f472b6"></div>Gamificación</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div>Errores Favoritos</div>
+  </div>
+
+  <div class="diagram-wrap">
+    <div class="mermaid">
+classDiagram
+    direction TB
+
+    class Usuario {
+        +String rut PK
+        +String nombre_completo
+        +String email
+        +String password_hash
+        +Integer xp_total
+        +Integer racha_actual
+        +autenticar() POST /auth/login
+        +actualizarRacha() PATCH /usuarios/racha
+        +cargarProgreso() GET /usuarios/progreso
+    }
+
+    class HistorialHabilidades {
+        +Integer id_progreso PK
+        +String rut_usuario FK
+        +Enum nombre_habilidad
+        +Float nivel_maestria
+        +DateTime ultima_actualizacion
+        +calcularMaestria() PUT /habilidades/maestria
+        +obtenerPuntosDebiles() GET /habilidades/debiles
+    }
+
+    class PreguntaIA {
+        +Integer id_pregunta PK
+        +Integer id_habilidad FK
+        +Text texto_inedito
+        +String enunciado
+        +JSON alternativas
+        +Char respuesta_correcta
+        +Text justificacion_CoT
+        +generarConSinclair() POST /ia/generar
+        +validarRespuesta() POST /preguntas/validar
+    }
+
+    class SesionExamen {
+        +Integer id_examen PK
+        +String rut_usuario FK
+        +Integer cantidad_preguntas
+        +Integer puntaje_obtenido
+        +Integer tiempo_total
+        +Boolean es_impulsivo
+        +iniciarCronometro() POST /examen/iniciar
+        +finalizarSimulacro() PATCH /examen/finalizar
+        +enviarErroresAGYM() POST /gym/errores
+    }
+
+    class EconomiaMonedas {
+        +String rut_usuario PK FK
+        +Integer saldo_monedas
+        +Integer total_acumulado
+        +sumarMonedasPorDesafio() PATCH /monedas/sumar
+        +canjearTemaPersonalizado() POST /monedas/canjear
+    }
+
+    class ErroresFavoritos {
+        +Integer id_error PK
+        +String rut_usuario FK
+        +Integer id_pregunta FK
+        +Integer id_habilidad FK
+        +Integer veces_fallada
+        +Boolean resuelta
+        +DateTime fecha_registro
+        +filtrarParaGYM() GET /gym/errores-favoritos
+        +marcarResuelta() PATCH /gym/errores/resolver
+    }
+
+    class SesionGYM {
+        +Integer id_gym PK
+        +String rut_usuario FK
+        +Integer id_error FK
+        +Integer intentos
+        +Boolean superada
+        +DateTime fecha_sesion
+        +iniciarMisionRefuerzo() POST /gym/iniciar
+        +registrarIntento() POST /gym/intento
+    }
+
+    Usuario "1" --> "*" HistorialHabilidades : tiene progreso en
+    Usuario "1" --> "1" EconomiaMonedas : gestiona economía
+    Usuario "1" --> "*" SesionExamen : rinde simulacros
+    SesionExamen "1" --> "*" PreguntaIA : contiene preguntas
+    PreguntaIA "*" --> "1" HistorialHabilidades : vinculada a habilidad
+    SesionExamen "1" --> "*" ErroresFavoritos : genera errores
+    ErroresFavoritos "1" --> "*" SesionGYM : alimenta misiones
+    Usuario "1" --> "*" ErroresFavoritos : acumula errores
+    </div>
+  </div>
+
+  <!-- Relaciones -->
+  <div class="relations">
+    <div class="section-title">Relaciones del Modelo</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Tipo</th>
+          <th>Origen</th>
+          <th>Destino</th>
+          <th>Descripción</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="rel-badge rel-1-n">1 → N</span></td>
+          <td>Usuario</td>
+          <td>HistorialHabilidades</td>
+          <td>Un usuario tiene progreso en las 6 áreas del DEMRE</td>
+        </tr>
+        <tr>
+          <td><span class="rel-badge rel-1-1">1 → 1</span></td>
+          <td>Usuario</td>
+          <td>EconomiaMonedas</td>
+          <td>Wallet único por estudiante para incentivos y canjes</td>
+        </tr>
+        <tr>
+          <td><span class="rel-badge rel-1-n">1 → N</span></td>
+          <td>Usuario</td>
+          <td>SesionExamen</td>
+          <td>Historial de simulacros adaptativos rendidos</td>
+        </tr>
+        <tr>
+          <td><span class="rel-badge rel-1-n">1 → N</span></td>
+          <td>SesionExamen</td>
+          <td>PreguntaIA</td>
+          <td>Cada sesión agrupa preguntas generadas por Sinclair</td>
+        </tr>
+        <tr>
+          <td><span class="rel-badge rel-n-n">N → 1</span></td>
+          <td>PreguntaIA</td>
+          <td>HistorialHabilidades</td>
+          <td>Cada pregunta actualiza la maestría de una habilidad</td>
+        </tr>
+        <tr>
+          <td><span class="rel-badge rel-1-n">1 → N</span></td>
+          <td>SesionExamen</td>
+          <td>ErroresFavoritos</td>
+          <td>Los errores del simulacro se registran para el GYM</td>
+        </tr>
+        <tr>
+          <td><span class="rel-badge rel-1-n">1 → N</span></td>
+          <td>ErroresFavoritos</td>
+          <td>SesionGYM</td>
+          <td>Los errores filtrados alimentan las Misiones de Refuerzo</td>
+        </tr>
+        <tr>
+          <td><span class="rel-badge rel-1-n">1 → N</span></td>
+          <td>Usuario</td>
+          <td>ErroresFavoritos</td>
+          <td>Registro personal de ítems con bajo desempeño acumulado</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Endpoints FastAPI -->
+  <div class="endpoints">
+    <div class="section-title">Endpoints FastAPI por Clase</div>
+    <div class="ep-grid">
+
+      <div class="ep-card">
+        <div class="ep-class">Usuario</div>
+        <ul class="ep-list">
+          <li class="ep-item"><span class="method-badge post">POST</span><span class="ep-path">/auth/login</span></li>
+          <li class="ep-item"><span class="method-badge patch">PATCH</span><span class="ep-path">/usuarios/racha</span></li>
+          <li class="ep-item"><span class="method-badge get">GET</span><span class="ep-path">/usuarios/progreso</span></li>
+          <li class="ep-item"><span class="method-badge post">POST</span><span class="ep-path">/auth/registro</span></li>
+        </ul>
+      </div>
+
+      <div class="ep-card">
+        <div class="ep-class">HistorialHabilidades</div>
+        <ul class="ep-list">
+          <li class="ep-item"><span class="method-badge get">GET</span><span class="ep-path">/habilidades/{rut}</span></li>
+          <li class="ep-item"><span class="method-badge put">PUT</span><span class="ep-path">/habilidades/maestria</span></li>
+          <li class="ep-item"><span class="method-badge get">GET</span><span class="ep-path">/habilidades/debiles</span></li>
+        </ul>
+      </div>
+
+      <div class="ep-card">
+        <div class="ep-class">PreguntaIA</div>
+        <ul class="ep-list">
+          <li class="ep-item"><span class="method-badge post">POST</span><span class="ep-path">/ia/generar</span></li>
+          <li class="ep-item"><span class="method-badge post">POST</span><span class="ep-path">/preguntas/validar</span></li>
+          <li class="ep-item"><span class="method-badge get">GET</span><span class="ep-path">/preguntas/{id}</span></li>
+        </ul>
+      </div>
+
+      <div class="ep-card">
+        <div class="ep-class">SesionExamen</div>
+        <ul class="ep-list">
+          <li class="ep-item"><span class="method-badge post">POST</span><span class="ep-path">/examen/iniciar</span></li>
+          <li class="ep-item"><span class="method-badge patch">PATCH</span><span class="ep-path">/examen/finalizar</span></li>
+          <li class="ep-item"><span class="method-badge post">POST</span><span class="ep-path">/gym/errores</span></li>
+          <li class="ep-item"><span class="method-badge get">GET</span><span class="ep-path">/examen/historial</span></li>
+        </ul>
+      </div>
+
+      <div class="ep-card">
+        <div class="ep-class">EconomiaMonedas</div>
+        <ul class="ep-list">
+          <li class="ep-item"><span class="method-badge get">GET</span><span class="ep-path">/monedas/saldo</span></li>
+          <li class="ep-item"><span class="method-badge patch">PATCH</span><span class="ep-path">/monedas/sumar</span></li>
+          <li class="ep-item"><span class="method-badge post">POST</span><span class="ep-path">/monedas/canjear</span></li>
+        </ul>
+      </div>
+
+      <div class="ep-card">
+        <div class="ep-class">ErroresFavoritos + GYM</div>
+        <ul class="ep-list">
+          <li class="ep-item"><span class="method-badge get">GET</span><span class="ep-path">/gym/errores-favoritos</span></li>
+          <li class="ep-item"><span class="method-badge patch">PATCH</span><span class="ep-path">/gym/errores/resolver</span></li>
+          <li class="ep-item"><span class="method-badge post">POST</span><span class="ep-path">/gym/iniciar</span></li>
+          <li class="ep-item"><span class="method-badge post">POST</span><span class="ep-path">/gym/intento</span></li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <footer style="margin-top:48px;">LexiScan PAES · Modelo de Clases · FastAPI + PostgreSQL + SQLAlchemy</footer>
+
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'dark',
+    themeVariables: {
+      primaryColor: '#1e2d45',
+      primaryTextColor: '#e2e8f0',
+      primaryBorderColor: '#00d4ff',
+      lineColor: '#64748b',
+      secondaryColor: '#111827',
+      tertiaryColor: '#0a0e1a',
+      background: '#0a0e1a',
+      mainBkg: '#111827',
+      nodeBorder: '#1e2d45',
+      clusterBkg: '#111827',
+      titleColor: '#e2e8f0',
+      edgeLabelBackground: '#111827',
+      attributeBackgroundColorEven: '#111827',
+      attributeBackgroundColorOdd: '#0a0e1a',
+      classText: '#e2e8f0',
+    },
+    classDiagram: {
+      htmlLabels: true,
+      curve: 'basis',
+    }
+  });
+</script>
+</body>
+</html>

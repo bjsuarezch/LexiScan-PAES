@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LexiScan PAES – Arquitectura del Sistema</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --border: #1e2d45;
+    --accent: #00d4ff;
+    --accent2: #7c3aed;
+    --accent3: #10b981;
+    --accent4: #f59e0b;
+    --accent5: #ef4444;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --glow: rgba(0,212,255,0.15);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    padding: 40px 24px 60px;
+    overflow-x: hidden;
+  }
+
+  /* Background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrapper {
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  /* Header */
+  header {
+    text-align: center;
+    margin-bottom: 52px;
+    animation: fadeDown 0.7s ease both;
+  }
+
+  .badge {
+    display: inline-block;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 4px 14px;
+    border-radius: 2px;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 800;
+    letter-spacing: -1px;
+    line-height: 1.1;
+    background: linear-gradient(135deg, #fff 30%, var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .subtitle {
+    margin-top: 12px;
+    color: var(--muted);
+    font-size: 14px;
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 1px;
+  }
+
+  /* Layer cards */
+  .layers {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .layer {
+    position: relative;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    padding: 28px 28px 28px 100px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    animation: slideIn 0.5s ease both;
+  }
+
+  .layer:not(:last-child)::after {
+    content: '▼';
+    position: absolute;
+    bottom: -22px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 14px;
+    color: var(--muted);
+    z-index: 10;
+    background: var(--bg);
+    padding: 2px 8px;
+    border-radius: 2px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .layer:hover {
+    border-color: var(--layer-color);
+    box-shadow: 0 0 32px var(--layer-glow), inset 0 0 32px var(--layer-glow);
+    z-index: 2;
+  }
+
+  /* Left accent strip */
+  .layer::before {
+    content: attr(data-num);
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 72px;
+    background: var(--layer-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    color: #000;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    letter-spacing: 3px;
+    font-size: 10px;
+    text-transform: uppercase;
+  }
+
+  .layer[data-num="01"] { --layer-color: var(--accent); --layer-glow: rgba(0,212,255,0.08); }
+  .layer[data-num="02"] { --layer-color: var(--accent2); --layer-glow: rgba(124,58,237,0.08); }
+  .layer[data-num="03"] { --layer-color: var(--accent3); --layer-glow: rgba(16,185,129,0.08); }
+  .layer[data-num="04"] { --layer-color: var(--accent4); --layer-glow: rgba(245,158,11,0.08); }
+  .layer[data-num="05"] { --layer-color: var(--accent5); --layer-glow: rgba(239,68,68,0.08); }
+
+  .layer-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .layer-icon {
+    font-size: 22px;
+    line-height: 1;
+  }
+
+  .layer-title {
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    color: var(--layer-color);
+  }
+
+  .layer-subtitle {
+    font-size: 11px;
+    font-family: 'Space Mono', monospace;
+    color: var(--muted);
+    letter-spacing: 1px;
+    margin-top: 2px;
+  }
+
+  /* Tech pills */
+  .tech-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+
+  .pill {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 4px 10px;
+    border-radius: 2px;
+    border: 1px solid var(--layer-color);
+    color: var(--layer-color);
+    background: transparent;
+    text-transform: uppercase;
+    transition: background 0.2s;
+  }
+
+  .pill.solid {
+    background: var(--layer-color);
+    color: #000;
+  }
+
+  /* Components grid */
+  .components {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+  }
+
+  .component {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    padding: 12px 14px;
+    border-radius: 2px;
+    border-left: 3px solid var(--layer-color);
+  }
+
+  .component-name {
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--text);
+  }
+
+  .component-desc {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.5;
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* Security/infra row at bottom */
+  .infra-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .infra-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.2);
+    padding: 8px 14px;
+    border-radius: 2px;
+    font-size: 12px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .infra-badge .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent5);
+    animation: pulse 2s infinite;
+  }
+
+  /* Footer */
+  footer {
+    margin-top: 52px;
+    text-align: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    animation: fadeUp 0.8s ease 1s both;
+  }
+
+  footer .line {
+    display: inline-block;
+    width: 40px;
+    height: 1px;
+    background: var(--border);
+    vertical-align: middle;
+    margin: 0 12px;
+  }
+
+  /* Animations */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-16px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .layer:nth-child(1) { animation-delay: 0.1s; }
+  .layer:nth-child(2) { animation-delay: 0.2s; }
+  .layer:nth-child(3) { animation-delay: 0.3s; }
+  .layer:nth-child(4) { animation-delay: 0.4s; }
+  .layer:nth-child(5) { animation-delay: 0.5s; }
+
+  @media (max-width: 600px) {
+    .layer { padding: 20px 16px 20px 80px; }
+    .layer::before { width: 58px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <header>
+    <div class="badge">Arquitectura del Sistema</div>
+    <h1>LexiScan PAES</h1>
+    <p class="subtitle">Solución Híbrida y Escalable · v1.0 · 2025</p>
+  </header>
+
+  <div class="layers">
+
+    <!-- Layer 01: Frontend -->
+    <div class="layer" data-num="01">
+      <div class="layer-header">
+        <span class="layer-icon">🖥️</span>
+        <div>
+          <div class="layer-title">Capa de Presentación</div>
+          <div class="layer-subtitle">Frontend · Web · iOS · Android</div>
+        </div>
+      </div>
+      <div class="tech-row">
+        <span class="pill solid">Ionic</span>
+        <span class="pill solid">Angular</span>
+        <span class="pill">Web</span>
+        <span class="pill">iOS</span>
+        <span class="pill">Android</span>
+        <span class="pill">Plugin Sinclair</span>
+      </div>
+      <div class="components">
+        <div class="component">
+          <div class="component-name">Dashboard de Maestría</div>
+          <div class="component-desc">Gráficos dinámicos de progreso y habilidades</div>
+        </div>
+        <div class="component">
+          <div class="component-name">Módulo de Habilidades</div>
+          <div class="component-desc">Seguimiento y visualización del avance PAES</div>
+        </div>
+        <div class="component">
+          <div class="component-name">Sistema de Gamificación</div>
+          <div class="component-desc">Monedas PAES · Rachas · Recompensas</div>
+        </div>
+        <div class="component">
+          <div class="component-name">Avatar Sinclair</div>
+          <div class="component-desc">Interacción por voz y audio vía plugin cliente</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Layer 02: Backend -->
+    <div class="layer" data-num="02">
+      <div class="layer-header">
+        <span class="layer-icon">⚙️</span>
+        <div>
+          <div class="layer-title">Capa de Servicios y Lógica</div>
+          <div class="layer-subtitle">Backend · API REST · Lógica de Negocio</div>
+        </div>
+      </div>
+      <div class="tech-row">
+        <span class="pill solid">FastAPI</span>
+        <span class="pill">REST API</span>
+        <span class="pill">Validadores RF15</span>
+      </div>
+      <div class="components">
+        <div class="component">
+          <div class="component-name">GYM – Misión de Refuerzo</div>
+          <div class="component-desc">Ataque a errores frecuentes del estudiante</div>
+        </div>
+        <div class="component">
+          <div class="component-name">Módulo de Examen</div>
+          <div class="component-desc">Simulacro adaptativo alineado al DEMRE</div>
+        </div>
+        <div class="component">
+          <div class="component-name">Validadores de Entrada</div>
+          <div class="component-desc">Integridad de datos en todos los formularios</div>
+        </div>
+        <div class="component">
+          <div class="component-name">Gestión de Sesión</div>
+          <div class="component-desc">Autenticación segura y control de acceso</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Layer 03: IA -->
+    <div class="layer" data-num="03">
+      <div class="layer-header">
+        <span class="layer-icon">🧠</span>
+        <div>
+          <div class="layer-title">Capa de Inteligencia Artificial</div>
+          <div class="layer-subtitle">IA Sinclair · LLM · Chain of Thought</div>
+        </div>
+      </div>
+      <div class="tech-row">
+        <span class="pill solid">Sinclair API</span>
+        <span class="pill solid">Gemini</span>
+        <span class="pill">Chain of Thought (CoT)</span>
+        <span class="pill">DEMRE Alignment</span>
+      </div>
+      <div class="components">
+        <div class="component">
+          <div class="component-name">Generación de Textos</div>
+          <div class="component-desc">Textos inéditos alineados al temario PAES</div>
+        </div>
+        <div class="component">
+          <div class="component-name">Generación de Preguntas</div>
+          <div class="component-desc">Ítems masivos calibrados al estándar DEMRE</div>
+        </div>
+        <div class="component">
+          <div class="component-name">Retroalimentación CoT</div>
+          <div class="component-desc">Pedagogía inmediata y personalizada por razonamiento</div>
+        </div>
+        <div class="component">
+          <div class="component-name">Motor Adaptativo</div>
+          <div class="component-desc">Ajuste dinámico de dificultad por estudiante</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Layer 04: DB -->
+    <div class="layer" data-num="04">
+      <div class="layer-header">
+        <span class="layer-icon">🗄️</span>
+        <div>
+          <div class="layer-title">Capa de Persistencia</div>
+          <div class="layer-subtitle">Base de Datos · Almacenamiento Seguro</div>
+        </div>
+      </div>
+      <div class="tech-row">
+        <span class="pill solid">PostgreSQL</span>
+        <span class="pill solid">Docker</span>
+        <span class="pill">Encriptación AES</span>
+      </div>
+      <div class="components">
+        <div class="component">
+          <div class="component-name">Datos de Identidad</div>
+          <div class="component-desc">RUT · Contraseñas encriptadas</div>
+        </div>
+        <div class="component">
+          <div class="component-name">Historial de Habilidades</div>
+          <div class="component-desc">Progresión por eje temático y habilidad lectora</div>
+        </div>
+        <div class="component">
+          <div class="component-name">Errores Favoritos</div>
+          <div class="component-desc">Registro de patrones de error recurrentes</div>
+        </div>
+        <div class="component">
+          <div class="component-name">Economía Interna</div>
+          <div class="component-desc">Saldo de Monedas PAES y transacciones</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Layer 05: Infra -->
+    <div class="layer" data-num="05">
+      <div class="layer-header">
+        <span class="layer-icon">🔒</span>
+        <div>
+          <div class="layer-title">Infraestructura y Seguridad</div>
+          <div class="layer-subtitle">Cloud PaaS · Alta Disponibilidad · Protección de Datos</div>
+        </div>
+      </div>
+      <div class="tech-row">
+        <span class="pill solid">Cloud PaaS</span>
+        <span class="pill solid">SSL/TLS</span>
+        <span class="pill">99.9% Uptime</span>
+        <span class="pill">&lt;5s Latencia</span>
+      </div>
+      <div class="infra-badges">
+        <div class="infra-badge">
+          <div class="dot"></div>
+          Disponibilidad 99.9% SLA
+        </div>
+        <div class="infra-badge">
+          <div class="dot"></div>
+          Latencia &lt; 5 segundos
+        </div>
+        <div class="infra-badge">
+          <div class="dot"></div>
+          Certificados SSL activos
+        </div>
+        <div class="infra-badge">
+          <div class="dot"></div>
+          Datos socioeconómicos protegidos
+        </div>
+        <div class="infra-badge">
+          <div class="dot"></div>
+          Despliegue optimizado con Docker
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <span class="line"></span>
+    LexiScan PAES · Arquitectura Híbrida Escalable · Fundación
+    <span class="line"></span>
+  </footer>
+
+</div>
+</body>
+</html>
