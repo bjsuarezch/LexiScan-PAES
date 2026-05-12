@@ -25,7 +25,7 @@ LexiScan-PAES es una solución completa que combina:
 - **Funcionalidades**: Autenticación, exámenes, seguimiento de progreso, habilidades personalizadas
 
 ### Stack Tecnológico
-- **Backend**: FastAPI, SQLAlchemy, PostgreSQL
+- **Backend**: FastAPI, SQLAlchemy, PostgreSQL, python-dotenv, requests
 - **Frontend**: Ionic, Angular, TypeScript
 - **Contenedorización**: Docker, Docker Compose
 - **Pruebas**: Pytest
@@ -145,18 +145,25 @@ source venv/bin/activate
 
 # Instalar dependencias
 pip install -r requirements.txt
-pip install pydantic[email]
-
-# Crear archivo .env
-[System.IO.File]::WriteAllLines("$(Get-Location)\.env", "GEMINI_API_KEY=tu_clave_real_aqui")
-
 ```
 
 **Dependencias del Backend:**
-- FastAPI - Framework web
-- Uvicorn - Servidor ASGI
-- SQLAlchemy - ORM
-- psycopg2-binary - Conector PostgreSQL
+- FastAPI
+- Uvicorn
+- SQLAlchemy
+- psycopg2-binary
+- python-dotenv
+- requests
+- pydantic
+
+### **Variables de entorno recomendadas**
+Crea un archivo `.env` en `Producto/backend/` con:
+
+```ini
+DATABASE_URL=postgresql://user_lexiscan:password123@localhost:5432/lexiscan_db
+GROQ_API_KEY=tu_clave_groq_aqui
+GEMINI_API_KEY=tu_clave_gemini_aqui
+```
 
 Verificar la instalación:
 ```bash
@@ -226,29 +233,34 @@ El frontend estará disponible en: **http://localhost:4200**
 
 ---
 
-### **Paso 7: Configuración de la IA (Groq Cloud)**
+### **Paso 7: Configuración de la IA**
 
-Para que el sistema de generación de preguntas funcione, cada integrante del equipo debe configurar su propia clave de acceso.
+El backend usa integración con Groq Cloud para generar preguntas y evaluar respuestas.
 
-Obtener API Key:
+#### Configurar la API Key desde el backend:
 
-        Regístrate en Groq Cloud Console.
+```bash
+POST http://localhost:8000/configurar-ia
+Content-Type: application/json
 
-        Haz clic en "Create API Key", dale un nombre (ej: LexiScan-Dev) y copia la llave generada (empieza con gsk_).
+{
+  "api_key": "gsk_tu_api_key",
+  "modelo": "llama-3.1-70b-versatile"
+}
+```
 
-Configurar en el Programa:
+#### Obtener modelos disponibles:
 
-        Abre el frontend en tu navegador (http://localhost:4200).
+```bash
+GET http://localhost:8000/modelos-disponibles
+```
 
-        En la pantalla de Login, busca el icono de engranaje (⚙️) en la parte inferior.
+#### Variables de entorno adicionales
 
-        Se abrirá un panel de configuración donde deberás:
-
-            Ingresar la API Key: Pega la llave gsk_ que obtuviste.
-
-            Seleccionar Modelo: Elige el modelo recomendado (ej: llama-3.1-70b-versatile).
-
-        Haz clic en Guardar Configuración.
+Para uso local, mantén también:
+```ini
+GEMINI_API_KEY=tu_clave_gemini_aqui
+```
 
 ---
 
@@ -262,7 +274,6 @@ LexiScan-PAES/
 ├── Producto/
 │   ├── docker-compose.yml             # Configuración de Docker
 │   ├── lexiscan_schema.sql            # Esquema de la base de datos
-│   ├── poblar_datos.sql               # Script para datos de prueba
 │   ├── tmp_hash.py                    # Utilidad de hashing
 │   │
 │   ├── backend/                       # API FastAPI
@@ -300,9 +311,27 @@ LexiScan-PAES/
 
 ## 🔌 API Endpoints
 
+### Configuración de IA
+
+**Configurar Groq**
+```
+POST /configurar-ia
+Content-Type: application/json
+
+{
+  "api_key": "gsk_tu_api_key",
+  "modelo": "llama-3.1-70b-versatile"
+}
+```
+
+**Modelos disponibles**
+```
+GET /modelos-disponibles
+```
+
 ### Autenticación
 
-**Registro de usuario:**
+**Registro de usuario**
 ```
 POST /register
 Content-Type: application/json
@@ -315,7 +344,7 @@ Content-Type: application/json
 }
 ```
 
-**Login:**
+**Login**
 ```
 POST /login
 Content-Type: application/json
@@ -326,9 +355,132 @@ Content-Type: application/json
 }
 ```
 
-**Dashboard del usuario:**
+### Usuario y habilidades
+
+**Dashboard del usuario**
 ```
 GET /dashboard/{rut}
+```
+
+**Detalle de habilidad**
+```
+GET /habilidades/{habilidad}?rut={rut}
+```
+
+### Generación y evaluación de preguntas
+
+**Generar preguntas por habilidad**
+```
+POST /generar-preguntas
+Content-Type: application/json
+
+{
+  "habilidad": "Interpretar"
+}
+```
+
+**Evaluar preguntas de habilidad**
+```
+POST /evaluar-preguntas
+Content-Type: application/json
+
+{
+  "rut": "12345678-9",
+  "tipo_habilidad": "Interpretar",
+  "preguntas": [
+    {
+      "enunciado": "...",
+      "alternativas": {"A": "...", "B": "...", "C": "...", "D": "..."},
+      "respuesta_usuario": "B",
+      "respuesta_correcta": "A"
+    }
+  ]
+}
+```
+
+### Exámenes
+
+**Crear examen**
+```
+POST /examen
+Content-Type: application/json
+
+{
+  "rut": "12345678-9",
+  "cantidad_preguntas": 10
+}
+```
+
+**Evaluar examen**
+```
+POST /evaluar-examen
+Content-Type: application/json
+
+{
+  "id_examen": 1,
+  "respuestas": [
+    {"id_pregunta": 101, "respuesta_dada": "C"},
+    {"id_pregunta": 102, "respuesta_dada": "B"}
+  ]
+}
+```
+
+**Guardar resultados de examen**
+```
+POST /guardar-resultados-examen
+Content-Type: application/json
+
+{
+  "rut": "12345678-9",
+  "id_examen": 1,
+  "total_preguntas": 10,
+  "puntaje": 7,
+  "xp_ganada": 35,
+  "mensaje": "Resultados guardados"
+}
+```
+
+### Errores y GYM
+
+**Error frecuente**
+```
+GET /error-frecuente/{rut}
+```
+
+**Errores frecuentes**
+```
+GET /errores-frecuentes/{rut}
+```
+
+**Resolver error frecuente**
+```
+PUT /errores-frecuentes/{error_id}/resolver
+```
+
+### Configuración general
+
+**Obtener configuración**
+```
+GET /configuracion
+```
+
+**Actualizar configuración**
+```
+POST /configuracion
+Content-Type: application/json
+
+{
+  "clave": "GROQ_MODEL",
+  "valor": "llama-3.1-8b-instant",
+  "descripcion": "Modelo LLM por defecto"
+}
+```
+
+### Groq models
+
+**Obtener modelos Groq**
+```
+GET /groq-models
 ```
 
 Prueba estos endpoints en: **http://localhost:8000/docs**
