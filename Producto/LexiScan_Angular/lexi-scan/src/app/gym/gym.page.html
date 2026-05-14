@@ -137,48 +137,50 @@
     </ion-card>
 
     <!-- Train Button -->
-    <ion-button expand="block" class="btn-entrenar" (click)="startTraining()">
-      Entrenar
-    </ion-button>
+    <ion-button expand="block" class="btn-entrenar" (click)="startTraining()" *ngIf="!trainingStarted">
+  Entrenar
+</ion-button>
 
-    <!-- Coaching Card - Error Favorito Detallado -->
-    <ion-card class="coaching-card" *ngIf="trainingStarted">
-      <ion-card-content>
-        <div class="coaching-header">
-          <ion-icon name="bulb"></ion-icon>
-          <p class="coaching-title">Concentrémonos en esto</p>
-        </div>
+<ion-card class="coaching-card" *ngIf="trainingStarted">
+  <ion-card-content>
+    <div class="coaching-header">
+      <ion-icon name="bulb"></ion-icon>
+      <p class="coaching-title">Concentrémonos en esto</p>
+    </div>
 
-        <!-- Error Info -->
-        <div class="error-info" *ngIf="errorActual">
-          <p class="error-label">
-            <strong>Habilidad:</strong> {{ errorActual.habilidad?.nombre ||
-            'Desconocida' }}
-          </p>
-          <p class="error-label">
-            <strong>Veces fallada:</strong> {{ errorActual.veces_fallada }}
-          </p>
-        </div>
+    <div class="error-info" *ngIf="errorActual">
+      <p class="error-label">
+        <strong>Habilidad:</strong> {{ errorActual.habilidad?.nombre || 'Desconocida' }}
+      </p>
+      <p class="error-label">
+        <strong>Veces fallada:</strong> {{ errorActual.veces_fallada }}
+      </p>
+    </div>
 
-        <!-- Question -->
-        <div class="question-section" *ngIf="errorActual">
-          <h3>Pregunta:</h3>
-          <p class="question-text">{{ errorActual.pregunta?.enunciado }}</p>
-        </div>
+    <div class="context-section" *ngIf="errorActual?.pregunta?.texto_inedito">
+      <div class="context-header">
+        <ion-icon name="book-outline"></ion-icon>
+        <span>Lectura de Apoyo</span>
+      </div>
+      <div class="context-body">
+        <p>{{ errorActual.pregunta.texto_inedito }}</p>
+      </div>
+    </div>
 
-        <!-- Alternatives -->
-        <div class="alternatives-section" *ngIf="errorActual">
-          <h4>Selecciona tu respuesta:</h4>
-          <ion-radio-group
-            [(ngModel)]="selectedAnswer"
-            [disabled]="evaluationSubmitted"
-          >
-            <ion-item *ngFor="let alt of getAlternativesArray()" lines="none">
-              <ion-label>{{ alt.key }}. {{ alt.value }}</ion-label>
-              <ion-radio slot="start" [value]="alt.key"></ion-radio>
-            </ion-item>
-          </ion-radio-group>
-        </div>
+    <div class="question-section" *ngIf="errorActual">
+      <h3>Pregunta:</h3>
+      <p class="question-text">{{ errorActual.pregunta?.enunciado }}</p>
+    </div>
+
+    <div class="alternatives-section" *ngIf="errorActual">
+      <h4>Selecciona tu respuesta:</h4>
+      <ion-radio-group [(ngModel)]="selectedAnswer" [disabled]="evaluationSubmitted">
+        <ion-item *ngFor="let alt of getAlternativesArray()" lines="none" class="alt-item">
+          <ion-label class="ion-text-wrap"><strong>{{ alt.key }}.</strong> {{ alt.value }}</ion-label>
+          <ion-radio slot="start" [value]="alt.key"></ion-radio>
+        </ion-item>
+      </ion-radio-group>
+    </div>
 
         <!-- Buttons -->
         <div class="button-group" *ngIf="errorActual && !evaluationSubmitted">
