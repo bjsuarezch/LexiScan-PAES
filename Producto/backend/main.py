@@ -209,23 +209,21 @@ def parse_gemini_output(raw_text: str | dict | list) -> dict:
 
 def build_evaluation_prompt(tipo_habilidad: str, preguntas: list[dict]) -> str:
     prompt_lines = [
-        'Eres la Profesora Sinclair, una correctora experta en la PAES chilena.',
-        'Evalúa las respuestas del estudiante con un tono pedagógico, claro y preciso.',
-        'Para cada pregunta, determina si la respuesta es correcta o incorrecta y explica por qué lo es.',
-        'Devuelve únicamente un JSON válido con las claves: resultados, total_correct, total_preguntas, puntaje, xp_ganada, mensaje.',
-        'Cada elemento de resultados debe incluir: pregunta_index, enunciado, respuesta_usuario, respuesta_correcta, correcta y feedback.',
-        'No agregues texto adicional fuera del JSON.',
+        'Eres la Profesora Sinclair. Tu misión es dar retroalimentación usando "Cadena de Pensamiento" (CoT).',
+        'Para cada respuesta, explica la lógica pedagógica: ¿Por qué la correcta es la que es y por qué la del usuario falla?',
+        'Estructura tu explicación paso a paso: 1. Premisa del texto, 2. Análisis de la pregunta, 3. Conclusión.',
+        'Devuelve un JSON con: {"resultados": [{"pregunta_index": int, "feedback": "string"}]}',
         f"Habilidad: {tipo_habilidad}",
-        'Preguntas:'
+        '---'
     ]
 
     for index, pregunta in enumerate(preguntas):
-        prompt_lines.append(f"Pregunta {index + 1}: {pregunta['enunciado']}")
-        prompt_lines.append('Alternativas:')
-        for key, option in pregunta['alternativas'].items():
-            prompt_lines.append(f"  {key}: {option}")
-        prompt_lines.append(f"Respuesta del estudiante: {pregunta['respuesta_usuario']}")
-        prompt_lines.append(f"Respuesta correcta: {pregunta['respuesta_correcta']}")
+        # Enviamos solo lo necesario para que la IA "razone"
+        prompt_lines.append(f"P{index + 1}: {pregunta['enunciado']}")
+        prompt_lines.append(f"Usuario marcó: {pregunta['respuesta_usuario']}")
+        prompt_lines.append(f"Correcta es: {pregunta['respuesta_correcta']}")
+        # IMPORTANTE: No enviamos las alternativas completas para ahorrar tokens, 
+        # la IA ya sabe de qué trata la habilidad y el texto.
         prompt_lines.append('')
 
     return '\n'.join(prompt_lines)
@@ -505,6 +503,7 @@ def evaluar_preguntas(request: schemas.EvaluarRespuestasRequest, db: Session = D
     if not habilidad_record:
         raise HTTPException(status_code=400, detail='Usuario no tiene registro en esta habilidad.')
     
+    print(f"DEBUG - Feedback Map recibido: {feedback_map}")
     for index, pregunta in enumerate(request.preguntas):
         respuesta_usuario = pregunta.respuesta_usuario.strip().upper()
         respuesta_correcta = pregunta.respuesta_correcta.strip().upper()
@@ -512,7 +511,14 @@ def evaluar_preguntas(request: schemas.EvaluarRespuestasRequest, db: Session = D
         if correcta:
             total_correct += 1
 
-        feedback = feedback_map.get(index+1, 'Revisa la justificación pedagógica y vuelve a intentarlo si es necesario.')
+        # Intenta buscar el índice de todas las formas posibles para evitar el desfase
+        feedback = (
+            feedback_map.get(index) or 
+            feedback_map.get(str(index)) or 
+            feedback_map.get(index + 1) or 
+            feedback_map.get(str(index + 1)) or 
+            'Revisa la justificación pedagógica y vuelve a intentarlo si es necesario.'
+        )
         resultados.append({
             'index': index,
             'enunciado': pregunta.enunciado,
