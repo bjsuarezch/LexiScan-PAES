@@ -234,30 +234,26 @@ El frontend estará disponible en: **http://localhost:4200**
 
 El backend usa integración con Groq Cloud para generar preguntas y evaluar respuestas.
 
-#### Configurar la API Key desde el backend:
+#### Configurar la API Key desde el programa:
 
 ```bash
-POST http://localhost:8000/configurar-ia
-Content-Type: application/json
-
-{
-  "api_key": "gsk_tu_api_key",
-  "modelo": "llama-3.1-70b-versatile"
-}
+En el login seleccionar el engranaje en el pie de pagina y añadir la API Key de Groq, luego guarda la configuracion
 ```
 
 #### Obtener modelos disponibles:
 
 ```bash
-GET http://localhost:8000/modelos-disponibles
+Vuelve a seleccionar el engranaje en el pie de pagina y ahora tendrás los modelos de IA disponibles
+(Te sugiero utilizar el modelo: llama-3.3-70b-versatile),
+luego guarda la configuracion
 ```
 
-#### Variables de entorno adicionales
+#### Usar datos de prueba
 
-Para uso local, mantén también:
+Para restaurar los datos_presentacion.sql en otro PC, ejecuta en la terminal :
 
 ```ini
-GEMINI_API_KEY=tu_clave_gemini_aqui
+psql -U user_lexiscan -d lexiscan_db < datos_presentacion.sql
 ```
 
 ---
