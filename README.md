@@ -125,8 +125,8 @@ Deberías ver algo como: `lexiscan_db_container`
 # Desde la carpeta Producto
 cd backend
 
-# Crear un entorno virtual (opcional pero recomendado)
-python -m venv venv
+# Crear un entorno virtual (usando Python 3.12)
+py -3.12 -m venv venv
 
 # Activar el entorno virtual
 # En Windows:
