@@ -1,79 +1,68 @@
-# LexiScan-PAES
+# LexiScan-PAES 📚
 
-Aplicación diseñada para que estudiantes puedan prepararse y sacar un excelente puntaje en la PAES de Comprensión Lectora. La aplicación proporciona un entorno interactivo con exámenes, seguimiento de habilidades y un gimnasio de práctica personalizado.
-
----
-
-## 📋 Tabla de Contenidos
-
-- [Descripción del Proyecto](#descripción-del-proyecto)
-- [Funcionalidades](#funcionalidades)
-- [Requisitos Previos](#requisitos-previos)
-- [Instalación y Configuración](#instalación-y-configuración)
-- [Estructura del Proyecto](#estructura-del-proyecto)
-- [API Endpoints](#api-endpoints)
-- [Desarrollo](#desarrollo)
-- [Troubleshooting](#troubleshooting)
+Aplicación diseñada para que estudiantes puedan prepararse y obtener un excelente puntaje en la PAES de Comprensión Lectora. La plataforma ofrece un entorno interactivo con exámenes simulados, seguimiento de habilidades y un "Gimnasio de Práctica" personalizado con IA.
 
 ---
 
 ## 📱 Descripción del Proyecto
 
-LexiScan-PAES es una solución completa que combina:
-- **Backend**: API REST en FastAPI con base de datos PostgreSQL
-- **Frontend**: Aplicación móvil con Ionic (Angular)
-- **Funcionalidades**: Autenticación, exámenes, seguimiento de progreso, habilidades personalizadas
+LexiScan-PAES es una solución full-stack que combina:
 
-### Stack Tecnológico
-- **Backend**: FastAPI, SQLAlchemy, PostgreSQL, python-dotenv, requests
-- **Frontend**: Ionic, Angular, TypeScript
-- **Contenedorización**: Docker, Docker Compose
-- **Pruebas**: Pytest
+- **Backend**: API REST robusta construida con **FastAPI**.
+- **Frontend**: Aplicación móvil híbrida desarrollada con **Ionic (Angular)**.
+- **Inteligencia Artificial**: Generación dinámica de textos y preguntas mediante **Groq (Llama 3)** y **Gemini**.
+- **Base de Datos**: Soporte híbrido para **PostgreSQL** (Producción) y **SQLite** (Desarrollo rápido).
 
 ---
 
 ## ✨ Funcionalidades
 
 ### 1. **Autenticación de Usuarios**
-   - Registro con validación de RUT y email
-   - Login seguro con credenciales
-   - Gestión de sesiones
+
+- Registro con validación de RUT y email
+- Login seguro con credenciales
+- Gestión de sesiones
 
 ### 2. **Exámenes PAES**
-   - Banco de preguntas de comprensión lectora
-   - Modo examen simulado
-   - Retroalimentación instantánea
-   - Corrección automática
+
+- Banco de preguntas de comprensión lectora
+- Modo examen simulado
+- Retroalimentación instantánea
+- Corrección automática
 
 ### 3. **Seguimiento de Habilidades**
-   - Análisis de desempeño por habilidad
-   - Identificación de áreas débiles
-   - Recomendaciones personalizadas
+
+- Análisis de desempeño por habilidad
+- Identificación de áreas débiles
+- Recomendaciones personalizadas
 
 ### 4. **Gimnasio de Práctica**
-   - Ejercicios orientados por dificultad
-   - Práctica temática
-   - Estadísticas de progreso
+
+- Ejercicios orientados por dificultad
+- Práctica temática
+- Estadísticas de progreso
 
 ### 5. **Dashboard del Estudiante**
-   - Resumen de avance
-   - Historial de exámenes
-   - Metas y logros
+
+- Resumen de avance
+- Historial de exámenes
+- Metas y logros
 
 ---
 
 ## 🔧 Requisitos Previos
 
-Asegúrate de tener instalado:
+Para asegurar el funcionamiento correcto en cualquier entorno (especialmente en Windows), se requieren las siguientes versiones:
 
-- **Docker** (versión 20.10 o superior) - [Descargar](https://www.docker.com/products/docker-desktop)
-- **Docker Compose** (incluido en Docker Desktop)
-- **Node.js** (versión 18.x o superior) - [Descargar](https://nodejs.org/)
-- **npm** (viene con Node.js)
-- **Ionic CLI** - Se instala con los comandos que siguen
-- **Git** (opcional)
+- **Python 3.12.x** (⚠️ **IMPORTANTE**: Evitar Python 3.15 experimental, ya que causa incompatibilidades con librerías binarias).
+- **Node.js** (v18.0 o superior) y **npm**.
+- **Docker & Docker Compose** (Para la base de datos PostgreSQL).
+- **PostgreSQL 16+**
+
+---
 
 ### Verificar instalaciones:
+
 ```bash
 docker --version
 docker-compose --version
@@ -99,7 +88,6 @@ La base de datos PostgreSQL se levanta automáticamente con Docker Compose:
 # Abrir Docker-Desktop y verificar que se vea Engine running dentro de docker-desktop
 ```
 
-
 ```bash
 # Navegar a la carpeta Producto
 cd Producto
@@ -109,17 +97,20 @@ docker-compose up -d
 ```
 
 Este comando:
+
 - ✅ Crea un contenedor de PostgreSQL
 - ✅ Carga automáticamente el esquema desde `lexiscan_schema.sql`
 - ✅ Expone la base de datos en `localhost:5432`
 
 **Credenciales de la BD:**
+
 - Usuario: `user_lexiscan`
 - Contraseña: `password123`
 - Base de datos: `lexiscan_db`
 - Puerto: `5432`
 
 Verificar que la base de datos está corriendo:
+
 ```bash
 docker ps
 ```
@@ -148,6 +139,7 @@ pip install -r requirements.txt
 ```
 
 **Dependencias del Backend:**
+
 - FastAPI
 - Uvicorn
 - SQLAlchemy
@@ -157,6 +149,7 @@ pip install -r requirements.txt
 - pydantic
 
 ### **Variables de entorno recomendadas**
+
 Crea un archivo `.env` en `Producto/backend/` con:
 
 ```ini
@@ -165,6 +158,7 @@ GEMINI_API_KEY=tu_clave_gemini_aqui
 ```
 
 Verificar la instalación:
+
 ```bash
 pip list
 ```
@@ -179,6 +173,7 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 Salida esperada:
+
 ```
 INFO:     Uvicorn running on http://127.0.0.1:8000
 INFO:     Application startup complete
@@ -187,6 +182,7 @@ INFO:     Application startup complete
 El backend estará disponible en: **http://localhost:8000**
 
 **Documentación interactiva:**
+
 - Swagger UI: http://localhost:8000/docs
 - ReDoc: http://localhost:8000/redoc
 
@@ -207,6 +203,7 @@ npm install -g @ionic/cli
 ```
 
 Verificar instalación de Ionic:
+
 ```bash
 ionic --version
 ```
@@ -223,6 +220,7 @@ ionic serve
 ```
 
 Salida esperada:
+
 ```
 [INFO] HTTP address: http://localhost:4200/
 [INFO] DevServer listening on http://localhost:4200/
@@ -257,6 +255,7 @@ GET http://localhost:8000/modelos-disponibles
 #### Variables de entorno adicionales
 
 Para uso local, mantén también:
+
 ```ini
 GEMINI_API_KEY=tu_clave_gemini_aqui
 ```
@@ -313,6 +312,7 @@ LexiScan-PAES/
 ### Configuración de IA
 
 **Configurar Groq**
+
 ```
 POST /configurar-ia
 Content-Type: application/json
@@ -324,6 +324,7 @@ Content-Type: application/json
 ```
 
 **Modelos disponibles**
+
 ```
 GET /modelos-disponibles
 ```
@@ -331,6 +332,7 @@ GET /modelos-disponibles
 ### Autenticación
 
 **Registro de usuario**
+
 ```
 POST /register
 Content-Type: application/json
@@ -344,6 +346,7 @@ Content-Type: application/json
 ```
 
 **Login**
+
 ```
 POST /login
 Content-Type: application/json
@@ -357,11 +360,13 @@ Content-Type: application/json
 ### Usuario y habilidades
 
 **Dashboard del usuario**
+
 ```
 GET /dashboard/{rut}
 ```
 
 **Detalle de habilidad**
+
 ```
 GET /habilidades/{habilidad}?rut={rut}
 ```
@@ -369,6 +374,7 @@ GET /habilidades/{habilidad}?rut={rut}
 ### Generación y evaluación de preguntas
 
 **Generar preguntas por habilidad**
+
 ```
 POST /generar-preguntas
 Content-Type: application/json
@@ -379,6 +385,7 @@ Content-Type: application/json
 ```
 
 **Evaluar preguntas de habilidad**
+
 ```
 POST /evaluar-preguntas
 Content-Type: application/json
@@ -400,6 +407,7 @@ Content-Type: application/json
 ### Exámenes
 
 **Crear examen**
+
 ```
 POST /examen
 Content-Type: application/json
@@ -411,6 +419,7 @@ Content-Type: application/json
 ```
 
 **Evaluar examen**
+
 ```
 POST /evaluar-examen
 Content-Type: application/json
@@ -425,6 +434,7 @@ Content-Type: application/json
 ```
 
 **Guardar resultados de examen**
+
 ```
 POST /guardar-resultados-examen
 Content-Type: application/json
@@ -442,16 +452,19 @@ Content-Type: application/json
 ### Errores y GYM
 
 **Error frecuente**
+
 ```
 GET /error-frecuente/{rut}
 ```
 
 **Errores frecuentes**
+
 ```
 GET /errores-frecuentes/{rut}
 ```
 
 **Resolver error frecuente**
+
 ```
 PUT /errores-frecuentes/{error_id}/resolver
 ```
@@ -459,11 +472,13 @@ PUT /errores-frecuentes/{error_id}/resolver
 ### Configuración general
 
 **Obtener configuración**
+
 ```
 GET /configuracion
 ```
 
 **Actualizar configuración**
+
 ```
 POST /configuracion
 Content-Type: application/json
@@ -478,6 +493,7 @@ Content-Type: application/json
 ### Groq models
 
 **Obtener modelos Groq**
+
 ```
 GET /groq-models
 ```
@@ -538,7 +554,7 @@ Editar `Producto/LexiScan_Angular/lexi-scan/src/environments/environment.ts`:
 ```typescript
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:8000'
+  apiUrl: "http://localhost:8000",
 };
 ```
 
@@ -615,6 +631,7 @@ npm list
 ## 🐛 Troubleshooting
 
 ### **Error: "Port 5432 already in use"**
+
 ```bash
 # Encuentra el contenedor que usa el puerto
 docker ps -a | grep 5432
@@ -624,6 +641,7 @@ docker-compose down
 ```
 
 ### **Error: "Module not found" en Backend**
+
 ```bash
 # Asegúrate de activar el entorno virtual
 venv\Scripts\activate  # Windows
@@ -634,6 +652,7 @@ pip install -r requirements.txt
 ```
 
 ### **Error: "npm: command not found"**
+
 ```bash
 # Instala Node.js desde: https://nodejs.org/
 # Verifica la instalación
@@ -642,12 +661,14 @@ npm --version
 ```
 
 ### **La app no se conecta al backend**
+
 1. Verifica que el backend está corriendo en `http://localhost:8000`
 2. Revisa la URL en `src/environments/environment.ts`
 3. Verifica el CORS en `backend/main.py`
 4. Abre las DevTools: `F12` en el navegador
 
 ### **Base de datos sin datos de prueba**
+
 ```bash
 # Ejecuta el script de población
 docker exec -i lexiscan_db_container psql -U user_lexiscan -d lexiscan_db < poblar_datos.sql
@@ -674,6 +695,7 @@ npm start
 ```
 
 Luego accede a:
+
 - **Frontend**: http://localhost:4200
 - **Backend Docs**: http://localhost:8000/docs
 - **Base de datos**: localhost:5432
@@ -687,5 +709,4 @@ Luego accede a:
 - Los datos se persisten en volúmenes de Docker
 - El servidor se recarga automáticamente con `--reload`
 
-¡Bienvenido a LexiScan-PAES! 🎉 
-
+¡Bienvenido a LexiScan-PAES! 🎉
