@@ -4,6 +4,12 @@
       <ion-back-button defaultHref="/home"></ion-back-button>
     </ion-buttons>
     <ion-title>Habilidades</ion-title>
+    <ion-buttons slot="end">
+      <ion-chip color="tertiary" *ngIf="textosRestantes !== undefined" routerLink="/seleccion-tema">
+        <ion-icon name="book"></ion-icon>
+        <ion-label>{{ textosRestantes }} restantes</ion-label>
+      </ion-chip>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -32,7 +38,40 @@
 
     <div class="habilidad-detail" *ngIf="selectedHabilidad">
       <h3>{{ selectedHabilidad.tipo_habilidad }}</h3>
-      <p class="texto-inedito">{{ selectedHabilidad.texto_inedito }}</p>
+      
+      <!-- CONTENIDO ENRIQUECIDO / BLOQUES JSON -->
+      <div class="rich-text-container">
+        <ng-container *ngFor="let block of getTextoBlocks()">
+          
+          <p *ngIf="block.tipo === 'parrafo'" class="texto-inedito parrafo">
+            {{ block.contenido }}
+          </p>
+
+          <div *ngIf="block.tipo === 'dato_clave'" class="dato-clave">
+            <ion-icon name="bulb-outline"></ion-icon>
+            <span><strong>Dato Clave:</strong> {{ block.contenido }}</span>
+          </div>
+
+          <div *ngIf="block.tipo === 'imagen'" class="imagen-bloque">
+            <!-- Usamos Pollinations AI para generar la imagen al vuelo usando el concepto -->
+            <img [src]="'https://image.pollinations.ai/prompt/' + block.concepto + '?width=600&height=400&nologo=true'" [alt]="block.concepto" />
+          </div>
+
+          <div *ngIf="block.tipo === 'grafico_barra'" class="grafico-bloque">
+            <div class="chart-title" *ngIf="block.titulo">{{ block.titulo }}</div>
+            <div class="bar-chart">
+              <div class="bar-item" *ngFor="let dato of block.datos">
+                <span class="bar-label">{{ dato.etiqueta }}</span>
+                <div class="bar-track">
+                  <div class="bar-fill" [style.width.%]="dato.valor"></div>
+                </div>
+                <span class="bar-value">{{ dato.valor }}</span>
+              </div>
+            </div>
+          </div>
+          
+        </ng-container>
+      </div>
       <div
         *ngFor="let pregunta of selectedHabilidad.preguntas; let i = index"
         class="pregunta-card"

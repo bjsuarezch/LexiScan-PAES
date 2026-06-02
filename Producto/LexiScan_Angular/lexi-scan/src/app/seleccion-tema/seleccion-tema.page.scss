@@ -1,0 +1,37 @@
+.tema-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.temas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 15px;
+}
+
+.tema-btn {
+  --border-radius: 12px;
+  margin: 0;
+  text-transform: none;
+  font-weight: 600;
+}
+
+.custom-tema-section {
+  margin-top: 30px;
+  padding: 20px;
+  background: var(--ion-color-light);
+  border-radius: 12px;
+  
+  h3 {
+    margin-top: 0;
+  }
+  
+  .custom-input {
+    margin: 15px 0;
+    --background: white;
+    --border-radius: 8px;
+  }
+}

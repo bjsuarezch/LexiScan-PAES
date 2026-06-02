@@ -9,6 +9,8 @@ export interface DashboardResponse {
   xp_total: number;
   racha_actual: number;
   saldo_monedas: number;
+  tema_actual_id?: number;
+  textos_restantes?: number;
   habilidades: HabilidadData[];
 }
 
@@ -18,7 +20,7 @@ export interface PreguntaItem {
   alternativas: Record<string, string>;
   respuesta_correcta: string;
   justificacion_cot: string;
-  texto_inedito?: string;
+  texto_inedito?: any[] | string;
 }
 
 export interface GeneratedPreguntaItem {
@@ -27,18 +29,18 @@ export interface GeneratedPreguntaItem {
   alternativas: Record<string, string>;
   respuesta_correcta: string;
   justificacion_cot: string;
-  texto_inedito?: string;
+  texto_inedito?: any[] | string;
 }
 
 export interface HabilidadDetail {
   nombre_habilidad: string;
-  texto_inedito: string;
+  texto_inedito: any[] | string;
   preguntas: PreguntaItem[];
 }
 
 export interface GeneratedHabilidadDetail {
   tipo_habilidad: string;
-  texto_inedito: string;
+  texto_inedito: any[] | string;
   preguntas: GeneratedPreguntaItem[];
 }
 

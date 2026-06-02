@@ -163,25 +163,35 @@ def build_system_prompt() -> str:
         'Tu función es diseñar material de evaluación riguroso, claro y útil para estudiantes que se preparan para la PAES.'
     )
 
-def build_user_prompt(habilidad: str) -> str:
+def build_user_prompt(habilidad: str, tema: str) -> str:
     num_preguntas = 4
     if habilidad == "Tipos_de_Texto" or habilidad == "Tipos de Texto":
         num_preguntas = 1
+    
+    tema_instruccion = f"El tema central del texto debe ser sobre: '{tema}'." if tema else "Elige un tema educativo y muy interesante al azar."
+
     return (
-        f"Genera un ejercicio completo para la habilidad de Comprension Lectora PAES  '{habilidad}'. "
+        f"Genera un ejercicio completo para la habilidad de Comprension Lectora PAES '{habilidad}'. "
+        f"{tema_instruccion}\n\n"
         "Tu tarea es generar un texto inédito de al menos 2 párrafos.\n\n"
         f"CANTIDAD DE PREGUNTAS A GENERAR: {num_preguntas}.\n\n"
         f"basándote exclusivamente en ese texto inedito y en la habilidad a evaluar, genera exactamente {num_preguntas} pregunta(s) de selección múltiple.\n"
-        "Devuelve únicamente un JSON válido con esta estructura exacta: "
-        "{"
-        "  \"tipo_habilidad\": \"string\", "
-        "  \"texto_inedito\": \"string\", "
-        "  \"preguntas\": [ "  # <--- IMPORTANTE: Usar corchetes aquí
-        "    { \"enunciado\": \"...\", \"alternativas\": {\"A\": \"...\", \"B\": \"...\", \"C\": \"...\", \"D\": \"...\"}, \"respuesta_correcta\": \"A\", \"justificacion_cot\": \"...\" }"
-        "  ]"
-        "}"
-        "REGLA DE ORO: El campo 'texto_inedito' DEBE contener el relato o artículo informativo completo."
-        "No puede ser una instrucción. Las preguntas deben ser imposibles de responder sin leer el texto inédito. "
+        "Devuelve únicamente un JSON válido con esta estructura exacta: \n"
+        "{\n"
+        "  \"tipo_habilidad\": \"string\",\n"
+        "  \"texto_inedito\": [\n"
+        "     {\"tipo\": \"parrafo\", \"contenido\": \"...\"},\n"
+        "     {\"tipo\": \"dato_clave\", \"contenido\": \"...\"},\n"
+        "     {\"tipo\": \"grafico_barra\", \"datos\": [{\"etiqueta\": \"...\", \"valor\": 80}]},\n"
+        "     {\"tipo\": \"imagen\", \"concepto\": \"palabra clave en ingles para buscar imagen relacionada\"}\n"
+        "  ],\n"
+        "  \"preguntas\": [ \n"
+        "    { \"enunciado\": \"...\", \"alternativas\": {\"A\": \"...\", \"B\": \"...\", \"C\": \"...\", \"D\": \"...\"}, \"respuesta_correcta\": \"A\", \"justificacion_cot\": \"...\" }\n"
+        "  ]\n"
+        "}\n"
+        "REGLA DE ORO: El campo 'texto_inedito' DEBE ser un arreglo JSON con los distintos bloques que forman el texto."
+        "Puedes usar varios 'parrafo'. Si aplica, añade 'dato_clave' y un 'grafico_barra'. SIEMPRE incluye un bloque 'imagen' con un concepto clave en inglés. "
+        "Las preguntas deben ser imposibles de responder sin leer el texto inédito. "
     )
 
 
@@ -209,10 +219,11 @@ def parse_gemini_output(raw_text: str | dict | list) -> dict:
 
 def build_evaluation_prompt(tipo_habilidad: str, preguntas: list[dict]) -> str:
     prompt_lines = [
-        'Eres la Profesora Sinclair. Tu misión es dar retroalimentación usando "Cadena de Pensamiento" (CoT).',
-        'Para cada respuesta, explica la lógica pedagógica: ¿Por qué la correcta es la que es y por qué la del usuario falla?',
-        'Estructura tu explicación paso a paso: 1. Premisa del texto, 2. Análisis de la pregunta, 3. Conclusión.',
-        'Devuelve un JSON con: {"resultados": [{"pregunta_index": int, "feedback": "string"}]}',
+        'Eres la Profesora Sinclair. Tu misión es dar retroalimentación breve y amigable al estudiante.',
+        'Para cada respuesta, explica de forma directa por qué la correcta es la que es y por qué la del usuario (si es incorrecta) falla.',
+        'NO uses formatos estructurados ni listas como "1. Premisa, 2. Análisis, 3. Conclusión". Escribe un solo párrafo conversacional, como un humano hablando con un alumno.',
+        'NO menciones que falta la premisa del texto o que asumes algo. Sé asertiva y directa.',
+        'Devuelve SOLO un objeto JSON estricto con: {"resultados": [{"pregunta_index": int, "feedback": "string"}]}',
         f"Habilidad: {tipo_habilidad}",
         '---'
     ]
@@ -287,7 +298,7 @@ def call_groq_feedback(tipo_habilidad: str, preguntas: list[dict], db: Session) 
     return feedback_map
 
 
-def call_gemini_api(habilidad: str, db: Session) -> dict:
+def call_gemini_api(habilidad: str, tema: str, db: Session) -> dict:
     api_key = crud.get_configuracion(db, 'GROQ_API_KEY')
     model = crud.get_configuracion(db, 'GROQ_MODEL') or 'llama-3.1-8b-instant'
     if not api_key:
@@ -297,7 +308,7 @@ def call_gemini_api(habilidad: str, db: Session) -> dict:
         "model": model,
         "messages": [
             {"role": "system", "content": build_system_prompt()},
-            {"role": "user", "content": build_user_prompt(habilidad)}
+            {"role": "user", "content": build_user_prompt(habilidad, tema)}
         ],
         "temperature": 0.2,
         "response_format": {"type": "json_object"} # Esto obliga a Groq a dar JSON
@@ -412,6 +423,18 @@ def guardar_resultados_examen(request: schemas.GuardarResultadosExamenRequest, d
         raise HTTPException(status_code=400, detail=str(exc))
 
 
+@app.get('/temas', response_model=list[schemas.TemaResponse])
+def listar_temas(db: Session = Depends(get_db)):
+    return crud.get_temas(db)
+
+@app.post('/seleccionar-tema')
+def seleccionar_tema(request: schemas.SeleccionarTemaRequest, db: Session = Depends(get_db)):
+    try:
+        crud.seleccionar_tema(db, request.rut, request.tema_id, request.tema_custom)
+        return {"message": "Tema seleccionado exitosamente"}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
 @app.post('/generar-preguntas', response_model=schemas.GenerarPreguntasResponse)
 def generar_preguntas(request: schemas.GenerarPreguntasRequest, db: Session = Depends(get_db)):
     habilidad_valida = normalize_habilidad_type(request.habilidad)
@@ -422,8 +445,66 @@ def generar_preguntas(request: schemas.GenerarPreguntasRequest, db: Session = De
     if not habilidad_db_name:
         raise HTTPException(status_code=400, detail='Habilidad no reconocida.')
 
+    user = crud.get_user_by_rut(db, request.rut)
+    if not user:
+        raise HTTPException(status_code=404, detail='Usuario no encontrado.')
+    
+    if user.textos_restantes <= 0:
+        raise HTTPException(status_code=403, detail='No te quedan textos de tu tema actual. Elige un nuevo tema.')
+
+    # Resolver tema actual desde el usuario si no se envía en el request
+    if not request.tema and user.tema_actual_id:
+        tema_actual = db.query(models.Tema).filter(models.Tema.id_tema == user.tema_actual_id).first()
+        if tema_actual:
+            request.tema = tema_actual.nombre
+            request.es_fijo = not tema_actual.es_custom
+
+    # Si es fijo y pide del pool
+    if request.es_fijo:
+        # Busca preguntas en el banco que correspondan a esa habilidad y tema
+        import random
+        # Para esto, necesitamos id_habilidad (usamos la global si existe)
+        habilidad_db = crud.get_habilidad_by_nombre(db, habilidad_db_name)
+        tema = db.query(models.Tema).filter(models.Tema.nombre.ilike(request.tema)).first() if request.tema else None
+        
+        if habilidad_db and tema:
+            preguntas_banco = db.query(models.BancoPreguntas).filter(
+                models.BancoPreguntas.id_habilidad == habilidad_db.id_progreso,
+                models.BancoPreguntas.id_tema == tema.id_tema,
+                models.BancoPreguntas.activa == True
+            ).all()
+            
+            if preguntas_banco:
+                # Agrupar por texto_inedito
+                import itertools
+                # Como texto_inedito es JSON (list), lo convertimos a string para agrupar o simplemente agarramos el de una
+                # Por simplicidad, tomamos un set de preguntas que compartan el mismo texto
+                # Tomamos la primera y sacamos las que tengan el mismo texto.
+                # (Se podría mejorar seleccionando aleatoriamente un grupo)
+                preguntas_seleccionadas = preguntas_banco[:4] if len(preguntas_banco) >= 4 else preguntas_banco
+                texto_inedito_json = preguntas_seleccionadas[0].texto_inedito
+                
+                resp = {
+                    "tipo_habilidad": habilidad_valida,
+                    "texto_inedito": texto_inedito_json,
+                    "preguntas": []
+                }
+                for p in preguntas_seleccionadas:
+                    resp["preguntas"].append({
+                        "id_pregunta": p.id_pregunta,
+                        "enunciado": p.enunciado,
+                        "alternativas": p.alternativas,
+                        "respuesta_correcta": p.respuesta_correcta,
+                        "justificacion_cot": p.justificacion_cot
+                    })
+                
+                # Descontar texto
+                user.textos_restantes -= 1
+                db.commit()
+                return resp
+
     # 1. Llamada a la IA para generar el contenido
-    generacion = call_gemini_api(habilidad_valida, db)
+    generacion = call_gemini_api(habilidad_valida, request.tema or "", db)
 
     if not isinstance(generacion, dict) or 'preguntas' not in generacion:
         raise HTTPException(status_code=502, detail='Respuesta inválida de la IA: formato inesperado.')
@@ -438,23 +519,28 @@ def generar_preguntas(request: schemas.GenerarPreguntasRequest, db: Session = De
     preguntas_guardadas_ids = []
     
     try:
-        texto_inedito = generacion.get('texto_inedito', 'Sin texto de contexto')
+        texto_inedito = generacion.get('texto_inedito', [{"tipo": "parrafo", "contenido": "Sin texto"}])
+        # Intentar obtener el tema actual
+        tema = db.query(models.Tema).filter(models.Tema.nombre.ilike(request.tema)).first() if request.tema else None
         
         for pregunta_data in generacion['preguntas']:
-            # Usamos la función save_generated_question que guarda en banco_preguntas
-            nueva_pregunta = crud.save_generated_question(
-                db,
+            pregunta = models.BancoPreguntas(
                 id_habilidad=habilidad_db.id_progreso,
+                id_tema=tema.id_tema if tema else None,
                 texto_inedito=texto_inedito,
                 enunciado=pregunta_data['enunciado'],
                 alternativas=pregunta_data['alternativas'],
                 respuesta_correcta=pregunta_data['respuesta_correcta'],
                 justificacion_cot=pregunta_data.get('justificacion_cot', ''),
-                modelo_ia=crud.get_configuracion(db, 'GROQ_MODEL') # O el modelo que estés usando
+                dificultad='medio',
+                activa=True
             )
-            # Añadimos el ID generado al objeto para que el frontend lo conozca
-            pregunta_data['id_pregunta'] = nueva_pregunta.id_pregunta
+            db.add(pregunta)
+            db.flush() # Para obtener el ID
+            pregunta_data['id_pregunta'] = pregunta.id_pregunta
             
+        # Descontar texto
+        user.textos_restantes -= 1
         db.commit() # Confirmamos todos los guardados
     except Exception as e:
         db.rollback()
@@ -519,6 +605,8 @@ def evaluar_preguntas(request: schemas.EvaluarRespuestasRequest, db: Session = D
             feedback_map.get(str(index + 1)) or 
             'Revisa la justificación pedagógica y vuelve a intentarlo si es necesario.'
         )
+        if isinstance(feedback, dict):
+            feedback = feedback.get('logica_pedagogica') or feedback.get('feedback') or str(feedback)
         resultados.append({
             'index': index,
             'enunciado': pregunta.enunciado,

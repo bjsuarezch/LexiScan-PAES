@@ -45,6 +45,13 @@ const routes: Routes = [
       ),
   },
   {
+    path: 'seleccion-tema',
+    loadChildren: () =>
+      import('./seleccion-tema/seleccion-tema.module').then(
+        (m) => m.SeleccionTemaPageModule,
+      ),
+  },
+  {
     path: '',
     loadChildren: () =>
       import('./tabs/tabs.module').then((m) => m.TabsPageModule),

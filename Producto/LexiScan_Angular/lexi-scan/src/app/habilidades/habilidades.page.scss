@@ -176,4 +176,106 @@ ion-content > .ion-padding {
       line-height: 1.5;
     }
   }
+
+  .rich-text-container {
+    margin-bottom: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    .parrafo {
+      color: #333;
+      line-height: 1.7;
+      font-size: 1rem;
+      margin: 0;
+    }
+
+    .dato-clave {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: #fff3cd;
+      color: #856404;
+      padding: 16px;
+      border-radius: 8px;
+      border-left: 4px solid #ffc107;
+      
+      ion-icon {
+        font-size: 1.5rem;
+        flex-shrink: 0;
+      }
+      
+      span {
+        line-height: 1.5;
+      }
+    }
+
+    .imagen-bloque {
+      width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      
+      img {
+        width: 100%;
+        height: auto;
+        display: block;
+        object-fit: cover;
+      }
+    }
+
+    .grafico-bloque {
+      background: #f8f9fa;
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid #e9ecef;
+
+      .chart-title {
+        font-weight: bold;
+        margin-bottom: 12px;
+        color: #495057;
+        text-align: center;
+      }
+
+      .bar-chart {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .bar-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        .bar-label {
+          width: 60px;
+          font-size: 0.85rem;
+          color: #495057;
+          text-align: right;
+        }
+
+        .bar-track {
+          flex: 1;
+          background: #e9ecef;
+          height: 16px;
+          border-radius: 8px;
+          overflow: hidden;
+        }
+
+        .bar-fill {
+          height: 100%;
+          background: var(--ion-color-primary, #3880ff);
+          transition: width 0.5s ease-in-out;
+        }
+
+        .bar-value {
+          width: 40px;
+          font-size: 0.85rem;
+          font-weight: bold;
+          color: #495057;
+        }
+      }
+    }
+  }
 }

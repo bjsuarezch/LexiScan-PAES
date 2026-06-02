@@ -20,6 +20,15 @@ from sqlalchemy.orm import relationship
 from database import Base
 
 
+class Tema(Base):
+    __tablename__ = 'temas'
+
+    id_tema = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    nombre = Column(String(100), nullable=False, unique=True)
+    es_custom = Column(Boolean, nullable=False, default=False)
+    activo = Column(Boolean, nullable=False, default=True)
+
+
 class Usuario(Base):
     __tablename__ = 'usuarios'
 
@@ -32,9 +41,12 @@ class Usuario(Base):
     fecha_registro = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
     activo = Column(Boolean, nullable=False, default=True)
     ultimo_acceso = Column(DateTime(timezone=True), nullable=True)
+    tema_actual_id = Column(Integer, ForeignKey('temas.id_tema'), nullable=True)
+    textos_restantes = Column(Integer, nullable=False, default=0)
 
     habilidades = relationship('HistorialHabilidades', back_populates='usuario', cascade='all, delete')
     wallet = relationship('EconomiaMonedas', back_populates='usuario', uselist=False, cascade='all, delete')
+    tema_actual = relationship('Tema')
 
 class HabilidadLectora(enum.Enum):
     Localizar = "Localizar"
@@ -79,7 +91,8 @@ class PreguntaIA(Base):
     id_pregunta = Column(Integer, primary_key=True, index=True, autoincrement=True)
     id_pregunta_origen = Column(Integer, nullable=True)
     id_habilidad = Column(Integer, ForeignKey('historial_habilidades.id_progreso'), nullable=False)
-    texto_inedito = Column(Text, nullable=False)
+    id_tema = Column(Integer, ForeignKey('temas.id_tema'), nullable=True)
+    texto_inedito = Column(JSON, nullable=False)
     enunciado = Column(String(500), nullable=False)
     alternativas = Column(JSON, nullable=False)
     respuesta_correcta = Column(String(1), nullable=False)
@@ -100,7 +113,8 @@ class BancoPreguntas(Base):
 
     id_pregunta = Column(Integer, primary_key=True, index=True, autoincrement=True)
     id_habilidad = Column(Integer, ForeignKey('historial_habilidades.id_progreso'), nullable=False)
-    texto_inedito = Column(Text, nullable=False)
+    id_tema = Column(Integer, ForeignKey('temas.id_tema'), nullable=True)
+    texto_inedito = Column(JSON, nullable=False)
     enunciado = Column(String(500), nullable=False)
     alternativas = Column(JSON, nullable=False)
     respuesta_correcta = Column(String(1), nullable=False)

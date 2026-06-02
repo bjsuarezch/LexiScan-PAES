@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, EmailStr, Field
 
@@ -24,6 +24,8 @@ class UserResponse(BaseModel):
     racha_actual: int
     activo: bool
     ultimo_acceso: Optional[datetime] = None
+    tema_actual_id: Optional[int] = None
+    textos_restantes: int = 0
 
     class Config:
         from_attributes = True
@@ -40,6 +42,8 @@ class DashboardResponse(BaseModel):
     xp_total: int
     racha_actual: int
     saldo_monedas: int
+    tema_actual_id: Optional[int] = None
+    textos_restantes: int = 0
     habilidades: List[HabilidadData]
 
 
@@ -63,7 +67,24 @@ class HabilidadDetailResponse(BaseModel):
 
 
 class GenerarPreguntasRequest(BaseModel):
+    rut: str
     habilidad: str
+    tema: Optional[str] = None
+    es_fijo: Optional[bool] = False
+
+class TemaResponse(BaseModel):
+    id_tema: int
+    nombre: str
+    es_custom: bool
+    activo: bool
+
+    class Config:
+        from_attributes = True
+
+class SeleccionarTemaRequest(BaseModel):
+    rut: str
+    tema_id: Optional[int] = None
+    tema_custom: Optional[str] = None
 
 
 class GeneratedPreguntaItem(BaseModel):
@@ -80,7 +101,7 @@ class EvaluarPreguntaUsuario(BaseModel):
     alternativas: Dict[str, str]
     respuesta_usuario: str
     respuesta_correcta: str
-    texto_inedito: Optional[str] = None
+    texto_inedito: Optional[Union[str, list]] = None
     justificacion: Optional[str] = None
 
 
@@ -153,7 +174,7 @@ class GuardarResultadosExamenRequest(BaseModel):
 
 class GenerarPreguntasResponse(BaseModel):
     tipo_habilidad: str
-    texto_inedito: str
+    texto_inedito: list  # JSON Array of blocks
     preguntas: List[GeneratedPreguntaItem]
 
 

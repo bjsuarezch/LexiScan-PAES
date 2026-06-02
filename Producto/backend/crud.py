@@ -129,8 +129,49 @@ def get_dashboard_data(db: Session, rut: str) -> Optional[dict]:
         'xp_total': user.xp_total,
         'racha_actual': user.racha_actual,
         'saldo_monedas': wallet.saldo_monedas if wallet else 0,
+        'tema_actual_id': user.tema_actual_id,
+        'textos_restantes': user.textos_restantes,
         'habilidades': [build_display_habilidad(h) for h in habilidades],
     }
+
+def get_temas(db: Session):
+    return db.query(models.Tema).filter(models.Tema.activo == True).all()
+
+def seleccionar_tema(db: Session, rut: str, tema_id: Optional[int], tema_custom: Optional[str]):
+    user = get_user_by_rut(db, rut)
+    if not user:
+        raise ValueError("Usuario no encontrado")
+
+    if tema_id:
+        tema = db.query(models.Tema).filter(models.Tema.id_tema == tema_id).first()
+        if not tema:
+            raise ValueError("Tema no encontrado")
+        user.tema_actual_id = tema.id_tema
+        user.textos_restantes = 3
+    elif tema_custom:
+        # Check if they have enough coins
+        wallet = db.query(models.EconomiaMonedas).filter(models.EconomiaMonedas.rut_usuario == rut).first()
+        costo = 50
+        if not wallet or wallet.saldo_monedas < costo:
+            raise ValueError("No tienes suficientes monedas para un tema personalizado.")
+        
+        wallet.saldo_monedas -= costo
+        
+        # Check if custom theme already exists
+        tema = db.query(models.Tema).filter(models.Tema.nombre.ilike(tema_custom)).first()
+        if not tema:
+            tema = models.Tema(nombre=tema_custom, es_custom=True, activo=True)
+            db.add(tema)
+            db.commit()
+            db.refresh(tema)
+            
+        user.tema_actual_id = tema.id_tema
+        user.textos_restantes = 3
+    else:
+        raise ValueError("Debe proveer tema_id o tema_custom")
+
+    db.commit()
+    return user
 
 def get_habilidad_by_nombre(db: Session, nombre_habilidad: str):
     """

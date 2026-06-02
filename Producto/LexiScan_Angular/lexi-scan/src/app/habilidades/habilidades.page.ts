@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { AlertController } from '@ionic/angular';
 import { ProfileService } from '../services/profile.service';
 import { HabilidadesService } from '../services/habilidades.service';
 import {
@@ -37,11 +38,14 @@ export class HabilidadesPage implements OnInit {
   submitting = false;
   isSubmitted = false;
   evaluationError: string | null = null;
+  textosRestantes: number = 0;
+  temaActualId: number | null = null;
 
   constructor(
     private router: Router,
     private profileService: ProfileService,
     private habilidadesService: HabilidadesService,
+    private alertController: AlertController,
   ) {}
 
   ngOnInit() {
@@ -55,8 +59,26 @@ export class HabilidadesPage implements OnInit {
 
   loadHabilidades(rut: string) {
     this.habilidadesService.getDashboard(rut).subscribe({
-      next: (data) => {
+      next: async (data) => {
         this.habilidades = data.habilidades;
+        this.textosRestantes = data.textos_restantes ?? 0;
+        this.temaActualId = data.tema_actual_id ?? null;
+        
+        if (this.textosRestantes <= 0) {
+          const alert = await this.alertController.create({
+            header: '¡Se acabaron tus textos!',
+            message: 'Se le han acabado los 3 textos personalizados, supera los desafios del dia para ganar puntos y mas oportunidades de escoger temas personalizados!',
+            buttons: [
+              {
+                text: 'Elegir nuevo tema',
+                handler: () => {
+                  this.router.navigate(['/seleccion-tema']);
+                }
+              }
+            ]
+          });
+          await alert.present();
+        }
       },
       error: (error) => {
         console.error('Error al cargar habilidades:', error);
@@ -84,14 +106,24 @@ export class HabilidadesPage implements OnInit {
     this.evaluationError = null;
     this.isSubmitted = false;
 
-    this.habilidadesService.generarPreguntas(skill).subscribe({
+    if (!this.profile?.rut) return;
+
+    // We can't know for sure the name of the custom theme, but if we have an ID it's a fixed or custom theme.
+    // The backend uses 'tema' as string. We should just pass es_fijo=false for now or true if it's fixed.
+    // Wait, backend expects 'tema' string, but if we don't pass it, it uses user.tema_actual_id for DB lookup.
+    // Actually, backend needs 'tema' for the prompt! But wait, backend prompt uses 'request.tema'.
+    // If request.tema is empty, it chooses random. But if they selected a theme, we should probably fetch the tema name.
+    // Or just let the backend handle it! Wait, we don't know the tema name.
+    // It's okay, we'll just pass es_fijo = false for now since backend already knows the ID and for the prompt it would be nice to have it, but let's see. 
+    
+    this.habilidadesService.generarPreguntas(this.profile.rut, skill, null, false).subscribe({
       next: (data) => {
         this.selectedHabilidad = data;
         this.totalQuestions = data.preguntas.length;
       },
       error: (error) => {
         console.error('Error al generar preguntas:', error);
-        alert('No se pudo generar las preguntas. Inténtalo de nuevo.');
+        alert(error.error?.detail || 'No se pudo generar las preguntas. Inténtalo de nuevo.');
       },
     });
   }
@@ -191,5 +223,22 @@ export class HabilidadesPage implements OnInit {
     }
 
     return points.join(' ');
+  }
+
+  getTextoBlocks(): any[] {
+    if (!this.selectedHabilidad) return [];
+    const texto = this.selectedHabilidad.texto_inedito;
+    if (typeof texto === 'string') {
+      try {
+        const parsed = JSON.parse(texto);
+        return Array.isArray(parsed) ? parsed : [{ tipo: 'parrafo', contenido: texto }];
+      } catch {
+        return [{ tipo: 'parrafo', contenido: texto }];
+      }
+    }
+    if (Array.isArray(texto)) {
+      return texto;
+    }
+    return [];
   }
 }

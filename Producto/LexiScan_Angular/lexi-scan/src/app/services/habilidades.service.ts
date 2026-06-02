@@ -54,11 +54,23 @@ export class HabilidadesService {
     );
   }
 
-  generarPreguntas(habilidad: string): Observable<GeneratedHabilidadDetail> {
+  generarPreguntas(rut: string, habilidad: string, tema: string | null = null, es_fijo: boolean = false): Observable<GeneratedHabilidadDetail> {
     return this.http.post<GeneratedHabilidadDetail>(
       `${this.baseUrl}/generar-preguntas`,
-      { habilidad },
+      { rut, habilidad, tema, es_fijo },
     );
+  }
+
+  getTemas(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/temas`);
+  }
+
+  seleccionarTema(rut: string, tema_id: number | null, tema_custom: string | null): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/seleccionar-tema`, {
+      rut,
+      tema_id,
+      tema_custom
+    });
   }
 
   evaluarRespuestas(payload: {
@@ -70,7 +82,7 @@ export class HabilidadesService {
       alternativas: Record<string, string>;
       respuesta_usuario: string;
       respuesta_correcta: string;
-      texto_inedito?: string;
+      texto_inedito?: string | any[];
       justificacion?: string;
     }>;
   }): Observable<EvaluarRespuestasResponse> {

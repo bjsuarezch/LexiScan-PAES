@@ -1,0 +1,51 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Elige tu Tema</ion-title>
+    <ion-buttons slot="end">
+      <ion-chip color="warning">
+        <ion-icon name="cash"></ion-icon>
+        <ion-label>{{ saldoMonedas }}</ion-label>
+      </ion-chip>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div class="tema-container">
+    <h2>Piscina de Temas</h2>
+    <p>Elige uno de estos temas para poder evaluar tus habilidades con 3 textos gratuitos:</p>
+    
+    <div class="temas-grid">
+      <ion-button 
+        *ngFor="let tema of temas" 
+        expand="block" 
+        color="primary"
+        class="tema-btn"
+        [disabled]="loading"
+        (click)="seleccionarTemaFijo(tema.id_tema)">
+        {{ tema.nombre }}
+      </ion-button>
+    </div>
+
+    <div class="custom-tema-section">
+      <h3>¿Prefieres otro tema?</h3>
+      <p>Ingresa tu propio tema y genera textos únicos. Costo: <ion-text color="warning"><strong>50 monedas</strong></ion-text></p>
+      
+      <ion-item class="custom-input">
+        <ion-label position="floating">Escribe tu tema (ej. El origen del sushi)</ion-label>
+        <ion-input [(ngModel)]="temaCustom" type="text" [disabled]="loading"></ion-input>
+      </ion-item>
+      
+      <ion-button 
+        expand="block" 
+        color="secondary" 
+        [disabled]="!temaCustom || loading"
+        (click)="seleccionarTemaCustom()">
+        Crear Tema Personalizado
+      </ion-button>
+    </div>
+  </div>
+</ion-content>
