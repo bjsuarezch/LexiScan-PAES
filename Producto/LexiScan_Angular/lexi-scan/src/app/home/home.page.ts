@@ -4,6 +4,8 @@ import { HabilidadesService } from '../services/habilidades.service';
 import { ProfileService } from '../services/profile.service';
 import { DashboardResponse, HabilidadData } from '../models/backend.model';
 import { IUserProfile } from '../models/auth.model';
+import { DesafiosService } from '../services/desafios.service';
+import { Desafio } from '../models/backend.model';
 
 @Component({
   selector: 'app-home',
@@ -17,11 +19,13 @@ export class HomePage implements OnInit {
   loading = false;
   errorFrecuente: any = null;
   habilidades: HabilidadData[] = [];
+  desafios: Desafio[] = [];
+  monedasExtra = 0;
 
-  constructor(
     private router: Router,
     private habilidadesService: HabilidadesService,
     private profileService: ProfileService,
+    private desafiosService: DesafiosService
   ) {}
 
   ngOnInit() {
@@ -38,6 +42,10 @@ export class HomePage implements OnInit {
         }
       },
     );
+    this.desafiosService.desafiosDiarios$.subscribe(desafios => {
+      this.desafios = desafios;
+    });
+    this.monedasExtra = parseInt(localStorage.getItem('monedas_extra') || '0', 10);
   }
 
   loadDashboard(rut: string): void {
@@ -45,6 +53,9 @@ export class HomePage implements OnInit {
     this.habilidadesService.getDashboard(rut).subscribe({
       next: (dashboard) => {
         this.dashboard = dashboard;
+        if (this.dashboard) {
+          this.dashboard.saldo_monedas += this.monedasExtra;
+        }
         this.loading = false;
       },
       error: (error) => {
@@ -96,6 +107,19 @@ export class HomePage implements OnInit {
 
   onChallengeClick(): void {
     console.log('Challenge clicked');
+  }
+
+  reclamarRecompensa(idDesafio: number) {
+    this.desafiosService.reclamarRecompensa(idDesafio);
+    // Actualizar monedas extra localmente
+    this.monedasExtra = parseInt(localStorage.getItem('monedas_extra') || '0', 10);
+    if (this.dashboard) {
+      // Recalcular el saldo total (restando el anterior y sumando el nuevo, o simplemente volviendo a sumar base + extra)
+      // Como dashboard se actualiza solo en loadDashboard, podemos pedir loadDashboard de nuevo
+      if (this.profile?.rut) {
+        this.loadDashboard(this.profile.rut);
+      }
+    }
   }
 
   // En tu clase del componente

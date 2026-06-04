@@ -93,3 +93,22 @@ export interface ExamenResponse {
   estimated_time: number;
   preguntas: PreguntaItem[];
 }
+
+export interface Desafio {
+  id: number;
+  titulo: string;
+  descripcion: string;
+  recompensa_monedas: number;
+  progreso: number;
+  meta: number;
+  completado: boolean;
+  reclamado: boolean;
+  tipo: 'tiempo_habilidades' | 'diversidad_habilidades' | 'habilidad_baja' | 'gym_sin_errores' | 'tiempo_examen';
+}
+
+export interface DesafioProgresoLocal {
+  fecha: string;
+  desafiosActivos: Desafio[];
+  habilidadesPracticadas: string[];
+  vecesHabilidadBajaPracticada: number;
+}

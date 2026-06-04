@@ -142,14 +142,14 @@
         Guardar Resultados
       </ion-button>
 
-      <ion-button expand="block" color="secondary" (click)="exportExam('PDF')">
-        <ion-icon name="document" slot="start"></ion-icon>
-        Exportar PDF
-      </ion-button>
-
-      <ion-button expand="block" color="tertiary" (click)="exportExam('TXT')">
-        <ion-icon name="document-text" slot="start"></ion-icon>
-        Exportar TXT
+      <ion-button
+        expand="block"
+        color="secondary"
+        (click)="downloadResultsPDF()"
+        id="btn-download-results-pdf"
+      >
+        <ion-icon name="download-outline" slot="start"></ion-icon>
+        Descargar Examen y Resultados (PDF)
       </ion-button>
 
       <ion-button expand="block" color="danger" (click)="discardExam()">

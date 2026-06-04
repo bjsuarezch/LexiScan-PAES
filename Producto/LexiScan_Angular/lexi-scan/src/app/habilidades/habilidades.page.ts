@@ -8,8 +8,9 @@ import {
   HabilidadData,
   GeneratedHabilidadDetail,
 } from '../models/backend.model';
-import { IUserProfile } from '../models/auth.model';
+import { DesafiosService } from '../services/desafios.service';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { OnDestroy } from '@angular/core';
 
 interface EvaluacionResultado {
   index: number;
@@ -26,7 +27,7 @@ interface EvaluacionResultado {
   styleUrls: ['habilidades.page.scss'],
   standalone: false,
 })
-export class HabilidadesPage implements OnInit {
+export class HabilidadesPage implements OnInit, OnDestroy {
   habilidades: HabilidadData[] = [];
   selectedHabilidad: GeneratedHabilidadDetail | null = null;
   profile: IUserProfile | null = null;
@@ -40,21 +41,32 @@ export class HabilidadesPage implements OnInit {
   evaluationError: string | null = null;
   textosRestantes: number = 0;
   temaActualId: number | null = null;
+  
+  private enterTime: number = 0;
 
   constructor(
     private router: Router,
     private profileService: ProfileService,
     private habilidadesService: HabilidadesService,
     private alertController: AlertController,
+    private desafiosService: DesafiosService
   ) {}
 
   ngOnInit() {
+    this.enterTime = Date.now();
     this.profileService.getProfile().subscribe((profile) => {
       this.profile = profile;
       if (profile?.rut) {
         this.loadHabilidades(profile.rut);
       }
     });
+  }
+
+  ngOnDestroy() {
+    if (this.enterTime > 0) {
+      const timeSpentMinutes = (Date.now() - this.enterTime) / 60000;
+      this.desafiosService.reportarTiempoHabilidades(timeSpentMinutes);
+    }
   }
 
   loadHabilidades(rut: string) {
@@ -178,6 +190,22 @@ export class HabilidadesPage implements OnInit {
           (this.loadHabilidades(this.profile.rut),
             this.habilidadesService.getDashboard(this.profile.rut).subscribe());
         }
+
+        // --- Desafios Report ---
+        if (this.selectedHabilidad) {
+          const habilidadPracticada = this.selectedHabilidad.tipo_habilidad;
+          // Determine if it's the lowest skill
+          let esLaMasBaja = false;
+          if (this.habilidades && this.habilidades.length > 0) {
+            const lowestScore = Math.min(...this.habilidades.map(h => h.nivel_maestria));
+            const currentHabilidad = this.habilidades.find(h => h.nombre_habilidad === habilidadPracticada);
+            if (currentHabilidad && currentHabilidad.nivel_maestria === lowestScore) {
+              esLaMasBaja = true;
+            }
+          }
+          this.desafiosService.reportarHabilidadPracticada(habilidadPracticada, esLaMasBaja);
+        }
+        // -----------------------
       },
       error: (error) => {
         console.error('Error al evaluar respuestas:', error);

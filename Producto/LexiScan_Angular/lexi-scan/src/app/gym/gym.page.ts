@@ -4,6 +4,7 @@ import { HabilidadesService } from '../services/habilidades.service';
 import { ProfileService } from '../services/profile.service';
 import { DashboardResponse } from '../models/backend.model';
 import { IUserProfile } from '../models/auth.model';
+import { DesafiosService } from '../services/desafios.service';
 
 @Component({
   selector: 'app-gym',
@@ -28,6 +29,7 @@ export class GymPage implements OnInit {
     private router: Router,
     private habilidadesService: HabilidadesService,
     private profileService: ProfileService,
+    private desafiosService: DesafiosService
   ) {}
 
   ngOnInit() {
@@ -116,6 +118,9 @@ export class GymPage implements OnInit {
               this.errorActual = this.erroresFrecuentes[0];
             } else {
               this.errorActual = null;
+              // --- Desafios Report ---
+              this.desafiosService.reportarGymSinErrores();
+              // -----------------------
             }
             this.selectedAnswer = '';
             this.evaluationSubmitted = false;

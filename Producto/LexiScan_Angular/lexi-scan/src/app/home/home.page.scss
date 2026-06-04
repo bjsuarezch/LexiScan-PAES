@@ -300,3 +300,114 @@ ion-card {
     --background: #f44336;
   }
 }
+
+.daily-challenges-card {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
+  background: white;
+  margin: 20px 0;
+  
+  ion-card-header {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8c 100%);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 12px 12px 0 0;
+    
+    ion-card-title {
+      color: white;
+      font-weight: 700;
+      font-size: 1.2rem;
+    }
+    ion-card-subtitle {
+      color: rgba(255, 255, 255, 0.85);
+      text-transform: none;
+      font-size: 0.9rem;
+    }
+  }
+
+  ion-card-content {
+    padding: 0;
+  }
+
+  .challenges-list {
+    background: transparent;
+    padding: 0;
+  }
+
+  .challenge-item {
+    --padding-start: 20px;
+    --padding-end: 20px;
+    --padding-top: 15px;
+    --padding-bottom: 15px;
+    --inner-border-width: 0 0 1px 0;
+    --inner-border-color: #eee;
+    
+    &:last-child {
+      --inner-border-width: 0;
+    }
+
+    .challenge-details {
+      width: 100%;
+      padding-right: 15px;
+      
+      h4 {
+        margin: 0 0 5px 0;
+        font-weight: 600;
+        color: #333;
+        font-size: 1.05rem;
+      }
+      p {
+        margin: 0 0 12px 0;
+        color: #666;
+        font-size: 0.9rem;
+        line-height: 1.3;
+      }
+      
+      .progress-bar-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        
+        ion-progress-bar {
+          flex: 1;
+          height: 8px;
+          border-radius: 4px;
+        }
+        .progress-text {
+          font-size: 0.8rem;
+          color: #888;
+          min-width: 40px;
+          text-align: right;
+          font-weight: 600;
+        }
+      }
+    }
+
+    .challenge-action {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-width: 60px;
+      gap: 5px;
+
+      .reward-info {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-weight: bold;
+        color: #ff9800;
+        
+        ion-icon {
+          font-size: 1.2rem;
+        }
+      }
+
+      ion-button {
+        --border-radius: 8px;
+        margin: 0;
+        font-weight: 600;
+      }
+    }
+  }
+}
