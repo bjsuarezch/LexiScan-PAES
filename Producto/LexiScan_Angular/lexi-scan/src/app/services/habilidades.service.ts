@@ -85,6 +85,7 @@ export class HabilidadesService {
       texto_inedito?: string | any[];
       justificacion?: string;
     }>;
+    tiempo_segundos?: number;
   }): Observable<EvaluarRespuestasResponse> {
     return this.http.post<EvaluarRespuestasResponse>(
       `${this.baseUrl}/evaluar-preguntas`,
@@ -102,10 +103,11 @@ export class HabilidadesService {
     });
   }
 
-  evaluarExamen(idExamen: number, respuestas: any[]): Observable<any> {
+  evaluarExamen(idExamen: number, respuestas: any[], tiempo_segundos?: number): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}/evaluar-examen`, {
       id_examen: idExamen,
       respuestas,
+      tiempo_segundos
     });
   }
 

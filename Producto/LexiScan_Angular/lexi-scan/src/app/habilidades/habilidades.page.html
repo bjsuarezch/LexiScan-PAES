@@ -97,10 +97,11 @@
       <ion-button
         expand="block"
         color="primary"
-        [disabled]="!canSubmit() || submitting"
+        [disabled]="!canSubmit() || isSubmitLocked || submitting"
         (click)="submitAnswers()"
       >
-        {{ submitting ? 'Evaluando...' : 'Enviar respuestas' }}
+        <span *ngIf="submitting">Evaluando...</span>
+        <span *ngIf="!submitting">{{ submitButtonText }}</span>
       </ion-button>
 
       <ion-text color="danger" *ngIf="evaluationError">

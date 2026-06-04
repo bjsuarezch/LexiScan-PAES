@@ -4,7 +4,7 @@ import { AlertController } from '@ionic/angular';
 import { HabilidadesService } from '../services/habilidades.service';
 import { ExamenResponse } from '../models/backend.model';
 import { DesafiosService } from '../services/desafios.service';
-
+import { interval, Subscription } from 'rxjs';
 
 
 @Component({
@@ -22,9 +22,12 @@ export class ExamenSimulacroPage implements OnInit, OnDestroy {
     private router: Router,
     private alertController: AlertController,
     private habilidadesService: HabilidadesService,
+    private desafiosService: DesafiosService
   ) {}
 
   private enterTime: number = 0;
+  elapsedSeconds: number = 0;
+  private timerSubscription: Subscription | null = null;
 
   ngOnInit() {
     this.enterTime = Date.now();
@@ -34,6 +37,7 @@ export class ExamenSimulacroPage implements OnInit, OnDestroy {
 
       if (this.examData) {
         this.organizeQuestions();
+        this.startTimer();
       }
     }
     if (!this.examData) {

@@ -5,9 +5,10 @@
     </ion-buttons>
     <ion-title>Simulacro PAES</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="finishExam()" [disabled]="loading">
+      <ion-button (click)="finishExam()" [disabled]="loading || isSubmitLocked">
         <ion-icon name="checkmark-circle"></ion-icon>
-        Terminar Examen
+        <span *ngIf="loading">Enviando...</span>
+        <span *ngIf="!loading">{{ submitButtonText }}</span>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
@@ -75,10 +76,11 @@
     <ion-button
       expand="block"
       (click)="finishExam()"
-      [disabled]="loading"
+      [disabled]="loading || isSubmitLocked"
       class="finish-btn"
     >
-      Finalizar y Evaluar
+      <span *ngIf="loading">Enviando...</span>
+      <span *ngIf="!loading">{{ submitButtonText }}</span>
     </ion-button>
   </div>
 </ion-content>

@@ -9,9 +9,8 @@ import {
   GeneratedHabilidadDetail,
 } from '../models/backend.model';
 import { DesafiosService } from '../services/desafios.service';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, interval, Subscription } from 'rxjs';
 import { OnDestroy } from '@angular/core';
-
 interface EvaluacionResultado {
   index: number;
   enunciado: string;
@@ -43,6 +42,10 @@ export class HabilidadesPage implements OnInit, OnDestroy {
   temaActualId: number | null = null;
   
   private enterTime: number = 0;
+  
+  // Temporizador de preguntas
+  elapsedSeconds: number = 0;
+  private timerSubscription: Subscription | null = null;
 
   constructor(
     private router: Router,
@@ -63,6 +66,7 @@ export class HabilidadesPage implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.stopTimer();
     if (this.enterTime > 0) {
       const timeSpentMinutes = (Date.now() - this.enterTime) / 60000;
       this.desafiosService.reportarTiempoHabilidades(timeSpentMinutes);
@@ -132,6 +136,7 @@ export class HabilidadesPage implements OnInit, OnDestroy {
       next: (data) => {
         this.selectedHabilidad = data;
         this.totalQuestions = data.preguntas.length;
+        this.startTimer();
       },
       error: (error) => {
         console.error('Error al generar preguntas:', error);
@@ -140,8 +145,40 @@ export class HabilidadesPage implements OnInit, OnDestroy {
     });
   }
 
+  get minSecondsRequired(): number {
+    return this.totalQuestions * 60; // 1 minuto por pregunta (60 seg)
+  }
+
+  get isSubmitLocked(): boolean {
+    return this.elapsedSeconds < this.minSecondsRequired;
+  }
+
+  get submitButtonText(): string {
+    if (!this.isSubmitLocked) return 'Enviar Respuestas';
+    const remaining = this.minSecondsRequired - this.elapsedSeconds;
+    const m = Math.floor(remaining / 60).toString().padStart(2, '0');
+    const s = (remaining % 60).toString().padStart(2, '0');
+    return `Espera ${m}:${s} para enviar`;
+  }
+
+  startTimer() {
+    this.stopTimer();
+    this.elapsedSeconds = 0;
+    this.timerSubscription = interval(1000).subscribe(() => {
+      this.elapsedSeconds++;
+    });
+  }
+
+  stopTimer() {
+    if (this.timerSubscription) {
+      this.timerSubscription.unsubscribe();
+      this.timerSubscription = null;
+    }
+  }
+
   canSubmit(): boolean {
     return (
+      !this.isSubmitLocked &&
       !this.isSubmitted &&
       Boolean(this.selectedHabilidad) &&
       (this.selectedHabilidad?.preguntas.every(
@@ -152,12 +189,13 @@ export class HabilidadesPage implements OnInit, OnDestroy {
   }
 
   submitAnswers(): void {
-    if (this.isSubmitted) return;
+    if (this.isSubmitted || this.isSubmitLocked) return;
 
     if (!this.selectedHabilidad || !this.profile?.rut) {
       return;
     }
 
+    this.stopTimer();
     this.submitting = true;
     this.evaluationError = null;
     this.evaluationResults = [];
@@ -175,6 +213,7 @@ export class HabilidadesPage implements OnInit, OnDestroy {
         texto_inedito:
           pregunta.texto_inedito || this.selectedHabilidad?.texto_inedito,
       })),
+      tiempo_segundos: this.elapsedSeconds
     };
 
     this.habilidadesService.evaluarRespuestas(payload).subscribe({
