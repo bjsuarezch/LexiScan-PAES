@@ -115,8 +115,66 @@ export class ExamenResultadosPage implements OnInit {
     await alert.present();
   }
 
-  exportExam(format: string) {
-    // Implementar exportación
-    alert(`Exportar en ${format} - Funcionalidad en desarrollo`);
+  async downloadResultsPDF() {
+    if (!this.examResult) return;
+
+    // Importación dinámica para no afectar el bundle inicial
+    const { jsPDF } = await import('jspdf');
+    const autoTableModule = await import('jspdf-autotable');
+    const autoTable = autoTableModule.default ? autoTableModule.default : (autoTableModule as any);
+
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const pageW = doc.internal.pageSize.getWidth();
+
+    // ── Encabezado ───────────────────────────────────────────────────────────
+    doc.setFillColor(58, 90, 148);
+    doc.rect(0, 0, pageW, 15, 'F');
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(255, 255, 255);
+    doc.text('LexiScan PAES - Reporte de Resultados', 15, 10);
+
+    // ── Datos del Estudiante ─────────────────────────────────────────────────
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(30, 30, 30);
+    doc.text('Datos del Estudiante', 15, 25);
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    const nombre = this.profile?.nombre || 'Estudiante';
+    const rut = this.profile?.rut || 'No disponible';
+    doc.text(`Nombre: ${nombre}`, 15, 32);
+    doc.text(`RUT: ${rut}`, 15, 38);
+
+    // ── Resumen de Resultados ────────────────────────────────────────────────
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Resumen del Examen', 15, 50);
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Puntaje: ${this.examResult.total_correctas} / ${this.examResult.total_preguntas}`, 15, 57);
+    doc.text(`Porcentaje de logro: ${this.examResult.porcentaje}%`, 15, 63);
+
+    // ── Tabla de Habilidades ─────────────────────────────────────────────────
+    if (this.examResult.rendimiento_habilidades && this.examResult.rendimiento_habilidades.length > 0) {
+      const tableData = this.examResult.rendimiento_habilidades.map((hab: any) => [
+        hab.nombre_habilidad,
+        `${hab.correctas} / ${hab.total}`,
+        `${hab.porcentaje}%`
+      ]);
+
+      autoTable(doc, {
+        startY: 75,
+        head: [['Habilidad', 'Puntaje', 'Porcentaje']],
+        body: tableData,
+        theme: 'striped',
+        headStyles: { fillColor: [58, 90, 148] },
+        styles: { font: 'helvetica', fontSize: 10 }
+      });
+    }
+
+    doc.save(`LexiScan_Resultados_${new Date().toISOString().slice(0, 10)}.pdf`);
   }
 }

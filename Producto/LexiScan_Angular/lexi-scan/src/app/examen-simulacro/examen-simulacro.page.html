@@ -17,9 +17,21 @@
   <div class="exam-container" *ngIf="examData">
     <div class="exam-header ion-margin-bottom">
       <h2>Responde todas las preguntas</h2>
-      <ion-badge color="secondary"
-        >Tiempo estimado: {{ examData.estimated_time }} min</ion-badge
-      >
+      <div class="exam-header-actions">
+        <ion-badge color="secondary"
+          >Tiempo estimado: {{ examData.estimated_time }} min</ion-badge
+        >
+        <ion-button
+          fill="outline"
+          size="small"
+          color="medium"
+          (click)="downloadPDF()"
+          id="btn-download-exam-pdf"
+        >
+          <ion-icon name="download-outline" slot="start"></ion-icon>
+          Descargar PDF
+        </ion-button>
+      </div>
     </div>
 
     <!-- Agrupamos por texto para no repetirlo -->
