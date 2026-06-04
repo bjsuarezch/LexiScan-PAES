@@ -1,0 +1,102 @@
+Pestaña 1
+Manual de usuario
+Sistema de Promoción de Donaciones de Sangre
+ “BloodPoint”
+Tabla de contenido
+Datos del documento
+Histórico de Revisiones
+Información del Proyecto
+Integrantes
+Objetivo
+Este manual tiene como objetivo guiar a los usuarios del Sistema de Promoción de Donaciones de Sangre BloodPoint en el uso correcto y eficiente de la plataforma. Describe de forma práctica las funcionalidades disponibles para cada Donante, incluyendo pasos para el registro, navegación por el mapa interactivo, generación de códigos QR, creación de campañas, notificaciones por filtrado, historial de donación y sistema de gamificación. Su propósito es asegurar una experiencia fluida y comprensible para todos los perfiles involucrados.
+Usuarios Involucrado
+Donante:
+Usuario que se registra voluntariamente para donar sangre. Puede generar códigos QR, visualizar campañas, ver su historial de donaciones y recibir notificaciones. Solicitar campaña de donación
+A continuación, se especifica qué podrá realizar cada usuario según su vista y nivel de acceso al sistema.
+Donante
+El donante en su vista podrá:
+Registrarse y acceder a su cuenta.
+Visualizar campañas y centros de donación en el mapa interactivo.
+Generar su código QR personal para registrar donaciones.
+Consultar su historial de donaciones.
+Recibir notificaciones y recordatorios de campañas.
+Participar en dinámicas de gamificación.
+Visualizar campañas activas y centros disponibles.
+Acceder a orientación vía chatbot.
+Consideración Técnica
+Permisos requeridos: Geolocalización para mapas 
+Conectividad: Conexión a internet para sincronización con backend en Heroku (Servidor)
+Seguridad: Todas las operaciones utilizan autenticación por tokens JWT
+Ingreso al sistema Con Datos
+El acceso a las funcionalidades del sistema se realiza mediante el ingreso correcto de las credenciales de cada usuario, las cuales constan de un Rut válido o Correo Electrónico y una contraseña, ingresadas en los campos correspondientes de la pantalla de inicio de sesión.
+Una vez validadas correctamente por el sistema, se permitirá el acceso a las funcionalidades específicas según el tipo de usuario (Donante, Representante, Administrador).
+Cada usuario será redirigido a su panel correspondiente donde podrá operar las funciones permitidas por su perfil.
+En caso de que las credenciales sean incorrectas o el usuario no se encuentre registrado, el sistema mostrará un mensaje de error indicando que los datos no son válidos.
+Si el usuario aún no posee una cuenta, deberá registrarse previamente (en el caso del Donante)
+Vista del donante:
+La vista del Donante está diseñada para facilitar la participación activa en campañas de donación, el seguimiento de su historial y la interacción con el sistema mediante funcionalidades intuitivas. Al iniciar sesión correctamente, el donante accede a un panel donde podrá realizar las siguientes acciones:
+Inicio
+Ver mapa interactivo permite visualizar los centros de donación y campañas activas más cercanas según la ubicación del usuario.
+Al abrir esta vista, el sistema solicita automáticamente permisos para acceder a la ubicación actual del usuario. El donante al hacer clic sobre el botón “Ver Perfil QR” el sistema realiza automáticamente una solicitud al servicio de QR en la cual el sistema lo redirige a una ventana con un QR generado en base a su datos personales para ser presentado y escaneado por un representante en los puntos de donación por asistir
+Para volver a la página principal se le da clic al botón “Regresar a Perfil”
+Donar (Puntos de donación)
+Listado de diferentes puntos y campañas de donaciones permite visualizar los centros de donación disponibles con sus respectivos información a detalles como nombre del centro u campaña, dirección, horario, contacto.
+En esta sección, el usuario podrá visualizar un listado de centros de donación disponibles, junto con detalles como: Nombre del centro, dirección y comuna, horarios de atención, teléfono de contacto, distancia desde la ubicación actual. Además, el sistema permite filtrar por ubicación, horario o texto. Al seleccionar un centro, el usuario puede acceder a su información completa.
+Ver detalles
+esta sección, el usuario podrá visualizar información detallada del punto o centro seleccionado con el nombre en el titulo, dirección, comuna, teléfono, distancia que se encuentra el punto actual del dispositivo con el centro o campaña seleccionada
+Para volver al punto anterior solo debes darle clic al botón de retroceso “<-”, también se encuentra disponible el botón de “Generar Ruta” al darle clic al botón el sistema nos permite acceder al uso de generación de enrutamiento esto nos redirige a la pagina principal y nos enmarca en el mapa interactivo la ruta para recorrer hasta el punto seleccionado
+Esto nos permite interactuar y navegar en ella, también nos permite acceder a la funcionalidad de detalles en el mapa al seleccionar el punto rojo que se encuentra esto nos despliega una ventana con la información detallada y la distancia en la que nos encontramos
+Notificación
+Esta sección permite al Donante recibir avisos importantes y personalizados dentro del sistema, con el fin de incentivar su participación y mantenerlo informado sobre eventos relevantes.
+Perfil
+La vista de Perfil del Donante centraliza la mayoría de las funcionalidades disponibles para el usuario donante, permitiéndole generar QR del donante, gestionar su información, visualizar su historial, controlar sus recompensas e interactuar con el sistema de forma personalizada.
+La vista de Perfil permite al donante visualizar y modificar su información personal registrada en el sistema.
+Campos editables: Nombre completo, Correo electrónico, Teléfono de contacto, Dirección, Fecha de nacimiento, Género. como también notificación. Profesión/Ocupación
+Editar Perfil
+La vista de Perfil permite al donante visualizar y modificar su información personal registrada en el sistema.
+Campos editables: Nombre completo, Correo electrónico, Teléfono de contacto, Dirección, Fecha de nacimiento, Género. como también notificación. Profesión/Ocupación
+Luego de realizar los cambios para confirmar el proceso se le da clic al botón que se encuentra en la parte final inferior del formulario “Guardar Cambios” esto emitira un mensaje de confirmación y exito “Perfil Actualizado Exitosamente”
+Historial de donación
+La sección de Historial de donaciones permite al donante visualizar un registro detallado de todas las donaciones realizadas a través del sistema.
+Detalle historial de donación
+La sección Detalle del historial de donación permite al donante revisar información específica de cada una de sus donaciones registradas en el sistema. Esta vista muestra, de forma ordenada y legible, los siguientes datos relevantes:
+Dirección del centro de donación donde se realizó la extracción
+Fecha exacta de la donación
+Tipo de sangre del donante
+Tipo de donación (sangre total, plaquetas, plasma, etc.)
+Cantidad donada (ml) registrada en el sistema
+Esta funcionalidad refuerza la trazabilidad y transparencia de las acciones del donante, permitiéndole hacer seguimiento de su aporte y visualizar su historial clínico de forma sencilla y accesible desde la app móvil.
+Ver Logros
+La sección Ver logros permite al donante revisar las recompensas o insignias obtenidas por su participación activa en campañas de donación Además, ofrece la opción de compartir estos logros directamente en sus redes sociales.
+Compartir logros
+La funcionalidad Compartir logro permite al donante publicar sus insignias o recompensas obtenidas en campañas de donación directamente en sus redes sociales. Esta opción busca reconocer públicamente su participación altruista, incentivar a otros usuarios a donar y reforzar la motivación mediante el reconocimiento social.
+Solicitar Donacion
+La sección Solicitar donación permite al donante crear una publicación para solicitar unidades de sangre específicas en situaciones de emergencia o campañas personales. La vista presenta un formulario encabezado por el título “Necesito sangre”, junto a una breve descripción que invita al usuario a indicar el tipo de sangre requerido y otros detalles relevantes.
+El formulario contempla los siguientes campos:
+Tipo de sangre: Selección del grupo sanguíneo requerido.
+Cantidad solicitada: Número de unidades necesarias.
+Centro de donación: Lista desplegable para seleccionar un centro disponible.
+Fecha y hora de inicio: Momento desde el cual se requiere comenzar la campaña o solicitud.
+Fecha y hora de término: Fecha límite para la solicitud.
+Comuna, ciudad y región: Ubicación territorial relacionada a la solicitud.
+Meta / Información adicional: Campo de texto libre para detallar el contexto, urgencia o motivación personal detrás de la solicitud.
+
+Esta funcionalidad permite canalizar solicitudes urgentes y conectar a los donantes con quienes más lo necesitan, fomentando el impacto comunitario de la aplicación.
+Ayuda
+La sección Ayuda está diseñada para asistir a los usuarios del sistema en el uso correcto y eficiente de todas las funcionalidades disponibles. Aquí podrán encontrar respuestas a preguntas frecuentes, guías rápidas y medios para contactar soporte técnico.
+además, para una ayuda más enfocada y profesional el usuario puede acceder a la funcionalidad de iniciar una conversación automática con el chatbot la cual proporciona y brinda ayuda específicas 
+Chatbot
+El sistema cuenta con un Chatbot integrado, diseñado para brindar soporte inmediato y asistencia automatizada a los usuarios en cualquier momento.
+Cerrar sesión
+La funcionalidad Cerrar sesión permite al usuario (donante, representante o administrador) finalizar su sesión activa en la aplicación móvil, garantizando la protección de sus datos personales y previniendo accesos no autorizados.
+Al seleccionar esta opción, el sistema invalida el token de sesión y redirige al usuario a la pantalla de inicio de sesión. Esta acción puede ejecutarse desde el menú principal o desde la vista de perfil, y forma parte de las buenas prácticas de seguridad implementadas en el sistema BloodPoint.
+Esta funcionalidad es especialmente relevante en dispositivos compartidos o públicos, reforzando la confidencialidad de la información asociada a la cuenta del usuario.
+Recuperar contraseña
+La funcionalidad Recuperar contraseña permite al usuario restablecer el acceso a su cuenta en caso de haber olvidado sus credenciales. Esta opción se encuentra disponible en la pantalla de inicio de sesión, a través del enlace "¿Olvidaste tu contraseña?".
+Al seleccionarlo, el sistema redirige al usuario al formulario de recuperación, donde debe ingresar el correo electrónico registrado en su cuenta. Luego de presionar el botón "Enviar Enlace", se muestra un mensaje confirmando el envío del correo:
+"Te hemos enviado un correo electrónico con un enlace para restablecer tu contraseña. Si no recibes un correo en unos minutos, revisa tu bandeja de spam."
+Esta funcionalidad garantiza una recuperación segura y privada de credenciales.
+Restablecimiento de contraseña
+Una vez solicitada la recuperación, el usuario recibirá un correo electrónico enviado por BloodPoint, con un enlace personalizado titulado "Restablecer contraseña".
+Al hacer clic en este enlace, el sistema redirige al usuario a una página donde deberá ingresar una nueva contraseña y confirmarla. Tras completar ambos campos, el usuario debe hacer clic en "Guardar" para aplicar el cambio.
+Esta funcionalidad asegura que el proceso de restablecimiento se realice de forma controlada y verificada, permitiendo al usuario recuperar el acceso a su cuenta sin comprometer la seguridad del sistema.
