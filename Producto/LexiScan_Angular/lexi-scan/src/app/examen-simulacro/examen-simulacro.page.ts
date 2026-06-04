@@ -1,8 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertController } from '@ionic/angular';
 import { HabilidadesService } from '../services/habilidades.service';
 import { ExamenResponse } from '../models/backend.model';
+import { DesafiosService } from '../services/desafios.service';
+
+
 
 @Component({
   selector: 'app-examen-simulacro',
@@ -10,7 +13,7 @@ import { ExamenResponse } from '../models/backend.model';
   styleUrls: ['examen-simulacro.page.scss'],
   standalone: false,
 })
-export class ExamenSimulacroPage implements OnInit {
+export class ExamenSimulacroPage implements OnInit, OnDestroy {
   examData: ExamenResponse | null = null;
   answers: { [key: number]: string } = {};
   loading = false;
@@ -21,7 +24,10 @@ export class ExamenSimulacroPage implements OnInit {
     private habilidadesService: HabilidadesService,
   ) {}
 
+  private enterTime: number = 0;
+
   ngOnInit() {
+    this.enterTime = Date.now();
     const navigation = this.router.getCurrentNavigation();
     if (navigation?.extras?.state) {
       this.examData = navigation.extras.state['examData'];

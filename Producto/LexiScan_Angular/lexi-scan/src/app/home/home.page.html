@@ -195,7 +195,55 @@
       </ion-card-content>
     </ion-card>
 
-    <!-- Challenge Card -->
+    <!-- Daily Challenges -->
+    <ion-card class="daily-challenges-card" *ngIf="desafios.length > 0">
+      <ion-card-header>
+        <ion-card-title>Desafíos Diarios</ion-card-title>
+        <ion-card-subtitle>Gana monedas para generar textos con IA</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list lines="none" class="challenges-list">
+          <ion-item *ngFor="let desafio of desafios" class="challenge-item">
+            <div class="challenge-details">
+              <h4>{{ desafio.titulo }}</h4>
+              <p>{{ desafio.descripcion }}</p>
+              
+              <div class="progress-bar-container">
+                <ion-progress-bar 
+                  [value]="desafio.progreso / desafio.meta"
+                  [color]="desafio.completado ? 'success' : 'primary'">
+                </ion-progress-bar>
+                <span class="progress-text">
+                  {{ desafio.tipo === 'gym_sin_errores' ? (desafio.completado ? 'Completado' : 'Pendiente') : (desafio.progreso | number:'1.0-0') + ' / ' + desafio.meta }}
+                </span>
+              </div>
+            </div>
+            
+            <div slot="end" class="challenge-action">
+              <div class="reward-info" *ngIf="!desafio.reclamado">
+                <ion-icon name="star" color="warning"></ion-icon>
+                <span>+{{ desafio.recompensa_monedas }}</span>
+              </div>
+              <ion-button 
+                *ngIf="desafio.completado && !desafio.reclamado" 
+                size="small" 
+                color="success" 
+                (click)="reclamarRecompensa(desafio.id)">
+                Reclamar
+              </ion-button>
+              <ion-icon 
+                *ngIf="desafio.reclamado" 
+                name="checkmark-circle" 
+                color="success" 
+                size="large">
+              </ion-icon>
+            </div>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Challenge Card (Debilidad) -->
     <ion-card class="challenge-card" *ngIf="errorFrecuente">
       <ion-card-content>
         <div class="challenge-content">
