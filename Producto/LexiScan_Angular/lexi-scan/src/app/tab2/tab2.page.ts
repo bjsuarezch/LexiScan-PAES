@@ -17,6 +17,13 @@ export class Tab2Page implements OnInit {
   showPassword = false;
   showConfirmPassword = false;
 
+  // Focus states for input animations
+  rutFocused = false;
+  nombreFocused = false;
+  emailFocused = false;
+  passwordFocused = false;
+  confirmFocused = false;
+
   constructor(
     private fb: FormBuilder,
     private router: Router,

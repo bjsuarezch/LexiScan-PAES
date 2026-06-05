@@ -1,90 +1,134 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title> Login </ion-title>
-  </ion-toolbar>
-</ion-header>
-
 <ion-content [fullscreen]="true" class="ion-padding">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Login</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <div class="login-container">
 
-  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
-    <!-- RUT Input -->
-    <ion-item>
-      <ion-label position="stacked">RUT (sin puntos con guión)</ion-label>
-      <ion-input formControlName="rut" placeholder="12345678-K" type="text">
-      </ion-input>
-    </ion-item>
-    <ion-text color="danger" *ngIf="getErrorMessage('rut')">
-      <p class="ion-padding-start">{{ getErrorMessage('rut') }}</p>
-    </ion-text>
+    <!-- ============================================ -->
+    <!-- HEADER DE IMPACTO                            -->
+    <!-- ============================================ -->
+    <div class="login-hero">
+      <span class="login-hero-emoji">🚀</span>
+      <h1 class="login-hero-title font-heading">LexiScan</h1>
+      <p class="login-hero-subtitle font-body">Entrena para la PAES jugando</p>
+    </div>
 
-    <!-- Email Input -->
-    <ion-item>
-      <ion-label position="stacked">Email</ion-label>
-      <ion-input
-        formControlName="email"
-        placeholder="ejemplo@correo.com"
-        type="email"
+    <!-- ============================================ -->
+    <!-- FORMULARIO DE ACCESO                         -->
+    <!-- ============================================ -->
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+
+      <!-- RUT Input -->
+      <div class="login-field card-elevated">
+        <label class="login-field-label font-heading" for="rut">RUT</label>
+        <div class="login-input-wrap">
+          <ion-icon name="person-outline" class="login-field-icon"></ion-icon>
+          <input
+            id="rut"
+            class="login-input font-body"
+            formControlName="rut"
+            placeholder="12345678-K"
+            type="text"
+            autocomplete="username"
+          />
+        </div>
+      </div>
+      <ion-text color="danger" *ngIf="getErrorMessage('rut')">
+        <p class="login-error font-body">{{ getErrorMessage('rut') }}</p>
+      </ion-text>
+
+      <!-- Email Input -->
+      <div class="login-field card-elevated">
+        <label class="login-field-label font-heading" for="email">Email</label>
+        <div class="login-input-wrap">
+          <ion-icon name="mail-outline" class="login-field-icon"></ion-icon>
+          <input
+            id="email"
+            class="login-input font-body"
+            formControlName="email"
+            placeholder="ejemplo@correo.com"
+            type="email"
+            autocomplete="email"
+          />
+        </div>
+      </div>
+      <ion-text color="danger" *ngIf="getErrorMessage('email')">
+        <p class="login-error font-body">{{ getErrorMessage('email') }}</p>
+      </ion-text>
+
+      <!-- Password Input -->
+      <div class="login-field card-elevated">
+        <label class="login-field-label font-heading" for="contrasena">Contraseña</label>
+        <div class="login-input-wrap">
+          <ion-icon name="lock-closed-outline" class="login-field-icon"></ion-icon>
+          <input
+            id="contrasena"
+            class="login-input login-input-password font-body"
+            formControlName="contrasena"
+            [type]="showPassword ? 'text' : 'password'"
+            placeholder="Ingrese su contraseña"
+            autocomplete="current-password"
+          />
+          <button
+            type="button"
+            class="login-eye-btn"
+            (click)="togglePasswordVisibility()"
+          >
+            <ion-icon [name]="showPassword ? 'eye-off' : 'eye'"></ion-icon>
+          </button>
+        </div>
+      </div>
+      <ion-text color="danger" *ngIf="getErrorMessage('contrasena')">
+        <p class="login-error font-body">{{ getErrorMessage('contrasena') }}</p>
+      </ion-text>
+
+      <!-- Form Status -->
+      <ion-text *ngIf="submitted && !loginForm.valid" color="warning">
+        <p class="login-warning font-body">Por favor corrija los errores en el formulario</p>
+      </ion-text>
+
+      <!-- Submit Button -->
+      <button
+        type="submit"
+        class="btn-chunky-3d login-btn-primary font-heading"
+        [disabled]="submitted && !loginForm.valid"
       >
-      </ion-input>
-    </ion-item>
-    <ion-text color="danger" *ngIf="getErrorMessage('email')">
-      <p class="ion-padding-start">{{ getErrorMessage('email') }}</p>
-    </ion-text>
+        Ingresar
+      </button>
+    </form>
 
-    <!-- Password Input -->
-    <ion-item>
-      <ion-label position="stacked">Contraseña</ion-label>
-      <ion-input
-        formControlName="contrasena"
-        [type]="showPassword ? 'text' : 'password'"
-        placeholder="Ingrese su contraseña"
-      >
-      </ion-input>
-      <ion-button fill="clear" slot="end" (click)="togglePasswordVisibility()">
-        <ion-icon slot="icon-only" [name]="showPassword ? 'eye-off' : 'eye'">
-        </ion-icon>
-      </ion-button>
-    </ion-item>
-    <ion-text color="danger" *ngIf="getErrorMessage('contrasena')">
-      <p class="ion-padding-start">{{ getErrorMessage('contrasena') }}</p>
-    </ion-text>
+    <!-- ============================================ -->
+    <!-- SEPARADOR                                    -->
+    <!-- ============================================ -->
+    <div class="login-divider">
+      <span class="font-body">o</span>
+    </div>
 
-    <!-- Form Status -->
-    <ion-text *ngIf="submitted && !loginForm.valid" color="warning">
-      <p class="ion-padding">Por favor corrija los errores en el formulario</p>
-    </ion-text>
-
-    <!-- Submit Button -->
-    <ion-button
-      expand="block"
-      type="submit"
-      class="ion-margin-top"
-      [disabled]="submitted && !loginForm.valid"
+    <!-- ============================================ -->
+    <!-- BOTÓN DEMO                                   -->
+    <!-- ============================================ -->
+    <button
+      type="button"
+      class="btn-chunky-3d login-btn-demo font-heading"
+      (click)="onDemoLogin()"
     >
-      Ingresar
-    </ion-button>
-  </form>
+      🔑 Probar con cuenta Demo
+    </button>
 
-  <!-- Create Account Button -->
-  <ion-button
-    expand="block"
-    color="secondary"
-    type="button"
-    (click)="goToCreateAccount()"
-    class="ion-margin-top"
-  >
-    Crear Cuenta
-  </ion-button>
+    <!-- ============================================ -->
+    <!-- CREAR CUENTA                                 -->
+    <!-- ============================================ -->
+    <button
+      type="button"
+      class="login-link-btn font-body"
+      (click)="goToCreateAccount()"
+    >
+      ¿No tienes cuenta? <strong>Créala aquí</strong>
+    </button>
 
-  <!-- Botón flotante de configuración -->
-  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-    <ion-fab-button (click)="openConfigModal()">
-      <ion-icon name="settings-outline"></ion-icon>
-    </ion-fab-button>
-  </ion-fab>
+    <!-- Config FAB -->
+    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+      <ion-fab-button (click)="openConfigModal()">
+        <ion-icon name="settings-outline"></ion-icon>
+      </ion-fab-button>
+    </ion-fab>
+
+  </div>
 </ion-content>

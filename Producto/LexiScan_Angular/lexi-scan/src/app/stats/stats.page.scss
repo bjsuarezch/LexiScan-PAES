@@ -1,0 +1,405 @@
+// ============================================================
+// Stats Page — Duolingo-Style Data Dashboard
+// LexiScan Design System — Chunky 3D
+// ============================================================
+
+// --- Header ---
+ion-header ion-toolbar {
+  background: var(--ion-toolbar-background, #ffffff);
+  border-bottom: 1px solid var(--ion-border-color, #e2e8f0);
+
+  ion-title {
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--ion-color-primary, #6366f1);
+  }
+}
+
+ion-content {
+  --background: var(--ion-background-color, #f8fafc);
+}
+
+.stats-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0 16px 32px;
+}
+
+// ============================================================
+// SECTION TITLES
+// ============================================================
+.section-title {
+  font-size: 1.2rem;
+  color: var(--ion-text-color, #1e293b);
+  margin: 28px 0 14px;
+  padding-left: 4px;
+}
+
+.section-subtitle {
+  font-size: 0.85rem;
+  color: var(--ion-color-medium, #94a3b8);
+  margin: -8px 0 16px;
+  padding-left: 4px;
+}
+
+// ============================================================
+// GAUGE CHART — Thick arc + gradient
+// ============================================================
+.gauge-card {
+  padding: 24px 16px 20px;
+  overflow: hidden;
+}
+
+.gauge-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+.gauge-svg {
+  display: block;
+  width: 100%;
+  overflow: visible;
+}
+
+.gauge-arc-bg {
+  fill: none;
+  stroke: var(--ion-color-light, #f1f5f9);
+  stroke-width: 24;
+  stroke-linecap: round;
+}
+
+.gauge-arc {
+  fill: none;
+  stroke-width: 24;
+  stroke-linecap: round;
+  stroke: url(#gaugeGradient);
+  animation: gaugeLoad 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes gaugeLoad {
+  from { stroke-dasharray: 0 400; }
+  to { stroke-dasharray: 400 0; }
+}
+
+.gauge-label {
+  font-size: 10px;
+  fill: var(--ion-color-medium, #94a3b8);
+  font-family: 'Nunito', sans-serif;
+  font-weight: 600;
+}
+
+.gauge-score {
+  text-align: center;
+  margin-top: -36px;
+  position: relative;
+  z-index: 2;
+}
+
+.gauge-score-number {
+  display: block;
+  font-family: 'Fredoka', sans-serif;
+  font-size: 3.5rem;
+  line-height: 1;
+  color: var(--ion-text-color, #1e293b);
+}
+
+.gauge-score-label {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--ion-color-medium, #94a3b8);
+  margin-top: 6px;
+}
+
+// --- Meta Stats Row ---
+.gauge-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid var(--ion-border-color, #f1f5f9);
+}
+
+.gauge-meta-item {
+  text-align: center;
+  flex: 1;
+}
+
+.gauge-meta-value {
+  display: block;
+  font-family: 'Fredoka', sans-serif;
+  font-size: 1.3rem;
+  color: var(--ion-text-color, #1e293b);
+}
+
+.gauge-meta-label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--ion-color-medium, #94a3b8);
+  margin-top: 2px;
+}
+
+.gauge-meta-divider {
+  width: 1px;
+  height: 32px;
+  background: var(--ion-border-color, #e2e8f0);
+}
+
+// ============================================================
+// TREND CHART — Bigger dots + area gradient
+// ============================================================
+.trend-card {
+  padding: 16px;
+}
+
+.trend-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.trend-subtitle {
+  font-size: 0.85rem;
+  color: var(--ion-color-medium, #94a3b8);
+}
+
+.trend-legend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: var(--ion-color-medium, #94a3b8);
+}
+
+.trend-legend-line {
+  width: 18px;
+  height: 3px;
+  background: #6366f1;
+  border-radius: 2px;
+}
+
+.trend-legend-dotted {
+  width: 18px;
+  height: 0;
+  border-top: 2px dashed #a78bfa;
+  margin-left: 8px;
+}
+
+.trend-chart-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.trend-svg {
+  display: block;
+  width: 100%;
+  min-width: 300px;
+}
+
+.trend-axis-label {
+  font-size: 9px;
+  fill: var(--ion-color-medium, #94a3b8);
+  font-family: 'Nunito', sans-serif;
+  font-weight: 600;
+}
+
+.trend-goal-label {
+  font-size: 9px;
+  fill: #a78bfa;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+}
+
+.trend-line {
+  animation: trendDraw 1.5s ease-out forwards;
+}
+
+@keyframes trendDraw {
+  from { stroke-dasharray: 500; stroke-dashoffset: 500; }
+  to { stroke-dasharray: 500; stroke-dashoffset: 0; }
+}
+
+.trend-area {
+  animation: areaFade 1.5s ease-out forwards;
+}
+
+@keyframes areaFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.trend-dot {
+  animation: dotPop 0.3s ease-out forwards;
+  opacity: 0;
+
+  @for $i from 1 through 20 {
+    &:nth-child(#{$i + 10}) {
+      animation-delay: #{0.1 * $i}s;
+    }
+  }
+}
+
+@keyframes dotPop {
+  from { opacity: 0; r: 0; }
+  to { opacity: 1; r: 7; }
+}
+
+// ============================================================
+// SKILL BARS
+// ============================================================
+.skill-bars-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.skill-bar-item {
+  padding: 14px 16px;
+}
+
+.skill-bar-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.skill-bar-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  ion-icon {
+    font-size: 1.1rem;
+    color: #ffffff;
+  }
+}
+
+.skill-bar-info {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.skill-bar-name {
+  font-size: 0.95rem;
+  color: var(--ion-text-color, #1e293b);
+}
+
+.skill-bar-pct {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--ion-color-medium, #64748b);
+}
+
+.skill-bar-track {
+  height: 20px;
+  background: var(--ion-color-light, #f1f5f9);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.skill-bar-fill {
+  height: 100%;
+  border-radius: 20px;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: barGrow 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes barGrow {
+  from { width: 0 !important; }
+}
+
+// ============================================================
+// REVENGE MISSIONS
+// ============================================================
+.revenge-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.revenge-item {
+  padding: 14px 16px;
+}
+
+.revenge-content {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.revenge-rank {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  background: rgba(249, 115, 22, 0.12);
+  color: var(--ion-color-secondary, #f97316);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.revenge-info {
+  flex: 1;
+
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--ion-text-color, #1e293b);
+  }
+
+  p {
+    margin: 2px 0 0;
+    font-size: 0.82rem;
+    color: var(--ion-color-medium, #94a3b8);
+  }
+}
+
+.revenge-flame {
+  font-size: 1.4rem;
+  color: var(--ion-color-secondary, #f97316);
+}
+
+.revenge-btn {
+  width: 100%;
+  font-size: 1rem;
+  padding: 14px 24px;
+}
+
+// --- Empty State ---
+.empty-revenge {
+  padding: 36px 20px;
+  text-align: center;
+
+  .empty-icon {
+    font-size: 3rem;
+    color: var(--ion-color-success, #38bdf8);
+    margin-bottom: 14px;
+  }
+
+  h3 {
+    margin: 0 0 6px;
+    font-size: 1.1rem;
+    color: var(--ion-text-color, #1e293b);
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--ion-color-medium, #94a3b8);
+  }
+}

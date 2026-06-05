@@ -22,6 +22,7 @@ export class HomePage implements OnInit {
   desafios: Desafio[] = [];
   monedasExtra = 0;
 
+  constructor(
     private router: Router,
     private habilidadesService: HabilidadesService,
     private profileService: ProfileService,
@@ -88,9 +89,31 @@ export class HomePage implements OnInit {
   }
 
   onLogout() {
-    // navigateRoot resetea el historial para que no se pueda volver atrás
-    // Usamos la ruta vacía porque tus Tabs están definidos en el path: ''
     this.router.navigate(['/']);
+  }
+
+  getDailyGoalPct(): number {
+    if (!this.dashboard?.habilidades) return 0;
+    const total = this.dashboard.habilidades.length;
+    if (total === 0) return 0;
+    const avg = this.dashboard.habilidades.reduce((s, h) => s + h.nivel_maestria, 0) / total;
+    return Math.round(avg);
+  }
+
+  getStreak(): number {
+    return 5;
+  }
+
+  getCoins(): number {
+    return 120;
+  }
+
+  getDailyGoalHint(): string {
+    const pct = this.getDailyGoalPct();
+    if (pct >= 80) return '¡Excelente! Llevas un ritmo increíble.';
+    if (pct >= 50) return '¡Vas por buen camino! Sigue así.';
+    if (pct >= 20) return 'Buen inicio, mantén la constancia.';
+    return '¡Comienza tu ruta de estudio hoy!';
   }
 
   onHabilidadesClick(): void {
@@ -105,8 +128,11 @@ export class HomePage implements OnInit {
     this.router.navigate(['/examen']);
   }
 
+  onStatsClick(): void {
+    this.router.navigate(['/stats']);
+  }
+
   onChallengeClick(): void {
-    console.log('Challenge clicked');
   }
 
   reclamarRecompensa(idDesafio: number) {

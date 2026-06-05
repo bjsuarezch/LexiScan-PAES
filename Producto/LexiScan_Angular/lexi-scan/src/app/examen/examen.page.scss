@@ -1,79 +1,63 @@
-ion-header {
-  ion-toolbar {
-    background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8c 100%);
-    color: #fff;
-    --border-bottom: none;
+// ============================================================
+// Examen Page — Duolingo Light Theme
+// LexiScan Design System — Chunky 3D
+// ============================================================
 
-    ion-title {
-      font-weight: bold;
-    }
+ion-header ion-toolbar {
+  background: var(--ion-toolbar-background, #ffffff);
+  border-bottom: 1px solid var(--ion-border-color, #e2e8f0);
 
-    ion-back-button {
-      color: #fff;
-    }
-
-    ion-button {
-      color: #fff;
-    }
+  ion-title {
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--ion-color-primary, #6366f1);
   }
 }
 
 ion-content {
-  --background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8c 100%);
-  --padding-start: 0;
-  --padding-end: 0;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-}
-
-/* Centered content container */
-ion-content > * {
-  margin: 0 auto;
-  max-width: 600px;
-  width: 100%;
-  padding: 0 20px;
-  box-sizing: border-box;
-}
-
-ion-content > .ion-padding {
-  padding: 20px;
+  --background: var(--ion-background-color, #f8fafc);
 }
 
 .examen-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 24px 16px;
   display: flex;
   justify-content: center;
   align-items: flex-start;
   min-height: 100%;
-  padding: 20px;
 }
 
 .config-card {
   width: 100%;
-  max-width: 400px;
-  background: rgba(255,255,255,0.95);
-  border-radius: 15px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  max-width: 420px;
+  background: #ffffff;
+  border-radius: 24px;
+  border: 1px solid #e2e8f0;
+  border-bottom: 4px solid #cbd5e1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: 32px 24px;
 
-  ion-card-content {
-    padding: 30px 20px;
-
-    h2 {
-      margin: 0 0 25px 0;
-      color: #1e3a5f;
-      font-weight: bold;
-      text-align: center;
-      font-size: 1.4rem;
-    }
+  h2 {
+    margin: 0 0 28px;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.5rem;
+    color: #1e293b;
+    text-align: center;
   }
 }
 
+// ============================================================
+// SLIDER
+// ============================================================
 .selection-section {
-  margin-bottom: 25px;
+  margin-bottom: 28px;
 
   .selection-label {
-    margin: 0 0 15px 0;
-    color: #1e3a5f;
+    margin: 0 0 16px;
+    color: #475569;
+    font-family: 'Nunito', sans-serif;
     font-weight: 600;
     font-size: 0.95rem;
   }
@@ -81,116 +65,124 @@ ion-content > .ion-padding {
   .slider-container {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 15px;
+    gap: 14px;
 
     .slider-min,
     .slider-max {
-      color: #666;
+      color: #94a3b8;
+      font-family: 'Fredoka', sans-serif;
       font-weight: 600;
       font-size: 0.9rem;
       min-width: 30px;
     }
 
     .slider-wrapper {
-  flex: 1;
-  position: relative;
-  display: flex;
-  align-items: center;
-  height: 50px; // Altura suficiente para el círculo de 45px
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+      height: 50px;
 
-  .custom-slider {
-    width: 100%;
-    height: 6px;
-    border-radius: 3px;
-    background: #ddd;
-    outline: none;
-    -webkit-appearance: none;
-    appearance: none;
-    z-index: 1;
+      .custom-slider {
+        width: 100%;
+        height: 8px;
+        border-radius: 4px;
+        background: #e2e8f0;
+        outline: none;
+        -webkit-appearance: none;
+        appearance: none;
+        z-index: 1;
 
-    // ESTILO PARA CHROME / SAFARI / EDGE
-    &::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 45px; // Tamaño grande
-      height: 45px;
-      border-radius: 50%;
-      background: #1e3a5f; // El azul que pediste
-      cursor: pointer;
-      border: none;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        &::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 48px;
+          height: 48px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #6366f1, #818cf8);
+          cursor: pointer;
+          border: none;
+          box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+          border-bottom: 4px solid #4f46e5;
+        }
+
+        &::-moz-range-thumb {
+          width: 48px;
+          height: 48px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #6366f1, #818cf8);
+          cursor: pointer;
+          border: none;
+          box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+          border-bottom: 4px solid #4f46e5;
+        }
+      }
+
+      .slider-value {
+        position: absolute;
+        pointer-events: none;
+        z-index: 2;
+        left: calc(var(--percent));
+        transform: translateX(-50%);
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        font-family: 'Fredoka', sans-serif;
+        font-weight: 700;
+        font-size: 1.1rem;
+      }
     }
-
-    // ESTILO PARA FIREFOX
-    &::-moz-range-thumb {
-      width: 45px;
-      height: 45px;
-      border-radius: 50%;
-      background: #1e3a5f;
-      cursor: pointer;
-      border: none;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    }
-  }
-
-  .slider-value {
-    position: absolute;
-    pointer-events: none; // El toque pasa al slider de abajo
-    z-index: 2; // El número se dibuja encima del círculo azul
-    
-    // Posicionamiento dinámico
-    left: calc(var(--percent));
-    transform: translateX(-50%);
-    
-    // Dimensiones iguales al thumb para centrado perfecto
-    width: 45px;
-    height: 45px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    
-    color: white; // Número blanco sobre fondo azul
-    font-weight: bold;
-    font-size: 1.1rem;
-  }
-}
   }
 }
 
+// ============================================================
+// TIME SECTION
+// ============================================================
 .time-section {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px;
-  background: #f5f5f5;
-  border-radius: 8px;
-  color: #1e3a5f;
+  gap: 10px;
+  padding: 14px 16px;
+  background: rgba(99, 102, 241, 0.06);
+  border-radius: 12px;
+  color: #475569;
+  font-family: 'Nunito', sans-serif;
   font-weight: 600;
-  font-size: 0.9rem;
-  margin-bottom: 20px;
+  font-size: 0.95rem;
+  margin-bottom: 24px;
 
   ion-icon {
     font-size: 1.2rem;
-    color: #2196f3;
+    color: #6366f1;
   }
 }
 
 .divider {
   border: none;
-  border-top: 1px solid #e0e0e0;
-  margin: 20px 0;
+  border-top: 1px solid #e2e8f0;
+  margin: 24px 0;
 }
 
+// ============================================================
+// START BUTTON
+// ============================================================
 .btn-start {
-  --background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8c 100%);
-  --background-activated: #1a2f4f;
-  font-weight: 600;
-  font-size: 1rem;
-  padding: 15px 0;
-  border-radius: 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  box-shadow: 0 4px 15px rgba(30, 58, 95, 0.3);
-  margin-top: 10px;
+  width: 100%;
+  --border-radius: 16px;
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  --padding-top: 18px;
+  --padding-bottom: 18px;
+  text-transform: none;
+  letter-spacing: 0;
+  --background: linear-gradient(135deg, #6366f1, #818cf8);
+  --background-activated: #4f46e5;
+  color: #ffffff;
+  border-bottom: 5px solid #4f46e5;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+  margin-top: 12px;
 }

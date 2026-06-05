@@ -1,1 +1,48 @@
+// ============================================================
+// Tabs Bar — LexiScan Design System
+// ============================================================
 
+ion-tab-bar {
+  background: var(--ion-toolbar-background, #ffffff);
+  border-top: 1px solid var(--ion-border-color, #e2e8f0);
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.06);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+ion-tab-button {
+  --background-selected: transparent;
+  --color: var(--ion-color-medium, #94a3b8);
+  --color-selected: var(--ion-color-primary, #6366f1);
+  --padding-top: 8px;
+  --padding-bottom: 8px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 600;
+  font-size: 0.7rem;
+  letter-spacing: 0.2px;
+  min-width: 64px;
+
+  ion-icon {
+    font-size: 1.4rem;
+    margin-bottom: 2px;
+    transition: transform 0.15s ease;
+  }
+
+  ion-label {
+    margin-top: 2px;
+  }
+
+  &.tab-selected {
+    ion-icon {
+      transform: scale(1.1);
+      color: var(--ion-color-primary, #6366f1);
+    }
+
+    ion-label {
+      color: var(--ion-color-primary, #6366f1);
+    }
+  }
+
+  &:active ion-icon {
+    transform: scale(0.92);
+  }
+}

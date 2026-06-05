@@ -1,37 +1,91 @@
-.tema-container {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  max-width: 600px;
-  margin: 0 auto;
+// ============================================================
+// Seleccion Tema Page — Duolingo Light Theme
+// LexiScan Design System — Chunky 3D
+// ============================================================
+
+ion-header ion-toolbar {
+  background: var(--ion-toolbar-background, #ffffff);
+  border-bottom: 1px solid var(--ion-border-color, #e2e8f0);
+
+  ion-title {
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--ion-color-primary, #6366f1);
+  }
 }
 
+ion-content {
+  --background: var(--ion-background-color, #f8fafc);
+}
+
+.tema-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  h2 {
+    margin: 0;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.3rem;
+    color: #1e293b;
+    text-align: center;
+  }
+
+  p {
+    margin: 0;
+    text-align: center;
+    color: #64748b;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    font-family: 'Nunito', sans-serif;
+  }
+}
+
+// ============================================================
+// THEME GRID
+// ============================================================
 .temas-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 15px;
+  gap: 12px;
 }
 
 .tema-btn {
-  --border-radius: 12px;
   margin: 0;
-  text-transform: none;
-  font-weight: 600;
+  font-size: 0.9rem;
 }
 
+// ============================================================
+// CUSTOM THEME SECTION
+// ============================================================
 .custom-tema-section {
-  margin-top: 30px;
   padding: 20px;
-  background: var(--ion-color-light);
-  border-radius: 12px;
-  
+  margin-top: 16px;
+
   h3 {
-    margin-top: 0;
+    margin: 0 0 8px;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.1rem;
+    color: #1e293b;
   }
-  
+
+  p {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.95rem;
+    text-align: left;
+    line-height: 1.5;
+    font-family: 'Nunito', sans-serif;
+  }
+
   .custom-input {
-    margin: 15px 0;
-    --background: white;
-    --border-radius: 8px;
+    margin: 16px 0;
+    --background: #f8fafc;
+    --border-radius: 12px;
+    --border-color: #e2e8f0;
   }
 }

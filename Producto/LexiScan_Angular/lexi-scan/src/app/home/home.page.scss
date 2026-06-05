@@ -1,413 +1,500 @@
-.main-container {
-  background: #f8f9fa; // Un fondo gris muy claro para que resalten las tarjetas blancas
-}
+// ============================================================
+// Home Page — Duolingo-Style Gamified Dashboard
+// LexiScan Design System — Radical Redesign
+// ============================================================
 
-.welcome-stats_card {
-  margin: 15px 0;
-  border-radius: 15px;
-  overflow: hidden; // Importante para que el fondo azul de los stats no se salga de las esquinas redondeadas
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+// --- Header ---
+ion-header ion-toolbar {
+  background: var(--ion-toolbar-background, #ffffff);
+  border-bottom: 1px solid var(--ion-border-color, #e2e8f0);
 
-  .welcome-header {
-    background: white;
-    padding: 25px 20px; // Amplios márgenes verticales
-    
-    h2 {
-      color: #004aad; // Azul corporativo/educativo
-      font-weight: 700;
-      margin: 0;
-    }
-    .subtitle {
-      color: #666;
-      margin-top: 5px;
-    }
-  }
-
-  .stats-footer {
-    background: #004aad; // Fondo azul
-    padding: 12px 20px;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-
-    .stat-item {
-      color: white; // Letras blancas
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.9rem;
-      
-      ion-icon { font-size: 1.2rem; color: #ffca28; } // Iconos resaltados
-    }
-
-    .stat-divider {
-      width: 1px;
-      height: 20px;
-      background: rgba(255,255,255,0.3);
-    }
+  ion-title {
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 700;
+    font-size: 1.3rem;
+    color: var(--ion-color-primary, #6366f1);
   }
 }
 
-
-
-
-ion-header {
-  ion-toolbar {
-    background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8c 100%);
-    color: #fff;
-
-    ion-title {
-      font-weight: bold;
-      font-size: 1.2rem;
-    }
-  }
+.btn-icon {
+  --color: var(--ion-color-medium, #94a3b8);
 }
 
 ion-content {
-  --background: #1e3a5f;
-  --padding-start: 0;
-  --padding-end: 0;
+  --background: var(--ion-background-color, #f8fafc);
 }
 
-/* Centered content container */
-ion-content > * {
-  margin: 0 auto;
+// --- Dashboard Container ---
+.dashboard-container {
   max-width: 600px;
-  width: 100%;
-  padding: 0 20px;
-  box-sizing: border-box;
+  margin: 0 auto;
+  padding: 0 16px 32px;
 }
 
-ion-content > .ion-padding {
-  padding: 20px;
+// ============================================================
+// HERO SECTION
+// ============================================================
+.hero-section {
+  margin-bottom: 8px;
 }
 
-.welcome-section {
-  background: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  color: #1e3a5f;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+.hero-greeting {
+  padding: 20px 0 16px;
 
-  h2 {
-    margin: 0 0 5px 0;
-    font-size: 1.8rem;
-    font-weight: bold;
-  }
-
-  .subtitle {
+  h1 {
     margin: 0;
+    font-size: 1.8rem;
+    color: var(--ion-text-color, #1e293b);
+    line-height: 1.2;
+  }
+
+  .hero-subtitle {
+    margin: 4px 0 0;
     font-size: 0.95rem;
-    opacity: 0.9;
+    color: var(--ion-color-medium, #64748b);
   }
 }
 
-.stats-card {
-  background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8c 100%);
-  box-shadow: 0 2px 8px #1e3a5f;
-  border-radius: 10px;
-  margin: 15px 0;
+// --- Stats Row ---
+.stats-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
 
-  ion-card-content {
-    padding: 20px;
-  }
+.stat-card {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+}
 
-  .stats-container {
-    display: flex;
-    justify-content: space-around;
-    gap: 20px;
+.stat-icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 
-    .stat-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      font-weight: 600;
-      color: #ffffff;
-
-      ion-icon {
-        font-size: 2rem;
-        color: #ff9800;
-      }
-    }
+  ion-icon {
+    font-size: 1.6rem;
   }
 }
 
-.chart-card {
-  margin: 15px;
+.stat-streak {
+  background: rgba(249, 115, 22, 0.08);
+
+  .stat-icon-wrap {
+    background: rgba(249, 115, 22, 0.18);
+    ion-icon { color: #f97316; }
+  }
+
+  .stat-value { color: #ea580c; }
+}
+
+.stat-coins {
+  background: rgba(99, 102, 241, 0.08);
+
+  .stat-icon-wrap {
+    background: rgba(99, 102, 241, 0.18);
+    ion-icon { color: #6366f1; }
+  }
+
+  .stat-value { color: #4f46e5; }
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-value {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.stat-label {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.75rem;
+  color: var(--ion-color-medium, #94a3b8);
+  margin-top: 2px;
+}
+
+// --- Daily Goal ---
+.daily-goal {
+  padding: 16px;
+}
+
+.daily-goal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+
+  span {
+    font-size: 0.95rem;
+    color: var(--ion-text-color, #1e293b);
+  }
+
+  .daily-goal-pct {
+    color: var(--ion-color-primary, #6366f1);
+    font-size: 1.1rem;
+  }
+}
+
+.daily-goal-bar {
+  height: 16px;
+  background: var(--ion-color-light, #f1f5f9);
   border-radius: 20px;
-  background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8c 100%);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+  overflow: hidden;
+}
+
+.daily-goal-fill {
+  height: 100%;
+  border-radius: 20px;
+  background: linear-gradient(90deg, #6366f1, #f97316);
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: goalGrow 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes goalGrow {
+  from { width: 0 !important; }
+}
+
+.daily-goal-hint {
+  margin: 8px 0 0;
+  font-size: 0.8rem;
+  color: var(--ion-color-medium, #94a3b8);
+}
+
+// ============================================================
+// SECTION TITLES
+// ============================================================
+.section-title {
+  font-size: 1.2rem;
+  color: var(--ion-text-color, #1e293b);
+  margin: 28px 0 14px;
+  padding-left: 4px;
+}
+
+// ============================================================
+// MODULE BUTTONS — Giant Duolingo Style
+// ============================================================
+.modules-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.module-btn {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  color: #fff;
+  font-family: 'Nunito', sans-serif;
+  border-bottom: 5px solid rgba(0, 0, 0, 0.2);
+  transition: transform 0.1s ease, border-bottom-width 0.1s ease;
+  position: relative;
+  top: 0;
+  width: 100%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+  &:active {
+    border-bottom-width: 2px;
+    top: 3px;
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.module-btn-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  ion-icon {
+    font-size: 1.6rem;
+    color: #fff;
+  }
+}
+
+.module-btn-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.module-btn-title {
+  display: block;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.module-btn-desc {
+  display: block;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 2px;
+  line-height: 1.3;
+}
+
+.module-btn-arrow {
+  font-size: 1.3rem;
+  color: rgba(255, 255, 255, 0.6);
+  flex-shrink: 0;
+}
+
+// Module color variants
+.module-btn-habilidades {
+  background: linear-gradient(135deg, #6366f1, #818cf8);
+  border-bottom-color: #4f46e5;
+
+  &:active { background: #4f46e5; border-bottom-color: #4338ca; }
+}
+
+.module-btn-gym {
+  background: linear-gradient(135deg, #f97316, #fb923c);
+  border-bottom-color: #ea580c;
+
+  &:active { background: #ea580c; border-bottom-color: #c2410c; }
+}
+
+.module-btn-simulacro {
+  background: linear-gradient(135deg, #a78bfa, #c4b5fd);
+  border-bottom-color: #8b5cf6;
+
+  &:active { background: #8b5cf6; border-bottom-color: #7c3aed; }
+}
+
+.module-btn-stats {
+  background: linear-gradient(135deg, #38bdf8, #7dd3fc);
+  border-bottom-color: #0ea5e9;
+
+  &:active { background: #0ea5e9; border-bottom-color: #0284c7; }
+}
+
+// ============================================================
+// RADAR CHART
+// ============================================================
+.chart-card {
+  padding: 12px;
+}
+
+.radar-container {
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.radar-chart {
+  display: block;
   overflow: visible;
 
-  ion-card-content {
-    padding: 10px;
+  .radar-polygon-fill {
+    animation: radarPulse 2s ease-in-out infinite alternate;
   }
 
-  .radar-container {
-    width: 100%;
-    max-width: 280px;
-    margin: 0 auto;
-    filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
+  path {
+    stroke: rgba(0, 0, 0, 0.08);
+    stroke-width: 0.5;
+    transition: all 0.5s ease-in-out;
+  }
 
-    .radar-chart {
-      display: block;
-      overflow: visible;
-      
-      path {
-        stroke: rgba(255,255,255,0.2);
-        stroke-width: 0.5;
-        transition: all 0.5s ease-in-out;
-      }
+  .radar-dot {
+    animation: dotPop 0.3s ease-out forwards;
+    opacity: 0;
 
-      circle {
-        transition: all 0.5s ease-in-out;
-        stroke: rgba(0,0,0,0.2);
-        stroke-width: 1;
-      }
-
-      .radar-label {
-        fill: #fff;
-        font-size: 9px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        pointer-events: none;
+    @for $i from 1 through 6 {
+      &:nth-child(#{13 + $i}) {
+        animation-delay: #{0.1 * $i}s;
       }
     }
+  }
+
+  .radar-label {
+    fill: #334155;
+    font-size: 8px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    pointer-events: none;
   }
 }
 
-.button-group-horizontal {
-  display: flex;            // Los pone en fila
-  justify-content: space-between; // Distribuye el espacio
-  gap: 8px;                 // Espacio entre botones
-  margin: 16px 0;           // Margen vertical para que no peguen a lo de arriba
-  width: 100%;
-
-
-
-  ion-button {
-    flex: 1;                // Hace que todos crezcan por igual para llenar el ancho
-    --border-radius: 12px;  // Opcional: para que se vean más modernos
-    margin: 0;              // Quitamos márgenes por defecto de Ionic
-    height: 45px; 
-    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); // Sombreado para el componente
-    font-weight: 600;
-    font-size: 0.95rem;
-    padding: 15px 0;
-    color: #ffffff;
-
-    &.btn-habilidades {
-      --background: linear-gradient(to bottom, #8aad49e8, #358d35e8);
-      --background-activated: rgb(155, 179, 66)e8;
-    }
-
-    &.btn-gym {
-      --background: linear-gradient(to bottom, #366db4, #3a1e5f);
-      --background-activated: #152a45;
-    }
-
-    &.btn-examen {
-      --background: linear-gradient(to bottom, #618eb8, #455a64);
-      --background-activated: #37474f;
-    }
-
-    // Efecto visual de "hundido" al presionar (opcional pero recomendado)
-    &:active {
-      transform: translateY(2px);
-      --box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-  }
+@keyframes radarPulse {
+  from { opacity: 0.6; }
+  to { opacity: 1; }
 }
 
+@keyframes dotPop {
+  from { opacity: 0; r: 0; }
+  to { opacity: 1; r: 5; }
+}
 
+// ============================================================
+// DAILY CHALLENGES — Individual Cards
+// ============================================================
+.challenges-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
 
 .challenge-card {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
-  background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8c 100%);
-  margin: 20px 0;
-
-  ion-card-content {
-    padding: 20px;
-    color: #fff;
-
-    .challenge-content {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-
-      .avatar {
-        flex-shrink: 0;
-
-        ion-icon {
-          font-size: 3rem;
-          color: rgba(255, 255, 255, 0.8);
-        }
-      }
-
-      .challenge-text {
-        flex: 1;
-
-        p {
-          margin: 5px 0;
-          font-size: 0.95rem;
-          line-height: 1.4;
-
-          &:first-child {
-            color: rgba(255, 255, 255, 0.9);
-          }
-
-          &.challenge-question {
-            color: #ffeb3b;
-            font-weight: 600;
-          }
-        }
-      }
-    }
-  }
+  padding: 16px;
 }
 
-ion-card {
-  margin: 15px 0;
+.challenge-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
 }
 
-.skills-card {
-  .skill-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
-  }
-
-  ion-chip {
-    color: white;
-    font-weight: 600;
-    border-radius: 20px;
-    padding: 0 10px;
-  }
-
-  ion-chip.maestria-full {
-    --background: #2196f3;
-  }
-
-  ion-chip.maestria-media {
-    --background: #4caf50;
-  }
-
-  ion-chip.maestria-baja {
-    --background: #f44336;
-  }
-}
-
-.daily-challenges-card {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+.challenge-card-icon {
+  width: 40px;
+  height: 40px;
   border-radius: 12px;
-  background: white;
-  margin: 20px 0;
-  
-  ion-card-header {
-    background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8c 100%);
-    color: white;
-    padding: 15px 20px;
-    border-radius: 12px 12px 0 0;
-    
-    ion-card-title {
-      color: white;
-      font-weight: 700;
-      font-size: 1.2rem;
-    }
-    ion-card-subtitle {
-      color: rgba(255, 255, 255, 0.85);
-      text-transform: none;
-      font-size: 0.9rem;
-    }
-  }
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-  ion-card-content {
-    padding: 0;
-  }
-
-  .challenges-list {
-    background: transparent;
-    padding: 0;
-  }
-
-  .challenge-item {
-    --padding-start: 20px;
-    --padding-end: 20px;
-    --padding-top: 15px;
-    --padding-bottom: 15px;
-    --inner-border-width: 0 0 1px 0;
-    --inner-border-color: #eee;
-    
-    &:last-child {
-      --inner-border-width: 0;
-    }
-
-    .challenge-details {
-      width: 100%;
-      padding-right: 15px;
-      
-      h4 {
-        margin: 0 0 5px 0;
-        font-weight: 600;
-        color: #333;
-        font-size: 1.05rem;
-      }
-      p {
-        margin: 0 0 12px 0;
-        color: #666;
-        font-size: 0.9rem;
-        line-height: 1.3;
-      }
-      
-      .progress-bar-container {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        
-        ion-progress-bar {
-          flex: 1;
-          height: 8px;
-          border-radius: 4px;
-        }
-        .progress-text {
-          font-size: 0.8rem;
-          color: #888;
-          min-width: 40px;
-          text-align: right;
-          font-weight: 600;
-        }
-      }
-    }
-
-    .challenge-action {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-width: 60px;
-      gap: 5px;
-
-      .reward-info {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        font-weight: bold;
-        color: #ff9800;
-        
-        ion-icon {
-          font-size: 1.2rem;
-        }
-      }
-
-      ion-button {
-        --border-radius: 8px;
-        margin: 0;
-        font-weight: 600;
-      }
-    }
+  ion-icon {
+    font-size: 1.2rem;
+    color: #fff;
   }
 }
+
+.challenge-icon-1 { background: linear-gradient(135deg, #f97316, #fb923c); }
+.challenge-icon-2 { background: linear-gradient(135deg, #6366f1, #818cf8); }
+.challenge-icon-3 {   background: linear-gradient(135deg, #fbbf24, #fde68a); }
+
+.challenge-card-reward {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--ion-color-secondary, #f97316);
+
+  ion-icon { font-size: 1.1rem; }
+}
+
+.challenge-card h4 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+  color: var(--ion-text-color, #1e293b);
+}
+
+.challenge-card p {
+  margin: 0 0 12px;
+  font-size: 0.82rem;
+  color: var(--ion-color-medium, #94a3b8);
+}
+
+.challenge-card-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  span {
+    font-size: 0.78rem;
+    color: var(--ion-color-medium, #94a3b8);
+    font-weight: 700;
+    min-width: 50px;
+    text-align: right;
+  }
+}
+
+.challenge-card-bar {
+  flex: 1;
+  height: 10px;
+  background: var(--ion-color-light, #f1f5f9);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.challenge-card-fill {
+  height: 100%;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #6366f1, #f97316);
+  transition: width 0.8s ease;
+  animation: goalGrow 1s ease forwards;
+}
+
+// ============================================================
+// WEAKNESS CARD
+// ============================================================
+.weakness-card {
+  padding: 16px;
+}
+
+.weakness-content {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.weakness-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: rgba(248, 113, 113, 0.12);
+
+  ion-icon {
+    font-size: 1.5rem;
+    color: #f87171;
+  }
+}
+
+.weakness-text {
+  flex: 1;
+
+  h3 {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--ion-text-color, #1e293b);
+  }
+
+  p {
+    margin: 2px 0 0;
+    font-size: 0.82rem;
+    color: var(--ion-color-medium, #94a3b8);
+  }
+}
+
+.module-arrow {
+  color: var(--ion-color-medium, #cbd5e1);
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+// ============================================================
+// PROGRESS UTILITY CLASSES (Test Data)
+// ============================================================
+.progress-0 { width: 0%; }
+.progress-45 { width: 45%; }
+.progress-50 { width: 50%; }
+.progress-60 { width: 60%; }

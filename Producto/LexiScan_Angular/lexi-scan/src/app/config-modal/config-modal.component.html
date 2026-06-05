@@ -10,56 +10,55 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-  <form [formGroup]="configForm" (ngSubmit)="onSubmit()">
-    <!-- API Key Input -->
-    <ion-item>
-      <ion-label position="stacked">API Key de Groq</ion-label>
-      <ion-input
-        formControlName="apiKey"
-        placeholder="Ingresa tu API Key de Groq"
-        type="password"
-      ></ion-input>
-    </ion-item>
-    <ion-text
-      color="danger"
-      *ngIf="
-        configForm.get('apiKey')?.invalid && configForm.get('apiKey')?.touched
-      "
-    >
-      <p class="ion-padding-start">La API Key es requerida</p>
-    </ion-text>
+  <div class="config-modal-container">
+    <form [formGroup]="configForm" (ngSubmit)="onSubmit()" class="config-form">
 
-    <!-- Model Selection -->
-    <ion-item>
-      <ion-label position="stacked">Modelo</ion-label>
-      <ion-select formControlName="model" placeholder="Selecciona un modelo">
-        <ion-select-option
-          *ngFor="let model of availableModels"
-          [value]="model"
-        >
-          {{ model }}
-        </ion-select-option>
-      </ion-select>
-    </ion-item>
+      <!-- API Key Input -->
+      <div class="input-group">
+        <label class="input-label">API Key de Groq</label>
+        <div class="input-block">
+          <ion-icon name="key-outline" class="input-icon"></ion-icon>
+          <input
+            formControlName="apiKey"
+            placeholder="Ingresa tu API Key de Groq"
+            type="password"
+            class="native-input"
+          />
+        </div>
+        <p class="input-error-msg" *ngIf="configForm.get('apiKey')?.invalid && configForm.get('apiKey')?.touched">
+          La API Key es requerida
+        </p>
+      </div>
 
-    <!-- Buttons -->
-    <ion-button
-      expand="block"
-      type="submit"
-      [disabled]="configForm.invalid || loading"
-      class="ion-margin-top"
-    >
-      <ion-spinner *ngIf="loading" slot="start" name="crescent"></ion-spinner>
-      Guardar Configuración
-    </ion-button>
+      <!-- Model Selection -->
+      <div class="input-group">
+        <label class="input-label">Modelo</label>
+        <div class="input-block">
+          <ion-icon name="cog-outline" class="input-icon"></ion-icon>
+          <select formControlName="model" class="native-select">
+            <option value="" disabled>Selecciona un modelo</option>
+            <option *ngFor="let model of availableModels" [value]="model">{{ model }}</option>
+          </select>
+        </div>
+      </div>
 
-    <ion-button
-      expand="block"
-      fill="outline"
-      (click)="closeModal()"
-      class="ion-margin-top"
-    >
-      Cancelar
-    </ion-button>
-  </form>
+      <!-- Buttons -->
+      <button
+        class="btn-chunky-3d btn-chunky-3d-indigo btn-full"
+        type="submit"
+        [disabled]="configForm.invalid || loading"
+      >
+        <ion-spinner *ngIf="loading" name="crescent"></ion-spinner>
+        Guardar Configuración
+      </button>
+
+      <button
+        class="btn-chunky-3d btn-chunky-3d-gray btn-full"
+        type="button"
+        (click)="closeModal()"
+      >
+        Cancelar
+      </button>
+    </form>
+  </div>
 </ion-content>

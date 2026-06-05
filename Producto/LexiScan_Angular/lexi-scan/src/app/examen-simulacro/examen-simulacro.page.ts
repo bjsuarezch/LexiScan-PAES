@@ -4,8 +4,7 @@ import { AlertController } from '@ionic/angular';
 import { HabilidadesService } from '../services/habilidades.service';
 import { ExamenResponse } from '../models/backend.model';
 import { DesafiosService } from '../services/desafios.service';
-import { interval, Subscription } from 'rxjs';
-
+import { Subscription, interval } from 'rxjs';
 
 @Component({
   selector: 'app-examen-simulacro',
@@ -18,16 +17,34 @@ export class ExamenSimulacroPage implements OnInit, OnDestroy {
   answers: { [key: number]: string } = {};
   loading = false;
 
+  // --- Navigation state ---
+  currentGroupIndex = 0;
+  currentQuestionIndex = 0;
+  totalPreguntas = 0;
+
+  // --- Feedback state ---
+  showFeedback = false;
+  isCorrect = false;
+  correctAnswerKey = '';
+  correctAnswerText = '';
+
+  // --- Timer ---
+  private enterTime: number = 0;
+  elapsedSeconds = 0;
+  private timerSubscription: Subscription | null = null;
+
+  // --- Submit state ---
+  isSubmitLocked = false;
+  submitButtonText = 'Terminar';
+
+  groupedQuestions: any[] = [];
+
   constructor(
     private router: Router,
     private alertController: AlertController,
     private habilidadesService: HabilidadesService,
     private desafiosService: DesafiosService
   ) {}
-
-  private enterTime: number = 0;
-  elapsedSeconds: number = 0;
-  private timerSubscription: Subscription | null = null;
 
   ngOnInit() {
     this.enterTime = Date.now();
@@ -37,6 +54,7 @@ export class ExamenSimulacroPage implements OnInit, OnDestroy {
 
       if (this.examData) {
         this.organizeQuestions();
+        this.totalPreguntas = this.examData.preguntas.length;
         this.startTimer();
       }
     }
@@ -45,6 +63,79 @@ export class ExamenSimulacroPage implements OnInit, OnDestroy {
     }
   }
 
+  ngOnDestroy() {
+    if (this.timerSubscription) {
+      this.timerSubscription.unsubscribe();
+    }
+  }
+
+  // ============================================================
+  // TIMER
+  // ============================================================
+  private startTimer() {
+    this.timerSubscription = interval(1000).subscribe(() => {
+      this.elapsedSeconds = Math.floor((Date.now() - this.enterTime) / 1000);
+    });
+  }
+
+  getElapsedMinutes(): number {
+    return Math.floor(this.elapsedSeconds / 60);
+  }
+
+  // ============================================================
+  // QUESTION NAVIGATION
+  // ============================================================
+  organizeQuestions() {
+    const groups: { [key: string]: any } = {};
+    let globalCounter = 1;
+
+    this.examData?.preguntas.forEach((pregunta: any) => {
+      const texto = pregunta.texto_inedito || 'Sin texto de contexto';
+
+      if (!groups[texto]) {
+        groups[texto] = {
+          texto,
+          preguntas: [],
+        };
+      }
+
+      groups[texto].preguntas.push({
+        ...pregunta,
+        globalIndex: globalCounter++,
+      });
+    });
+
+    this.groupedQuestions = Object.values(groups);
+  }
+
+  getCurrentGrupo(): any {
+    if (this.currentGroupIndex >= this.groupedQuestions.length) return null;
+    return this.groupedQuestions[this.currentGroupIndex];
+  }
+
+  getCurrentPregunta(): any {
+    const grupo = this.getCurrentGrupo();
+    if (!grupo) return null;
+    if (this.currentQuestionIndex >= grupo.preguntas.length) return null;
+    return grupo.preguntas[this.currentQuestionIndex];
+  }
+
+  getCurrentIndex(): number {
+    let idx = 0;
+    for (let g = 0; g < this.currentGroupIndex; g++) {
+      idx += this.groupedQuestions[g].preguntas.length;
+    }
+    return idx + this.currentQuestionIndex;
+  }
+
+  getProgressPct(): number {
+    if (this.totalPreguntas === 0) return 0;
+    return Math.round(((this.getCurrentIndex() + 1) / this.totalPreguntas) * 100);
+  }
+
+  // ============================================================
+  // ANSWERS
+  // ============================================================
   getAlternativesArray(
     alternativas: any,
   ): Array<{ key: string; value: string }> {
@@ -57,6 +148,70 @@ export class ExamenSimulacroPage implements OnInit, OnDestroy {
       .sort((a, b) => a.key.localeCompare(b.key));
   }
 
+  selectAnswer(key: string) {
+    const pregunta = this.getCurrentPregunta();
+    if (!pregunta || this.showFeedback) return;
+    this.answers[pregunta.id_pregunta] = key;
+  }
+
+  // ============================================================
+  // FEEDBACK
+  // ============================================================
+  checkAnswer() {
+    const pregunta = this.getCurrentPregunta();
+    if (!pregunta) return;
+
+    const selected = this.answers[pregunta.id_pregunta];
+    if (!selected) return;
+
+    this.correctAnswerKey = pregunta.respuesta_correcta;
+    this.isCorrect = selected === pregunta.respuesta_correcta;
+    this.showFeedback = true;
+
+    // Find correct answer text
+    const alts = this.getAlternativesArray(pregunta.alternativas);
+    const correctAlt = alts.find(a => a.key === pregunta.respuesta_correcta);
+    this.correctAnswerText = correctAlt ? correctAlt.value : '';
+  }
+
+  showExplanation() {
+    const pregunta = this.getCurrentPregunta();
+    if (!pregunta) return;
+
+    const alert = document.createElement('ion-alert');
+    alert.header = 'Explicación';
+    alert.message = pregunta.justificacion_cot || 'No hay explicación disponible para esta pregunta.';
+    alert.buttons = ['Entendido'];
+    document.body.appendChild(alert);
+    alert.present();
+  }
+
+  continueToNext() {
+    this.showFeedback = false;
+
+    const grupo = this.getCurrentGrupo();
+    if (!grupo) return;
+
+    // Try next question in same group
+    if (this.currentQuestionIndex < grupo.preguntas.length - 1) {
+      this.currentQuestionIndex++;
+      return;
+    }
+
+    // Try next group
+    if (this.currentGroupIndex < this.groupedQuestions.length - 1) {
+      this.currentGroupIndex++;
+      this.currentQuestionIndex = 0;
+      return;
+    }
+
+    // All questions answered — finish exam
+    this.finishExam();
+  }
+
+  // ============================================================
+  // SUBMIT
+  // ============================================================
   async finishExam() {
     const alert = await this.alertController.create({
       header: 'Confirmar',
@@ -78,38 +233,11 @@ export class ExamenSimulacroPage implements OnInit, OnDestroy {
     await alert.present();
   }
 
-  groupedQuestions: any[] = [];
-
-  // Función para organizar preguntas por su texto
-  organizeQuestions() {
-    const groups: { [key: string]: any } = {};
-    let globalCounter = 1;
-
-    this.examData?.preguntas.forEach((pregunta: any) => {
-      const texto = pregunta.texto_inedito || 'Sin texto de contexto';
-
-      if (!groups[texto]) {
-        groups[texto] = {
-          texto: texto,
-          preguntas: [],
-        };
-      }
-
-      // Añadimos un índice global para que las preguntas sigan numeradas del 1 al 20
-      groups[texto].preguntas.push({
-        ...pregunta,
-        globalIndex: globalCounter++,
-      });
-    });
-
-    this.groupedQuestions = Object.values(groups);
-  }
-
   submitExam() {
     if (!this.examData) return;
 
     this.loading = true;
-    const respuestas = this.examData.preguntas.map((pregunta, index) => ({
+    const respuestas = this.examData.preguntas.map((pregunta) => ({
       id_pregunta: pregunta.id_pregunta,
       respuesta_dada: this.answers[pregunta.id_pregunta] || null,
     }));
@@ -134,11 +262,8 @@ export class ExamenSimulacroPage implements OnInit, OnDestroy {
   async downloadPDF() {
     if (!this.examData) return;
 
-    // Importación dinámica para no afectar el bundle inicial
     const { jsPDF } = await import('jspdf');
-
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-
     const pageW = doc.internal.pageSize.getWidth();
     const pageH = doc.internal.pageSize.getHeight();
     const marginL = 18;
@@ -149,7 +274,6 @@ export class ExamenSimulacroPage implements OnInit, OnDestroy {
 
     let y = marginT;
 
-    // ── Utilidades ──────────────────────────────────────────────────────────
     const checkNewPage = (neededHeight: number) => {
       if (y + neededHeight > pageH - marginB) {
         doc.addPage();
@@ -169,7 +293,7 @@ export class ExamenSimulacroPage implements OnInit, OnDestroy {
       doc.setFont('helvetica', fontStyle);
       doc.setTextColor(...color);
       const lines: string[] = doc.splitTextToSize(text, usableW);
-      const lineH = fontSize * 0.3528 * lineSpacing; // pt → mm
+      const lineH = fontSize * 0.3528 * lineSpacing;
       lines.forEach((line: string) => {
         checkNewPage(lineH);
         doc.text(line, x, y);
@@ -177,17 +301,15 @@ export class ExamenSimulacroPage implements OnInit, OnDestroy {
       });
     };
 
-    // ── Encabezado del documento ─────────────────────────────────────────────
-    doc.setFillColor(58, 90, 148);
+    // Header
+    doc.setFillColor(99, 102, 241);
     doc.rect(0, 0, pageW, 14, 'F');
     doc.setFontSize(13);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(255, 255, 255);
-    doc.text('LexiScan PAES – Simulacro de Examen', marginL, 9.5);
+    doc.text('LexiScan PAES -- Simulacro de Examen', marginL, 9.5);
 
     y = 22;
-
-    // Título + tiempo
     addWrappedText('Simulacro PAES', marginL, 16, 'bold', [30, 30, 30]);
     y += 1;
     doc.setFontSize(10);
@@ -199,13 +321,9 @@ export class ExamenSimulacroPage implements OnInit, OnDestroy {
       y,
     );
     y += 4;
-
-    // Línea separadora
     doc.setDrawColor(200, 200, 200);
     doc.line(marginL, y, pageW - marginR, y);
     y += 6;
-
-    // Instrucción
     doc.setFontSize(9);
     doc.setFont('helvetica', 'italic');
     doc.setTextColor(80, 80, 80);
@@ -217,75 +335,56 @@ export class ExamenSimulacroPage implements OnInit, OnDestroy {
     );
     y += 8;
 
-    // ── Contenido por grupos ─────────────────────────────────────────────────
     this.groupedQuestions.forEach((grupo, grupoIdx) => {
-      // — Texto contextual ——————————————————————————————————
       checkNewPage(20);
-
-      // Fondo de etiqueta
       doc.setFillColor(240, 244, 255);
       doc.roundedRect(marginL, y - 4, usableW, 7, 1.5, 1.5, 'F');
       doc.setFontSize(8);
       doc.setFont('helvetica', 'bold');
-      doc.setTextColor(58, 90, 148);
+      doc.setTextColor(99, 102, 241);
       doc.text(`LECTURA CONTEXTUAL ${grupoIdx + 1}`, marginL + 2, y);
       y += 5;
 
       addWrappedText(grupo.texto, marginL, 10, 'normal', [40, 40, 40], 1.45);
       y += 5;
 
-      // Línea separadora sutil
       doc.setDrawColor(220, 220, 220);
       doc.setLineDashPattern([2, 2], 0);
       doc.line(marginL, y, pageW - marginR, y);
       doc.setLineDashPattern([], 0);
       y += 5;
 
-      // — Preguntas del grupo ——————————————————————————————
       grupo.preguntas.forEach((pregunta: any) => {
         const alts = this.getAlternativesArray(pregunta.alternativas);
         const estimatedLines = Math.ceil(pregunta.enunciado.length / 80) + alts.length * 2 + 6;
         checkNewPage(estimatedLines * 4.5);
 
-        // Número de pregunta
-        doc.setFillColor(58, 90, 148);
+        doc.setFillColor(99, 102, 241);
         doc.circle(marginL + 3.5, y - 1.5, 3.5, 'F');
         doc.setFontSize(8.5);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(255, 255, 255);
-        const numStr = String(pregunta.globalIndex);
-        doc.text(numStr, marginL + 3.5, y - 0.8, { align: 'center' });
+        doc.text(String(pregunta.globalIndex), marginL + 3.5, y - 0.8, { align: 'center' });
 
-        // Enunciado
         doc.setFontSize(10.5);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(30, 30, 30);
-        const enunciadoLines: string[] = doc.splitTextToSize(
-          pregunta.enunciado,
-          usableW - 10,
-        );
+        const enunciadoLines: string[] = doc.splitTextToSize(pregunta.enunciado, usableW - 10);
         enunciadoLines.forEach((line: string, li: number) => {
           doc.text(line, marginL + 9, y);
           y += li === 0 ? 5 : 4.8;
         });
         y += 2;
 
-        // Alternativas
         alts.forEach((alt) => {
           checkNewPage(8);
-
-          // Círculo para marcar
           doc.setDrawColor(140, 140, 140);
           doc.setFillColor(255, 255, 255);
           doc.circle(marginL + 11, y - 1.5, 2.8, 'FD');
-
-          // Letra
           doc.setFontSize(9.5);
           doc.setFont('helvetica', 'bold');
-          doc.setTextColor(58, 90, 148);
+          doc.setTextColor(99, 102, 241);
           doc.text(alt.key, marginL + 11, y - 0.8, { align: 'center' });
-
-          // Texto alternativa
           doc.setFontSize(10);
           doc.setFont('helvetica', 'normal');
           doc.setTextColor(50, 50, 50);
@@ -297,12 +396,10 @@ export class ExamenSimulacroPage implements OnInit, OnDestroy {
           });
           y += 0.5;
         });
-
         y += 5;
       });
     });
 
-    // ── Footer en cada página ────────────────────────────────────────────────
     const totalPages = (doc.internal as any).getNumberOfPages();
     for (let p = 1; p <= totalPages; p++) {
       doc.setPage(p);
@@ -310,14 +407,13 @@ export class ExamenSimulacroPage implements OnInit, OnDestroy {
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(150, 150, 150);
       doc.text(
-        `LexiScan PAES – Página ${p} de ${totalPages}`,
+        `LexiScan PAES -- Pagina ${p} de ${totalPages}`,
         pageW / 2,
         pageH - 8,
         { align: 'center' },
       );
     }
 
-    // ── Guardar ──────────────────────────────────────────────────────────────
     doc.save(`LexiScan_Examen_${new Date().toISOString().slice(0, 10)}.pdf`);
   }
 }

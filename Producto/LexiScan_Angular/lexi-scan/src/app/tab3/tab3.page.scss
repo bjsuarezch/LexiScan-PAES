@@ -1,126 +1,368 @@
-.profile-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+// ============================================================
+// Tab3 (Perfil) — Premium Duolingo Design System
+// LexiScan PAES
+// ============================================================
 
-  ion-item {
-    --padding-start: 0;
-    --padding-end: 0;
-    margin-bottom: 0.5rem;
-  }
+ion-header ion-toolbar {
+  background: var(--ion-toolbar-background, #ffffff);
+  border-bottom: 1px solid var(--ion-border-color, #e2e8f0);
 
-  ion-text {
-    margin-top: -0.5rem;
-    font-size: 0.875rem;
+  ion-title {
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #4f46e5;
   }
 }
 
-.no-profile {
+ion-content {
+  --background: var(--ion-background-color, #f8fafc);
+}
+
+.profile-container {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+// ============================================================
+// LOADING STATE
+// ============================================================
+.loading-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 60vh;
+  min-height: 300px;
+  gap: 12px;
+
+  ion-spinner {
+    --color: #6366f1;
+    width: 40px;
+    height: 40px;
+  }
+
+  p {
+    margin: 0;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.9rem;
+    color: #64748b;
+  }
+}
+
+// ============================================================
+// EMPTY STATE
+// ============================================================
+.empty-state {
+  .empty-emoji {
+    font-size: 3.5rem;
+    margin-bottom: 12px;
+  }
+
+  .empty-title {
+    margin: 0 0 8px;
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 700;
+    font-size: 1.3rem;
+    color: #1e293b;
+  }
+
+  .empty-text {
+    margin: 0;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.95rem;
+    color: #64748b;
+    line-height: 1.5;
+  }
+}
+
+// ============================================================
+// VIEW MODE
+// ============================================================
+.view-mode {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+// ============================================================
+// AVATAR CARD
+// ============================================================
+.avatar-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 24px 24px;
   text-align: center;
 
-  .icon {
-    font-size: 4rem;
-    color: var(--ion-color-medium);
-    margin-bottom: 1rem;
-  }
+  border-radius: 24px !important;
+}
 
-  ion-text {
-    p {
-      font-size: 1rem;
-      font-weight: 500;
-      margin: 0.5rem 0;
-    }
+.avatar-ring {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f97316, #fb923c);
+  padding: 4px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 16px rgba(249, 115, 22, 0.25);
 
-    small {
-      color: var(--ion-color-medium);
-      font-size: 0.875rem;
-    }
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &.avatar-ring-edit {
+    background: linear-gradient(135deg, #a78bfa, #c4b5fd);
+    box-shadow: 0 4px 16px rgba(167, 139, 250, 0.25);
   }
 }
 
-ion-card {
-  margin-top: 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+.avatar-emoji {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+}
 
-  ion-card-header {
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--ion-color-light);
+.avatar-name {
+  margin: 0 0 4px;
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: #1e293b;
+}
 
-    ion-card-title {
-      font-size: 1.25rem;
-      font-weight: 600;
-    }
+.avatar-email {
+  margin: 0;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+// ============================================================
+// INFO CARD
+// ============================================================
+.info-card {
+  padding: 24px;
+
+  border-radius: 24px !important;
+  border-bottom-width: 4px !important;
+}
+
+.info-title {
+  margin: 0 0 20px;
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #1e293b;
+}
+
+.info-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background 0.15s ease;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(99, 102, 241, 0.04);
+    margin: 0 -8px;
+    padding: 12px 8px;
+    border-radius: 8px;
   }
 
-  ion-item {
-    --padding-start: 0;
-    --padding-end: 0;
-    padding: 0.75rem 0;
-
-    ion-label {
-      p {
-        font-size: 0.75rem;
-        color: var(--ion-color-medium);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin: 0 0 0.25rem 0;
-      }
-
-      h3 {
-        font-size: 1rem;
-        font-weight: 500;
-        margin: 0;
-        word-break: break-word;
-      }
-    }
+  &.info-row-last {
+    border-bottom: none;
+    padding-bottom: 0;
   }
 }
 
+.info-label {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #94a3b8;
+}
+
+.info-value {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: #1e293b;
+  word-break: break-word;
+}
+
+// ============================================================
+// EDIT MODE
+// ============================================================
+.edit-mode {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.edit-card {
+  padding: 24px;
+
+  border-radius: 24px !important;
+  border-bottom-width: 4px !important;
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+// ============================================================
+// INPUT GROUP
+// ============================================================
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.input-label {
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #475569;
+  padding-left: 4px;
+}
+
+// ============================================================
+// INPUT BLOCK
+// ============================================================
+.input-block {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 0 16px;
+  min-height: 52px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    border-color: #cbd5e1;
+    background: #ffffff;
+  }
+
+  &.input-focused {
+    border-color: #6366f1;
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+  }
+
+  &.input-error {
+    border-color: #f87171;
+    background: rgba(248, 113, 113, 0.08);
+
+    &.input-focused {
+      box-shadow: 0 0 0 4px rgba(248, 113, 113, 0.1);
+    }
+  }
+
+  &.input-readonly {
+    background: #f1f5f9;
+    border-color: #e2e8f0;
+    cursor: default;
+  }
+}
+
+.input-icon {
+  font-size: 1.25rem;
+  color: #94a3b8;
+  flex-shrink: 0;
+
+  .input-focused & {
+    color: #6366f1;
+  }
+
+  .input-error & {
+    color: #f87171;
+  }
+
+  .input-readonly & {
+    color: #cbd5e1;
+  }
+}
+
+.native-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  color: #1e293b;
+  padding: 14px 0;
+
+  &::placeholder {
+    color: #94a3b8;
+  }
+}
+
+.readonly-value {
+  flex: 1;
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #64748b;
+  padding: 14px 0;
+}
+
+// ============================================================
+// ERROR MESSAGES
+// ============================================================
+.input-error-msg {
+  margin: 0;
+  padding-left: 4px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.8rem;
+  color: #ef4444;
+  line-height: 1.3;
+}
+
+.form-warning {
+  margin: 0;
+  padding: 10px 14px;
+  background: rgba(251, 191, 36, 0.1);
+  border-left: 3px solid #fbbf24;
+  border-radius: 8px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.85rem;
+  color: #d97706;
+}
+
+// ============================================================
+// BUTTON GROUP
+// ============================================================
 .button-group {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  margin-top: 2rem;
+  gap: 10px;
+}
 
-  ion-button {
-    margin: 0;
-  }
+.btn-small {
+  font-size: 0.85rem !important;
 }
 
 ion-text {
   p {
     margin: 0;
     padding: 0;
-  }
-}
-
-.ion-margin-top {
-  margin-top: 1rem;
-}
-
-.ion-padding-start {
-  padding-left: 1rem;
-}
-
-ion-spinner {
-  display: block;
-  margin: 3rem auto;
-}
-
-// Responsive adjustments
-@media (min-width: 768px) {
-  .button-group {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.75rem;
-
-    ion-button:last-child {
-      grid-column: 1 / -1;
-    }
   }
 }

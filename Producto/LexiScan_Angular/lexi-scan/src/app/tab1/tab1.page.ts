@@ -102,6 +102,16 @@ export class Tab1Page implements OnInit {
   }
 
   onSubmit(): void {
+    // TEMPORARY DEVELOPMENT LOGIN — bypass backend auth for dev
+    // TODO: Revert this before production deployment
+    const demoUser = { isLoggedIn: true, user: { nombre: 'Usuario Demo' } };
+    localStorage.setItem('lexiscan_dev_session', JSON.stringify(demoUser));
+    const profile = { rut: '12345678-9', nombre: 'Usuario Demo', email: 'demo@dev.local', telefono: '', direccion: '' };
+    this.profileService.saveProfile(profile);
+    this.router.navigate(['/home']);
+    return;
+
+    /*
     this.submitted = true;
 
     if (this.loginForm.valid) {
@@ -124,6 +134,16 @@ export class Tab1Page implements OnInit {
         }
       });
     }
+    */
+    // END TEMPORARY DEVELOPMENT LOGIN
+  }
+
+  onDemoLogin(): void {
+    const demoUser = { isLoggedIn: true, user: { nombre: 'Usuario Demo' } };
+    localStorage.setItem('lexiscan_dev_session', JSON.stringify(demoUser));
+    const profile = { rut: '12345678-9', nombre: 'Usuario Demo', email: 'demo@dev.local', telefono: '', direccion: '' };
+    this.profileService.saveProfile(profile);
+    this.router.navigate(['/home']);
   }
 
   resetForm(): void {

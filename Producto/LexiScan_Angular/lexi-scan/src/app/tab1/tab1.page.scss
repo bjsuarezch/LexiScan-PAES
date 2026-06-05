@@ -1,35 +1,257 @@
+// ============================================================
+// Login Page — Premium EdTech 2026
+// LexiScan Design System — Radical Redesign
+// ============================================================
+
+ion-content {
+  --background: #ffffff;
+}
+
+// --- Container ---
+.login-container {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0 24px 32px;
+}
+
+// ============================================================
+// HERO HEADER — Impact
+// ============================================================
+.login-hero {
+  text-align: center;
+  padding: 48px 0 36px;
+}
+
+.login-hero-emoji {
+  font-size: 3.6rem;
+  display: block;
+  margin-bottom: 8px;
+  animation: heroFloat 2s ease-in-out infinite alternate;
+}
+
+@keyframes heroFloat {
+  from { transform: translateY(0); }
+  to { transform: translateY(-6px); }
+}
+
+.login-hero-title {
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: #4f46e5;
+  margin: 0;
+  line-height: 1.1;
+}
+
+.login-hero-subtitle {
+  font-size: 1rem;
+  color: #64748b;
+  margin: 8px 0 0;
+}
+
+// ============================================================
+// FORMULARIO
+// ============================================================
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 4px;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 28px 24px;
+  border: 1px solid #e2e8f0;
+  border-bottom: 4px solid #cbd5e1;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.04);
+}
 
-  ion-item {
-    --padding-start: 0;
-    --padding-end: 0;
-    margin-bottom: 0.5rem;
-  }
+// --- Field Cards ---
+.login-field {
+  padding: 16px 18px;
+  border-radius: 16px;
+  margin-bottom: 0;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  border: 2px solid transparent;
 
-  ion-text {
-    margin-top: -0.5rem;
-    font-size: 0.875rem;
-  }
-
-  ion-button {
-    margin-top: 1rem;
+  &:focus-within {
+    border-color: var(--ion-color-primary, #6366f1);
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.12);
   }
 }
 
-ion-text {
-  p {
-    margin: 0;
-    padding: 0;
+.login-field-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #64748b;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.login-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.login-field-icon {
+  font-size: 1.2rem;
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+.login-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  color: #1e293b;
+  padding: 0;
+  width: 100%;
+
+  &::placeholder {
+    color: #cbd5e1;
   }
 }
 
-.ion-margin-top {
-  margin-top: 1rem;
+.login-input-password {
+  padding-right: 40px;
 }
 
-.ion-padding-start {
-  padding-left: 1rem;
+.login-eye-btn {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  color: #94a3b8;
+  font-size: 1.15rem;
+  transition: color 0.2s ease;
+
+  &:active {
+    color: #6366f1;
+  }
+}
+
+.login-input-wrap {
+  position: relative;
+}
+
+// --- Error text ---
+.login-error {
+  margin: -4px 0 4px 4px;
+  font-size: 0.78rem;
+  color: #f87171;
+  padding: 0;
+}
+
+.login-warning {
+  text-align: center;
+  padding: 12px 16px;
+  margin: 4px 0;
+  font-size: 0.85rem;
+  color: #f97316;
+  background: rgba(249, 115, 22, 0.08);
+  border-radius: 12px;
+}
+
+// ============================================================
+// BOTONES
+// ============================================================
+
+// --- Ingresar ---
+.login-btn-primary {
+  width: 100%;
+  margin-top: 16px;
+  padding: 18px 24px;
+  font-size: 1.15rem;
+}
+
+// --- Demo ---
+.login-btn-demo {
+  width: 100%;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+  color: #475569;
+  border-bottom: 4px solid #cbd5e1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  font-size: 1rem;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: linear-gradient(135deg, #e2e8f0, #f1f5f9);
+    color: #334155;
+    transform: translateY(2px);
+    border-bottom-width: 2px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  }
+
+  &:active {
+    background: #f1f5f9;
+    border-bottom-width: 0px;
+    transform: translateY(4px);
+    box-shadow: none;
+  }
+}
+
+// --- Divider ---
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 24px 0 20px;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #e2e8f0;
+  }
+
+  span {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    flex-shrink: 0;
+  }
+}
+
+// --- Link ---
+.login-link-btn {
+  display: block;
+  width: 100%;
+  text-align: center;
+  margin-top: 20px;
+  padding: 12px;
+  background: none;
+  border: none;
+  font-size: 0.9rem;
+  color: #64748b;
+  cursor: pointer;
+
+  strong {
+    color: #6366f1;
+    font-weight: 700;
+  }
+
+  &:active strong {
+    color: #4f46e5;
+  }
+}
+
+// --- Config FAB ---
+ion-fab {
+  margin-bottom: 16px;
+
+  ion-fab-button {
+    --background: #f1f5f9;
+    --color: #94a3b8;
+    width: 44px;
+    height: 44px;
+    --border-radius: 14px;
+  }
 }

@@ -88,7 +88,6 @@ export class GymPage implements OnInit {
   }
 
   startTraining(): void {
-    console.log('Starting training');
     this.trainingStarted = true;
     if (this.profile?.rut) {
       this.loadErroresFrecuentes(this.profile.rut);

@@ -1,0 +1,100 @@
+// ============================================================
+// Config Modal — Premium Duolingo Design System
+// ============================================================
+
+ion-content {
+  --background: var(--ion-background-color, #f8fafc);
+}
+
+.config-modal-container {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.config-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.input-label {
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #475569;
+  padding-left: 4px;
+}
+
+.input-block {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 0 16px;
+  min-height: 52px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    border-color: #cbd5e1;
+    background: #ffffff;
+  }
+
+  &:focus-within {
+    border-color: #6366f1;
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+  }
+}
+
+.input-icon {
+  font-size: 1.25rem;
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+.native-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  color: #1e293b;
+  padding: 14px 0;
+
+  &::placeholder {
+    color: #94a3b8;
+  }
+}
+
+.native-select {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  color: #1e293b;
+  padding: 14px 0;
+  cursor: pointer;
+}
+
+.input-error-msg {
+  margin: 0;
+  padding-left: 4px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.8rem;
+  color: #ef4444;
+}
+
+.btn-full {
+  width: 100%;
+}

@@ -8,6 +8,7 @@ import {
   HabilidadData,
   GeneratedHabilidadDetail,
 } from '../models/backend.model';
+import { IUserProfile } from '../models/auth.model';
 import { DesafiosService } from '../services/desafios.service';
 import { BehaviorSubject, Observable, interval, Subscription } from 'rxjs';
 import { OnDestroy } from '@angular/core';

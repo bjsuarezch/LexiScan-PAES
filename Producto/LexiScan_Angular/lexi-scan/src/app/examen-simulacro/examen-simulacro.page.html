@@ -1,86 +1,135 @@
-<ion-header [translucent]="true">
+<ion-header [translucent]="true" class="ion-no-border">
   <ion-toolbar>
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/examen"></ion-back-button>
     </ion-buttons>
-    <ion-title>Simulacro PAES</ion-title>
+    <ion-title><span class="font-heading">Simulacro PAES</span></ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="finishExam()" [disabled]="loading || isSubmitLocked">
-        <ion-icon name="checkmark-circle"></ion-icon>
-        <span *ngIf="loading">Enviando...</span>
-        <span *ngIf="!loading">{{ submitButtonText }}</span>
+      <ion-button class="btn-icon" (click)="finishExam()" [disabled]="loading">
+        <ion-icon name="checkmark-circle-outline" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true" class="ion-padding">
-  <div class="exam-container" *ngIf="examData">
-    <div class="exam-header ion-margin-bottom">
-      <h2>Responde todas las preguntas</h2>
-      <div class="exam-header-actions">
-        <ion-badge color="secondary"
-          >Tiempo estimado: {{ examData.estimated_time }} min</ion-badge
-        >
-        <ion-button
-          fill="outline"
-          size="small"
-          color="medium"
-          (click)="downloadPDF()"
-          id="btn-download-exam-pdf"
-        >
-          <ion-icon name="download-outline" slot="start"></ion-icon>
-          Descargar PDF
-        </ion-button>
+<ion-content [fullscreen]="true">
+  <div class="quiz-container" *ngIf="examData">
+
+    <!-- ============================================ -->
+    <!-- PROGRESS BAR (Top)                           -->
+    <!-- ============================================ -->
+    <div class="quiz-progress">
+      <div class="quiz-progress-info">
+        <span class="font-body">Pregunta {{ getCurrentIndex() + 1 }} de {{ totalPreguntas }}</span>
+        <span class="font-heading quiz-progress-pct">{{ getProgressPct() }}%</span>
+      </div>
+      <ion-progress-bar [value]="getProgressPct() / 100" color="primary"></ion-progress-bar>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- TEXT CONTEXTUAL (si existe)                  -->
+    <!-- ============================================ -->
+    <div class="text-context" *ngIf="getCurrentGrupo()?.texto">
+      <div class="text-context-header">
+        <ion-icon name="document-text-outline"></ion-icon>
+        <span class="font-heading">Lectura Contextual</span>
+      </div>
+      <div class="text-context-body font-body">
+        {{ getCurrentGrupo()?.texto }}
       </div>
     </div>
 
-    <!-- Agrupamos por texto para no repetirlo -->
-    <div *ngFor="let grupo of groupedQuestions">
-      <!-- Sección del Texto Contextual -->
-      <ion-card class="text-context-card">
-        <ion-card-header>
-          <ion-card-subtitle>Lectura Contextual</ion-card-subtitle>
-          <ion-card-title>Lee atentamente:</ion-card-title>
-        </ion-card-header>
-        <ion-card-content class="text-content">
-          {{ grupo.texto }}
-        </ion-card-content>
-      </ion-card>
-
-      <!-- Preguntas asociadas a ese texto específico -->
-      <ion-card
-        *ngFor="let pregunta of grupo.preguntas; let i = index"
-        class="question-card"
-      >
-        <ion-card-content>
-          <h3 class="question-number">Pregunta {{ pregunta.globalIndex }}</h3>
-          <p class="question-text">{{ pregunta.enunciado }}</p>
-
-          <ion-radio-group [(ngModel)]="answers[pregunta.id_pregunta]">
-            <ion-item
-              *ngFor="let alt of getAlternativesArray(pregunta.alternativas)"
-              lines="none"
-              class="alt-item"
-            >
-              <ion-radio slot="start" [value]="alt.key"></ion-radio>
-              <ion-label class="ion-text-wrap"
-                >{{ alt.key }}. {{ alt.value }}</ion-label
-              >
-            </ion-item>
-          </ion-radio-group>
-        </ion-card-content>
-      </ion-card>
+    <!-- ============================================ -->
+    <!-- PREGUNTA ACTUAL                             -->
+    <!-- ============================================ -->
+    <div class="question-card card-elevated" *ngIf="getCurrentPregunta()">
+      <div class="question-header">
+        <span class="question-number font-heading">{{ getCurrentPregunta()?.globalIndex }}</span>
+        <span class="question-label font-body">Pregunta</span>
+      </div>
+      <p class="question-text font-body">{{ getCurrentPregunta()?.enunciado }}</p>
     </div>
 
-    <ion-button
-      expand="block"
-      (click)="finishExam()"
-      [disabled]="loading || isSubmitLocked"
-      class="finish-btn"
-    >
-      <span *ngIf="loading">Enviando...</span>
-      <span *ngIf="!loading">{{ submitButtonText }}</span>
-    </ion-button>
+    <!-- ============================================ -->
+    <!-- ALTERNATIVAS (A, B, C, D, E)                -->
+    <!-- ============================================ -->
+    <div class="alternatives-list" *ngIf="getCurrentPregunta()">
+      <div
+        *ngFor="let alt of getAlternativesArray(getCurrentPregunta()?.alternativas)"
+        class="alt-card card-elevated"
+        [class.alt-selected]="answers[getCurrentPregunta()?.id_pregunta] === alt.key"
+        (click)="selectAnswer(alt.key)"
+      >
+        <div class="alt-letter font-heading">{{ alt.key }}</div>
+        <div class="alt-text font-body">{{ alt.value }}</div>
+        <div class="alt-check" *ngIf="answers[getCurrentPregunta()?.id_pregunta] === alt.key">
+          <ion-icon name="checkmark-circle"></ion-icon>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- BOTÓN COMPROBAR                              -->
+    <!-- ============================================ -->
+    <div class="action-bar" *ngIf="!showFeedback">
+      <button
+        class="btn-chunky-3d-primary action-btn"
+        [disabled]="!answers[getCurrentPregunta()?.id_pregunta]"
+        (click)="checkAnswer()"
+      >
+        Comprobar
+      </button>
+    </div>
+
   </div>
+
+  <!-- ============================================ -->
+  <!-- FEEDBACK DRAWER (Correcto / Incorrecto)      -->
+  <!-- ============================================ -->
+  <div class="feedback-drawer" [class.feedback-open]="showFeedback" [class.feedback-correct]="isCorrect" [class.feedback-incorrect]="!isCorrect && showFeedback">
+    <div class="feedback-drawer-content">
+      <!-- Header del drawer -->
+      <div class="feedback-header">
+        <div class="feedback-icon-wrap" *ngIf="isCorrect">
+          <ion-icon name="checkmark-circle"></ion-icon>
+        </div>
+        <div class="feedback-icon-wrap" *ngIf="!isCorrect">
+          <ion-icon name="close-circle"></ion-icon>
+        </div>
+        <div class="feedback-title">
+          <h2 class="font-heading" *ngIf="isCorrect">¡Excelente trabajo!</h2>
+          <h2 class="font-heading" *ngIf="!isCorrect">¡Puedes mejorarlo!</h2>
+          <p class="font-body" *ngIf="isCorrect">+10 XP ganados</p>
+          <p class="font-body" *ngIf="!isCorrect">No te preocupes, revisa la explicación</p>
+        </div>
+      </div>
+
+      <!-- Respuesta correcta (si se equivocó) -->
+      <div class="correct-answer-reveal" *ngIf="!isCorrect">
+        <span class="font-body">Respuesta correcta:</span>
+        <span class="correct-answer-key font-heading">{{ correctAnswerKey }}. {{ correctAnswerText }}</span>
+      </div>
+
+      <!-- Botones de acción del drawer -->
+      <div class="feedback-actions">
+        <button
+          *ngIf="!isCorrect"
+          class="btn-chunky-3d-outline feedback-btn-explain"
+          (click)="showExplanation()"
+        >
+          Ver Explicación
+        </button>
+        <button
+          class="feedback-btn-continue"
+          (click)="continueToNext()"
+        >
+          Continuar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Overlay oscuro detrás del drawer -->
+  <div class="feedback-overlay" [class.overlay-visible]="showFeedback" (click)="continueToNext()"></div>
+
 </ion-content>
