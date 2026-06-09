@@ -40,6 +40,7 @@ class Usuario(Base):
     racha_actual = Column(Integer, nullable=False, default=0)
     fecha_registro = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
     activo = Column(Boolean, nullable=False, default=True)
+    es_admin = Column(Boolean, nullable=False, default=False)
     ultimo_acceso = Column(DateTime(timezone=True), nullable=True)
     tema_actual_id = Column(Integer, ForeignKey('temas.id_tema'), nullable=True)
     textos_restantes = Column(Integer, nullable=False, default=0)

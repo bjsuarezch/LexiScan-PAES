@@ -831,3 +831,22 @@ def get_ranking(db: Session, limit: int = 10, rut_actual: Optional[str] = None) 
         "ranking": ranking_list,
         "usuario_actual": usuario_actual_data
     }
+
+def get_all_users_admin(db: Session):
+    return db.query(models.Usuario).order_by(models.Usuario.fecha_registro.desc()).all()
+
+def toggle_user_status(db: Session, rut: str) -> bool:
+    user = db.query(models.Usuario).filter(models.Usuario.rut == rut).first()
+    if not user:
+        return False
+    user.activo = not user.activo
+    db.commit()
+    return True
+
+def delete_user(db: Session, rut: str) -> bool:
+    user = db.query(models.Usuario).filter(models.Usuario.rut == rut).first()
+    if not user:
+        return False
+    db.delete(user)
+    db.commit()
+    return True

@@ -23,6 +23,7 @@ export interface IUserProfile {
   codigoPostal?: string;
   createdAt?: Date;
   updatedAt?: Date;
+  es_admin?: boolean;
 }
 
 export interface IValidationErrors {

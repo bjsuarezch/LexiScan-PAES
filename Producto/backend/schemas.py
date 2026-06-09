@@ -23,6 +23,7 @@ class UserResponse(BaseModel):
     xp_total: int
     racha_actual: int
     activo: bool
+    es_admin: bool
     ultimo_acceso: Optional[datetime] = None
     tema_actual_id: Optional[int] = None
     textos_restantes: int = 0
@@ -279,3 +280,15 @@ class RankingUserItem(BaseModel):
 class RankingResponse(BaseModel):
     ranking: List[RankingUserItem]
     usuario_actual: Optional[RankingUserItem] = None
+
+class AdminUsuarioItem(BaseModel):
+    rut: str
+    nombre_completo: str
+    email: str
+    activo: bool
+    es_admin: bool
+    xp_total: int
+    racha_actual: int
+
+    class Config:
+        from_attributes = True

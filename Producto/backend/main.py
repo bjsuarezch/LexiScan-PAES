@@ -853,3 +853,39 @@ def get_ranking(rut: str = None, limit: int = 10, db: Session = Depends(get_db))
         return crud.get_ranking(db, limit, rut)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f'Error al obtener el ranking: {str(e)}')
+
+
+# --- ADMIN ENDPOINTS ---
+
+def verificar_admin(rut: str, db: Session):
+    user = db.query(models.Usuario).filter(models.Usuario.rut == rut).first()
+    if not user or not getattr(user, 'es_admin', False):
+        raise HTTPException(status_code=403, detail="No tienes permisos de administrador")
+    return user
+
+@app.get('/admin/usuarios', response_model=list[schemas.AdminUsuarioItem])
+def get_admin_usuarios(rut_admin: str, db: Session = Depends(get_db)):
+    verificar_admin(rut_admin, db)
+    return crud.get_all_users_admin(db)
+
+@app.put('/admin/usuarios/{rut_target}/toggle-status')
+def toggle_user_status_endpoint(rut_target: str, rut_admin: str, db: Session = Depends(get_db)):
+    verificar_admin(rut_admin, db)
+    if rut_target == rut_admin:
+        raise HTTPException(status_code=400, detail="No puedes desactivarte a ti mismo")
+    
+    success = crud.toggle_user_status(db, rut_target)
+    if not success:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    return {"message": "Estado del usuario actualizado exitosamente"}
+
+@app.delete('/admin/usuarios/{rut_target}')
+def delete_user_endpoint(rut_target: str, rut_admin: str, db: Session = Depends(get_db)):
+    verificar_admin(rut_admin, db)
+    if rut_target == rut_admin:
+        raise HTTPException(status_code=400, detail="No puedes eliminarte a ti mismo")
+    
+    success = crud.delete_user(db, rut_target)
+    if not success:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    return {"message": "Usuario eliminado exitosamente"}

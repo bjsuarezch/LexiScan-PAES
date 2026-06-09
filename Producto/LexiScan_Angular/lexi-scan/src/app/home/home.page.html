@@ -5,6 +5,9 @@
     </ion-title>
 
     <ion-buttons slot="end">
+      <ion-button *ngIf="profile?.es_admin" color="warning" class="btn-icon" (click)="onAdminClick()">
+        <ion-icon name="shield-checkmark" slot="icon-only"></ion-icon>
+      </ion-button>
       <ion-button class="btn-icon" (click)="onLogout()">
         <ion-icon name="log-out-outline" slot="icon-only"></ion-icon>
       </ion-button>

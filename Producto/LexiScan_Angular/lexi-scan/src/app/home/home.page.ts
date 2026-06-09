@@ -132,6 +132,10 @@ export class HomePage implements OnInit {
     this.router.navigate(['/ranking']);
   }
 
+  onAdminClick(): void {
+    this.router.navigate(['/admin']);
+  }
+
   onStatsClick(): void {
     this.router.navigate(['/stats']);
   }

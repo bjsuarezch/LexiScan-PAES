@@ -125,3 +125,13 @@ export interface RankingResponse {
   ranking: RankingUserItem[];
   usuario_actual?: RankingUserItem;
 }
+
+export interface AdminUsuarioItem {
+  rut: string;
+  nombre_completo: string;
+  email: string;
+  activo: boolean;
+  es_admin: boolean;
+  xp_total: number;
+  racha_actual: number;
+}

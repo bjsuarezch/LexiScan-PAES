@@ -4,7 +4,7 @@ import { BehaviorSubject, Observable, of } from 'rxjs';
 import { IUserProfile } from '../models/auth.model';
 import { Habilidad } from '../models/habilidad.model';
 import { environment } from '../../environments/environment';
-import { RankingResponse } from '../models/backend.model';
+import { RankingResponse, AdminUsuarioItem } from '../models/backend.model';
 
 @Injectable({
   providedIn: 'root'
@@ -153,5 +153,18 @@ export class ProfileService {
       url += `&rut=${rut}`;
     }
     return this.http.get<RankingResponse>(url);
+  }
+
+  // --- ADMIN FUNCTIONS ---
+  getAdminUsuarios(rutAdmin: string): Observable<AdminUsuarioItem[]> {
+    return this.http.get<AdminUsuarioItem[]>(`${environment.apiUrl}/admin/usuarios?rut_admin=${rutAdmin}`);
+  }
+
+  toggleUserStatus(rutTarget: string, rutAdmin: string): Observable<any> {
+    return this.http.put(`${environment.apiUrl}/admin/usuarios/${rutTarget}/toggle-status?rut_admin=${rutAdmin}`, {});
+  }
+
+  deleteUser(rutTarget: string, rutAdmin: string): Observable<any> {
+    return this.http.delete(`${environment.apiUrl}/admin/usuarios/${rutTarget}?rut_admin=${rutAdmin}`);
   }
 }
