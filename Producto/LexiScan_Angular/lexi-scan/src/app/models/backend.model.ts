@@ -83,6 +83,7 @@ export interface EvaluarRespuestasResponse {
   total_preguntas: number;
   puntaje: number;
   xp_ganada: number;
+  rendimiento_cambio?: number;
   mensaje: string;
 }
 

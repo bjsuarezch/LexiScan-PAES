@@ -115,7 +115,27 @@ def build_display_habilidad(item: models.HistorialHabilidades) -> dict:
     }
 
 
+def apply_engagement_penalty(db: Session, rut: str) -> None:
+    habilidades = db.query(models.HistorialHabilidades).filter(models.HistorialHabilidades.rut_usuario == rut).all()
+    now = datetime.now(timezone.utc)
+    updated = False
+    
+    for hab in habilidades:
+        if hab.ultima_actualizacion:
+            dias_transcurridos = (now.date() - hab.ultima_actualizacion.date()).days
+            if dias_transcurridos > 0:
+                penalizacion = dias_transcurridos * 5.0
+                nuevo_nivel = max(0.0, float(hab.nivel_maestria) - penalizacion)
+                hab.nivel_maestria = nuevo_nivel
+                hab.ultima_actualizacion = now
+                updated = True
+    
+    if updated:
+        db.commit()
+
+
 def get_dashboard_data(db: Session, rut: str) -> Optional[dict]:
+    apply_engagement_penalty(db, rut)
     user = get_user_by_rut(db, rut)
     if not user:
         return None
@@ -235,9 +255,9 @@ def update_user_racha(db: Session, user: models.Usuario) -> None:
     db.commit()
 
 
-def update_user_skill_results(db: Session, rut: str, habilidad: str, correct_count: int, total_questions: int) -> int:
+def update_user_skill_results(db: Session, rut: str, habilidad: str, correct_count: int, total_questions: int) -> dict:
     if total_questions <= 0:
-        return 0
+        return {'xp_ganada': 0, 'rendimiento_cambio': 0.0}
 
     user = get_user_by_rut(db, rut)
     if not user:
@@ -255,16 +275,23 @@ def update_user_skill_results(db: Session, rut: str, habilidad: str, correct_cou
     xp_ganada = correct_count * 10
     user.xp_total += xp_ganada
 
+    incorrect_count = total_questions - correct_count
     porcentaje_aciertos = correct_count / total_questions
-    incremento = int(round(porcentaje_aciertos * 15))
-    habilidad_record.nivel_maestria = min(100.0, float(habilidad_record.nivel_maestria) + incremento)
+    incremento_base = int(round(porcentaje_aciertos * 15))
+    decremento = incorrect_count * 3
+    cambio_neto = incremento_base - decremento
+
+    nuevo_nivel = max(0.0, min(100.0, float(habilidad_record.nivel_maestria) + cambio_neto))
+    rendimiento_cambio = nuevo_nivel - float(habilidad_record.nivel_maestria)
+
+    habilidad_record.nivel_maestria = nuevo_nivel
     habilidad_record.ultima_actualizacion = datetime.now(timezone.utc)
 
     db.add(user)
     db.add(habilidad_record)
     db.commit()
 
-    return xp_ganada
+    return {'xp_ganada': xp_ganada, 'rendimiento_cambio': round(rendimiento_cambio, 2)}
 
 
 def create_exam_session(db: Session, rut: str, cantidad_preguntas: int) -> Optional[dict]:

@@ -637,8 +637,11 @@ def evaluar_preguntas(request: schemas.EvaluarRespuestasRequest, db: Session = D
                 print(f"Error registrando fallo en pregunta {index}: {str(e)}")
 
     xp_ganada = 0
+    rendimiento_cambio = 0.0
     try:
-        xp_ganada = crud.update_user_skill_results(db, request.rut, habilidad_db, total_correct, len(request.preguntas))
+        resultado_skill = crud.update_user_skill_results(db, request.rut, habilidad_db, total_correct, len(request.preguntas))
+        xp_ganada = resultado_skill['xp_ganada']
+        rendimiento_cambio = resultado_skill['rendimiento_cambio']
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
 
@@ -648,6 +651,7 @@ def evaluar_preguntas(request: schemas.EvaluarRespuestasRequest, db: Session = D
         'total_preguntas': len(request.preguntas),
         'puntaje': total_correct,
         'xp_ganada': xp_ganada,
+        'rendimiento_cambio': rendimiento_cambio,
         'mensaje': 'Evaluación almacenada correctamente.',
     }
 

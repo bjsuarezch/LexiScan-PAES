@@ -123,6 +123,11 @@ class EvaluarResultadoItem(BaseModel):
 class EvaluarRespuestasResponse(BaseModel):
     resultados: List[EvaluarResultadoItem]
     total_correct: int
+    total_preguntas: int
+    puntaje: int
+    xp_ganada: int
+    rendimiento_cambio: float
+    mensaje: str
 
 
 class ExamenRequest(BaseModel):

@@ -230,6 +230,24 @@ export class HabilidadesPage implements OnInit, OnDestroy {
             this.habilidadesService.getDashboard(this.profile.rut).subscribe());
         }
 
+        // --- Alerta de Rendimiento ---
+        if (result.rendimiento_cambio !== undefined) {
+           const cambio = result.rendimiento_cambio;
+           const isPositive = cambio > 0;
+           const isNegative = cambio < 0;
+           const prefix = isPositive ? 'Subió' : isNegative ? 'Bajó' : 'Se mantuvo';
+           const symbol = isPositive ? '+' : '';
+           // We use css styles directly or ion-text-color classes if they exist, but standard CSS works in message.
+           const colorHtml = isPositive ? 'color: var(--ion-color-success);' : isNegative ? 'color: var(--ion-color-danger);' : 'color: var(--ion-color-medium);';
+           
+           this.alertController.create({
+             header: 'Rendimiento de Habilidad',
+             subHeader: 'Resultados de tu práctica',
+             message: `Tu rendimiento en la habilidad ${this.selectedHabilidad?.tipo_habilidad} <strong style="${colorHtml}">${prefix} ${symbol}${cambio.toFixed(2)}%</strong>.`,
+             buttons: ['Entendido']
+           }).then(alert => alert.present());
+        }
+
         // --- Desafios Report ---
         if (this.selectedHabilidad) {
           const habilidadPracticada = this.selectedHabilidad.tipo_habilidad;
