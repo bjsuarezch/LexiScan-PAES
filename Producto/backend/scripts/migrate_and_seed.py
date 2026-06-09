@@ -40,7 +40,22 @@ def reset_and_seed():
         tema_transformers = models.Tema(nombre="Transformers", es_custom=False, activo=True)
         tema_myhero = models.Tema(nombre="My Hero Academia", es_custom=False, activo=True)
         
-        db.add_all([tema_tesla, tema_musica, tema_transformers, tema_myhero])
+        nuevos_temas = [
+            models.Tema(nombre="Mitología Griega", es_custom=False, activo=True),
+            models.Tema(nombre="Exploración Espacial", es_custom=False, activo=True),
+            models.Tema(nombre="Inteligencia Artificial", es_custom=False, activo=True),
+            models.Tema(nombre="Cambio Climático", es_custom=False, activo=True),
+            models.Tema(nombre="Cultura Pop Coreana", es_custom=False, activo=True),
+            models.Tema(nombre="Literatura Latinoamericana", es_custom=False, activo=True),
+            models.Tema(nombre="Biología Marina", es_custom=False, activo=True),
+            models.Tema(nombre="Videojuegos Retro", es_custom=False, activo=True),
+            models.Tema(nombre="Psicología Humana", es_custom=False, activo=True),
+            models.Tema(nombre="Misterios Sin Resolver", es_custom=False, activo=True),
+            models.Tema(nombre="Deportes Extremos", es_custom=False, activo=True),
+            models.Tema(nombre="Avances Médicos", es_custom=False, activo=True)
+        ]
+        
+        db.add_all([tema_tesla, tema_musica, tema_transformers, tema_myhero] + nuevos_temas)
         db.commit()
 
         # Agregar un usuario sistema para amarrar las habilidades globales
