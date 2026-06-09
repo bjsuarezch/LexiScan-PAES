@@ -845,3 +845,11 @@ async def obtener_umbral_impulsividad(
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f'Error al calcular umbral de impulsividad: {str(e)}')
+
+
+@app.get('/ranking', response_model=schemas.RankingResponse)
+def get_ranking(rut: str = None, limit: int = 10, db: Session = Depends(get_db)):
+    try:
+        return crud.get_ranking(db, limit, rut)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f'Error al obtener el ranking: {str(e)}')

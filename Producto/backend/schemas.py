@@ -269,3 +269,13 @@ class UmbralImpulsividadResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class RankingUserItem(BaseModel):
+    posicion: int
+    nombre_completo: str
+    xp_total: int
+    rut_parcial: str
+
+class RankingResponse(BaseModel):
+    ranking: List[RankingUserItem]
+    usuario_actual: Optional[RankingUserItem] = None

@@ -113,3 +113,15 @@ export interface DesafioProgresoLocal {
   habilidadesPracticadas: string[];
   vecesHabilidadBajaPracticada: number;
 }
+
+export interface RankingUserItem {
+  posicion: number;
+  nombre_completo: string;
+  xp_total: number;
+  rut_parcial: string;
+}
+
+export interface RankingResponse {
+  ranking: RankingUserItem[];
+  usuario_actual?: RankingUserItem;
+}

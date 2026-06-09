@@ -779,3 +779,55 @@ def get_random_questions(db: Session, cantidad: int, id_habilidad: Optional[int]
         query = query.filter(models.BancoPreguntas.id_habilidad == id_habilidad)
 
     return query.order_by(func.random()).limit(cantidad).all()
+
+
+def get_ranking(db: Session, limit: int = 10, rut_actual: Optional[str] = None) -> dict:
+    usuarios = db.query(models.Usuario).filter(models.Usuario.activo == True).order_by(models.Usuario.xp_total.desc()).limit(limit).all()
+    
+    ranking_list = []
+    usuario_actual_data = None
+    
+    for idx, u in enumerate(usuarios):
+        # Format name to "First LastInitial."
+        parts = u.nombre_completo.split()
+        if len(parts) > 1:
+            name_display = f"{parts[0]} {parts[1][0]}."
+        else:
+            name_display = parts[0]
+
+        item = {
+            "posicion": idx + 1,
+            "nombre_completo": name_display,
+            "xp_total": u.xp_total,
+            "rut_parcial": u.rut[:4] + "***"
+        }
+        ranking_list.append(item)
+        if rut_actual and u.rut == rut_actual:
+            usuario_actual_data = item
+            
+    # If the user is not in the top N, find their position
+    if rut_actual and not usuario_actual_data:
+        u_actual = get_user_by_rut(db, rut_actual)
+        if u_actual:
+            posicion_real = db.query(models.Usuario).filter(
+                models.Usuario.activo == True,
+                models.Usuario.xp_total > u_actual.xp_total
+            ).count() + 1
+            
+            parts = u_actual.nombre_completo.split()
+            if len(parts) > 1:
+                name_display = f"{parts[0]} {parts[1][0]}."
+            else:
+                name_display = parts[0]
+                
+            usuario_actual_data = {
+                "posicion": posicion_real,
+                "nombre_completo": name_display,
+                "xp_total": u_actual.xp_total,
+                "rut_parcial": u_actual.rut[:4] + "***"
+            }
+            
+    return {
+        "ranking": ranking_list,
+        "usuario_actual": usuario_actual_data
+    }

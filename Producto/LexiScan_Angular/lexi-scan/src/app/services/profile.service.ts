@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable, of } from 'rxjs';
 import { IUserProfile } from '../models/auth.model';
 import { Habilidad } from '../models/habilidad.model';
 import { environment } from '../../environments/environment';
+import { RankingResponse } from '../models/backend.model';
 
 @Injectable({
   providedIn: 'root'
@@ -141,5 +142,16 @@ export class ProfileService {
    */
   getHabilidades(rut: string): Observable<Habilidad[]> {
     return this.http.get<Habilidad[]>(`${environment.apiUrl}/habilidades/${rut}`);
+  }
+
+  /**
+   * Obtener ranking de usuarios
+   */
+  getRanking(rut?: string, limit: number = 10): Observable<RankingResponse> {
+    let url = `${environment.apiUrl}/ranking?limit=${limit}`;
+    if (rut) {
+      url += `&rut=${rut}`;
+    }
+    return this.http.get<RankingResponse>(url);
   }
 }

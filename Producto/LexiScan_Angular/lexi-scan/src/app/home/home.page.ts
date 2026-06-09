@@ -128,6 +128,10 @@ export class HomePage implements OnInit {
     this.router.navigate(['/examen']);
   }
 
+  onRankingClick(): void {
+    this.router.navigate(['/ranking']);
+  }
+
   onStatsClick(): void {
     this.router.navigate(['/stats']);
   }
