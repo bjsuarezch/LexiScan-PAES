@@ -1,0 +1,222 @@
+<ion-header [translucent]="true" class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title><span class="font-heading">Mis Estadísticas</span></ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="stats-container">
+
+    <!-- ============================================ -->
+    <!-- GAUGE CHART — Puntaje Estimado PAES          -->
+    <!-- ============================================ -->
+    <section class="gauge-section">
+      <h2 class="section-title font-heading">Tu puntaje estimado</h2>
+
+      <div class="card-elevated gauge-card">
+        <div class="gauge-wrap">
+          <svg viewBox="0 0 300 170" class="gauge-svg">
+            <defs>
+              <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#6366f1" />
+                <stop offset="50%" stop-color="#a78bfa" />
+                <stop offset="100%" stop-color="#f97316" />
+              </linearGradient>
+              <filter id="gaugeShadow">
+                <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.15" />
+              </filter>
+            </defs>
+
+            <!-- Background arc -->
+            <path
+              d="M 30 150 A 120 120 0 0 1 270 150"
+              fill="none"
+              stroke="#f1f5f9"
+              stroke-width="24"
+              stroke-linecap="round"
+            />
+
+            <!-- Colored arc (animated) -->
+            <path
+              [attr.d]="getGaugeArcPath()"
+              fill="none"
+              stroke="url(#gaugeGradient)"
+              stroke-width="24"
+              stroke-linecap="round"
+              class="gauge-arc"
+              filter="url(#gaugeShadow)"
+            />
+
+            <!-- Needle -->
+            <line
+              [attr.x1]="150"
+              [attr.y1]="150"
+              [attr.x2]="getNeedleX()"
+              [attr.y2]="getNeedleY()"
+              stroke="#1e293b"
+              stroke-width="3"
+              stroke-linecap="round"
+              class="gauge-needle"
+            />
+            <circle cx="150" cy="150" r="8" fill="#1e293b" />
+            <circle cx="150" cy="150" r="4" fill="#fff" />
+
+            <!-- Scale labels -->
+            <text x="25" y="168" text-anchor="middle" class="gauge-label font-body">100</text>
+            <text x="150" y="35" text-anchor="middle" class="gauge-label font-body">550</text>
+            <text x="275" y="168" text-anchor="middle" class="gauge-label font-body">1000</text>
+          </svg>
+
+          <div class="gauge-score">
+            <span class="gauge-score-number font-heading">{{ getEstimatedPAES() }}</span>
+            <span class="gauge-score-label font-body">puntos PAES</span>
+          </div>
+        </div>
+
+        <div class="gauge-meta">
+          <div class="gauge-meta-item">
+            <span class="gauge-meta-value font-heading">{{ getXPTotal() }}</span>
+            <span class="gauge-meta-label font-body">XP acumulados</span>
+          </div>
+          <div class="gauge-meta-divider"></div>
+          <div class="gauge-meta-item">
+            <span class="gauge-meta-value font-heading">{{ getStreak() }}</span>
+            <span class="gauge-meta-label font-body">días de racha</span>
+          </div>
+          <div class="gauge-meta-divider"></div>
+          <div class="gauge-meta-item">
+            <span class="gauge-meta-value font-heading">{{ getCoins() }}</span>
+            <span class="gauge-meta-label font-body">monedas</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================ -->
+    <!-- TREND CHART — Curva de Aprendizaje           -->
+    <!-- ============================================ -->
+    <section class="trend-section">
+      <h2 class="section-title font-heading">Tu curva de aprendizaje</h2>
+
+      <div class="card-elevated trend-card">
+        <div class="trend-header">
+          <span class="font-body trend-subtitle">Puntaje estimado por intento</span>
+          <div class="trend-legend">
+            <span class="trend-legend-line"></span>
+            <span class="font-body">Real</span>
+            <span class="trend-legend-dotted"></span>
+            <span class="font-body">Meta</span>
+          </div>
+        </div>
+
+        <div class="trend-chart-wrap">
+          <svg viewBox="0 0 340 180" class="trend-svg" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#6366f1" stop-opacity="0.15" />
+                <stop offset="100%" stop-color="#6366f1" stop-opacity="0.01" />
+              </linearGradient>
+            </defs>
+
+            <!-- Grid lines -->
+            <line *ngFor="let y of [30, 70, 110, 150]" x1="40" [attr.y1]="y" x2="330" [attr.y2]="y" stroke="#f1f5f9" stroke-width="1" />
+
+            <!-- Y-axis labels -->
+            <text x="35" y="34" text-anchor="end" class="trend-axis-label font-body">1000</text>
+            <text x="35" y="74" text-anchor="end" class="trend-axis-label font-body">750</text>
+            <text x="35" y="114" text-anchor="end" class="trend-axis-label font-body">500</text>
+            <text x="35" y="154" text-anchor="end" class="trend-axis-label font-body">250</text>
+
+            <!-- Goal line (dotted, violet) -->
+            <line x1="40" [attr.y1]="getGoalLineY()" x2="330" [attr.y2]="getGoalLineY()" stroke="#a78bfa" stroke-width="3" stroke-dasharray="8,5" />
+            <text x="332" [attr.y]="getGoalLineY() - 6" class="trend-goal-label font-body">¡Tu Meta!</text>
+
+            <!-- Area fill -->
+            <path [attr.d]="getTrendAreaPath()" fill="url(#trendGradient)" class="trend-area" />
+
+            <!-- Line -->
+            <path [attr.d]="getTrendLinePath()" fill="none" stroke="#6366f1" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" class="trend-line" />
+
+            <!-- Data points -->
+            <circle
+              *ngFor="let pt of getTrendPoints(); let i = index"
+              [attr.cx]="pt.x"
+              [attr.cy]="pt.y"
+              r="7"
+              fill="#fff"
+              stroke="#6366f1"
+              stroke-width="3"
+              class="trend-dot"
+            />
+
+            <!-- X-axis labels -->
+            <text *ngFor="let lbl of getTrendLabels(); let i = index" [attr.x]="lbl.x" y="175" text-anchor="middle" class="trend-axis-label font-body">{{ lbl.text }}</text>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================ -->
+    <!-- SKILL BARS — Dominio por Ejes Temáticos      -->
+    <!-- ============================================ -->
+    <section class="skills-section">
+      <h2 class="section-title font-heading">Dominio por habilidad</h2>
+
+      <div class="skill-bars-list">
+        <div class="skill-bar-item card-elevated" *ngFor="let skill of getSkills(); let i = index">
+          <div class="skill-bar-header">
+            <div class="skill-bar-icon" [style.background]="getSkillColor(i)">
+              <ion-icon [name]="getSkillIcon(skill.nombre_habilidad)"></ion-icon>
+            </div>
+            <div class="skill-bar-info">
+              <span class="skill-bar-name font-heading">{{ getSkillDisplayName(skill.nombre_habilidad) }}</span>
+              <span class="skill-bar-pct font-body">{{ skill.nivel_maestria }}%</span>
+            </div>
+          </div>
+          <div class="skill-bar-track">
+            <div class="skill-bar-fill" [style.width]="skill.nivel_maestria + '%'" [style.background]="getSkillColor(i)"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================ -->
+    <!-- REVENGE MISSIONS — Temas Críticos            -->
+    <!-- ============================================ -->
+    <section class="revenge-section" *ngIf="erroresFrecuentes.length > 0">
+      <h2 class="section-title font-heading">Misiones de revancha</h2>
+      <p class="section-subtitle font-body">Refuerza tus temas más débiles con práctica enfocada</p>
+
+      <div class="revenge-list">
+        <div class="revenge-item card-elevated" *ngFor="let error of erroresFrecuentes; let i = index">
+          <div class="revenge-content">
+            <div class="revenge-rank font-heading">{{ i + 1 }}</div>
+            <div class="revenge-info">
+              <h3 class="font-heading">{{ error.habilidad }}</h3>
+              <p class="font-body">Fallaste {{ error.veces_fallada }} {{ error.veces_fallada === 1 ? 'vez' : 'veces' }}</p>
+            </div>
+            <ion-icon name="flame" class="revenge-flame"></ion-icon>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-chunky-3d-primary revenge-btn" (click)="goToGym()">
+        <ion-icon name="barbell-outline"></ion-icon>
+        Ir al GYM
+      </button>
+    </section>
+
+    <!-- Empty state for revenge -->
+    <section class="revenge-section" *ngIf="erroresFrecuentes.length === 0 && !loading">
+      <div class="card-elevated empty-revenge">
+        <ion-icon name="trophy-outline" class="empty-icon"></ion-icon>
+        <h3 class="font-heading">¡Sin errores pendientes!</h3>
+        <p class="font-body">No hay temas críticos por resolver. ¡Sigue así!</p>
+      </div>
+    </section>
+
+  </div>
+</ion-content>

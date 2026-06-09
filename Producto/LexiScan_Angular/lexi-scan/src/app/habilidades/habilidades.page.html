@@ -1,4 +1,4 @@
-<ion-header [translucent]="true">
+<ion-header [translucent]="true" class="ion-no-border">
   <ion-toolbar>
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/home"></ion-back-button>
@@ -30,19 +30,15 @@
     </div>
 
     <!-- Radar Chart Card -->
-    <ion-card class="chart-card">
-      <ion-card-content>
-        <app-radar-chart [habilidades]="habilidades"></app-radar-chart>
-      </ion-card-content>
-    </ion-card>
+    <div class="chart-card card-elevated">
+      <app-radar-chart [habilidades]="habilidades"></app-radar-chart>
+    </div>
 
     <div class="habilidad-detail" *ngIf="selectedHabilidad">
       <h3>{{ selectedHabilidad.tipo_habilidad }}</h3>
-      
-      <!-- CONTENIDO ENRIQUECIDO / BLOQUES JSON -->
+
       <div class="rich-text-container">
         <ng-container *ngFor="let block of getTextoBlocks()">
-          
           <p *ngIf="block.tipo === 'parrafo'" class="texto-inedito parrafo">
             {{ block.contenido }}
           </p>
@@ -53,7 +49,6 @@
           </div>
 
           <div *ngIf="block.tipo === 'imagen'" class="imagen-bloque">
-            <!-- Usamos Pollinations AI para generar la imagen al vuelo usando el concepto -->
             <img [src]="'https://image.pollinations.ai/prompt/' + block.concepto + '?width=600&height=400&nologo=true'" [alt]="block.concepto" />
           </div>
 
@@ -69,71 +64,64 @@
               </div>
             </div>
           </div>
-          
         </ng-container>
       </div>
+
       <div
         *ngFor="let pregunta of selectedHabilidad.preguntas; let i = index"
         class="pregunta-card"
       >
-        <ion-card>
-          <ion-card-header>
-            <ion-card-title>Pregunta {{ i + 1 }}</ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
+        <div class="card-elevated card-flush">
+          <div class="pregunta-header">
+            <h4 class="pregunta-title">Pregunta {{ i + 1 }}</h4>
+          </div>
+          <div class="pregunta-body">
             <p class="pregunta-enunciado">{{ pregunta.enunciado }}</p>
             <ion-radio-group [(ngModel)]="selectedAnswers[i]">
               <ion-item *ngFor="let key of ['A', 'B', 'C', 'D']">
-                <ion-label
-                  >{{ key }}. {{ pregunta.alternativas[key] }}</ion-label
-                >
+                <ion-label>{{ key }}. {{ pregunta.alternativas[key] }}</ion-label>
                 <ion-radio slot="start" [value]="key"></ion-radio>
               </ion-item>
             </ion-radio-group>
-          </ion-card-content>
-        </ion-card>
+          </div>
+        </div>
       </div>
 
-      <ion-button
-        expand="block"
-        color="primary"
+      <button
+        class="btn-chunky-3d btn-chunky-3d-indigo btn-full"
         [disabled]="!canSubmit() || isSubmitLocked || submitting"
         (click)="submitAnswers()"
       >
         <span *ngIf="submitting">Evaluando...</span>
         <span *ngIf="!submitting">{{ submitButtonText }}</span>
-      </ion-button>
+      </button>
 
       <ion-text color="danger" *ngIf="evaluationError">
         {{ evaluationError }}
       </ion-text>
 
       <div *ngIf="evaluationResults.length" class="evaluation-results">
-        <ion-card *ngFor="let resultado of evaluationResults">
-          <ion-card-header>
-            <ion-card-title>
-              Pregunta {{ resultado.index + 1 }} -
-              <span [ngClass]="resultado.correcta ? 'correcto' : 'incorrecto'">
-                {{ resultado.correcta ? 'Correcta' : 'Incorrecta' }}
-              </span>
-            </ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-            <p>
-              <strong>Tu respuesta:</strong> {{ resultado.respuesta_usuario }}
-            </p>
-            <p *ngIf="!resultado.correcta">
-              <strong>Respuesta correcta:</strong> {{
-              resultado.respuesta_correcta }}
-            </p>
-            <p><strong>Retroalimentación:</strong> {{ resultado.feedback }}</p>
-          </ion-card-content>
-        </ion-card>
+        <div *ngFor="let resultado of evaluationResults" class="card-elevated evaluation-result-card">
+          <h4 class="pregunta-title">
+            Pregunta {{ resultado.index + 1 }} -
+            <span [ngClass]="resultado.correcta ? 'correcto' : 'incorrecto'">
+              {{ resultado.correcta ? 'Correcta' : 'Incorrecta' }}
+            </span>
+          </h4>
+          <p class="result-text">
+            <strong>Tu respuesta:</strong> {{ resultado.respuesta_usuario }}
+          </p>
+          <p *ngIf="!resultado.correcta" class="result-text">
+            <strong>Respuesta correcta:</strong> {{ resultado.respuesta_correcta }}
+          </p>
+          <p class="result-text">
+            <strong>Retroalimentación:</strong> {{ resultado.feedback }}
+          </p>
+        </div>
 
-        <ion-note>
-          Obtuviste {{ totalCorrect }} de {{ totalQuestions }} correctas. XP
-          ganada: {{ xpGanada }}.
-        </ion-note>
+        <p class="score-summary">
+          Obtuviste {{ totalCorrect }} de {{ totalQuestions }} correctas. XP ganada: {{ xpGanada }}.
+        </p>
       </div>
     </div>
   </div>

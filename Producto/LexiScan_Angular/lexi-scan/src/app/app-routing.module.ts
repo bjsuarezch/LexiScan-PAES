@@ -38,11 +38,9 @@ const routes: Routes = [
       ),
   },
   {
-    path: 'examen-simulacro',
+    path: 'stats',
     loadChildren: () =>
-      import('./examen-simulacro/examen-simulacro.module').then(
-        (m) => m.ExamenSimulacroPageModule,
-      ),
+      import('./stats/stats.module').then((m) => m.StatsPageModule),
   },
   {
     path: 'seleccion-tema',

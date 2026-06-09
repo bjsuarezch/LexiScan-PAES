@@ -1,269 +1,250 @@
-<ion-header [translucent]="true">
+<ion-header [translucent]="true" class="ion-no-border">
   <ion-toolbar>
-    <ion-title> Mi Perfil </ion-title>
+    <ion-title>Mi Perfil</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true" class="ion-padding">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Mi Perfil</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <div class="profile-container">
 
-  <!-- Loading State -->
-  <ion-spinner *ngIf="isLoading" name="circles"></ion-spinner>
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-state">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Cargando perfil...</p>
+    </div>
 
-  <!-- No Profile Message -->
-  <div *ngIf="!profileExists && !isLoading" class="no-profile">
-    <ion-icon name="person-outline" class="icon"></ion-icon>
-    <ion-text>
-      <p>No tienes perfil creado</p>
-      <small>Completa tu información para continuar</small>
-    </ion-text>
+    <!-- No Profile Message -->
+    <div *ngIf="!profileExists && !isLoading" class="empty-state">
+      <div class="card-elevated" style="padding: 40px 24px; text-align: center;">
+        <div class="empty-emoji">🥷</div>
+        <h3 class="empty-title">Sin perfil aún</h3>
+        <p class="empty-text">Crea tu perfil para desbloquear todas las funciones</p>
+      </div>
+    </div>
+
+    <!-- Profile Form -->
+    <form
+      *ngIf="!isLoading"
+      [formGroup]="profileForm"
+      (ngSubmit)="onSubmit()"
+      class="profile-form"
+    >
+
+      <!-- ========== VIEW MODE ========== -->
+      <div *ngIf="profileExists && !isEditing" class="view-mode">
+
+        <!-- Avatar Card -->
+        <div class="avatar-card card-elevated">
+          <div class="avatar-ring">
+            <div class="avatar-emoji">🚀</div>
+          </div>
+          <h2 class="avatar-name">{{ profileForm.get('nombre')?.value }}</h2>
+          <p class="avatar-email">{{ profileForm.get('email')?.value }}</p>
+        </div>
+
+        <!-- Info Card -->
+        <div class="info-card card-elevated">
+          <h3 class="info-title">Información de Perfil</h3>
+
+          <div class="info-row">
+            <span class="info-label">RUT</span>
+            <span class="info-value">{{ profileForm.get('rut')?.value }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">NOMBRE</span>
+            <span class="info-value">{{ profileForm.get('nombre')?.value }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">EMAIL</span>
+            <span class="info-value">{{ profileForm.get('email')?.value }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">TELÉFONO</span>
+            <span class="info-value">{{ profileForm.get('telefono')?.value }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">DIRECCIÓN</span>
+            <span class="info-value">{{ profileForm.get('direccion')?.value }}</span>
+          </div>
+
+          <div class="info-row" *ngIf="profileForm.get('ciudad')?.value">
+            <span class="info-label">CIUDAD</span>
+            <span class="info-value">{{ profileForm.get('ciudad')?.value }}</span>
+          </div>
+
+          <div class="info-row info-row-last" *ngIf="profileForm.get('codigoPostal')?.value">
+            <span class="info-label">CÓDIGO POSTAL</span>
+            <span class="info-value">{{ profileForm.get('codigoPostal')?.value }}</span>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="button-group">
+          <button class="btn-chunky-3d btn-chunky-3d-violet" type="button" (click)="toggleEdit()">
+            Editar Perfil
+          </button>
+          <button class="btn-chunky-3d btn-chunky-3d-gray btn-small" type="button" (click)="deleteProfile()">
+            Eliminar Perfil
+          </button>
+        </div>
+      </div>
+
+      <!-- ========== EDIT MODE ========== -->
+      <div *ngIf="isEditing" class="edit-mode">
+
+        <!-- Edit Avatar -->
+        <div class="avatar-card card-elevated">
+          <div class="avatar-ring avatar-ring-edit">
+            <div class="avatar-emoji">✏️</div>
+          </div>
+          <h2 class="avatar-name">Editando Perfil</h2>
+        </div>
+
+        <!-- Edit Card -->
+        <div class="edit-card card-elevated">
+
+          <!-- RUT (readonly) -->
+          <div class="input-group">
+            <label class="input-label">RUT (no editable)</label>
+            <div class="input-block input-readonly">
+              <ion-icon name="finger-print-outline" class="input-icon"></ion-icon>
+              <span class="readonly-value">{{ profileForm.get('rut')?.value }}</span>
+            </div>
+          </div>
+
+          <!-- Nombre Input -->
+          <div class="input-group">
+            <label class="input-label">Nombre completo</label>
+            <div class="input-block" [class.input-focused]="editNombreFocused" [class.input-error]="getErrorMessage('nombre')">
+              <ion-icon name="person-outline" class="input-icon"></ion-icon>
+              <input
+                formControlName="nombre"
+                placeholder="Tu nombre"
+                type="text"
+                class="native-input"
+                (focus)="editNombreFocused = true"
+                (blur)="editNombreFocused = false"
+              />
+            </div>
+            <p class="input-error-msg" *ngIf="getErrorMessage('nombre')">{{ getErrorMessage('nombre') }}</p>
+          </div>
+
+          <!-- Email Input -->
+          <div class="input-group">
+            <label class="input-label">Correo electrónico</label>
+            <div class="input-block" [class.input-focused]="editEmailFocused" [class.input-error]="getErrorMessage('email')">
+              <ion-icon name="mail-outline" class="input-icon"></ion-icon>
+              <input
+                formControlName="email"
+                placeholder="ejemplo@correo.com"
+                type="email"
+                class="native-input"
+                (focus)="editEmailFocused = true"
+                (blur)="editEmailFocused = false"
+              />
+            </div>
+            <p class="input-error-msg" *ngIf="getErrorMessage('email')">{{ getErrorMessage('email') }}</p>
+          </div>
+
+          <!-- Teléfono Input -->
+          <div class="input-group">
+            <label class="input-label">Teléfono</label>
+            <div class="input-block" [class.input-focused]="editTelefonoFocused" [class.input-error]="getErrorMessage('telefono')">
+              <ion-icon name="call-outline" class="input-icon"></ion-icon>
+              <input
+                formControlName="telefono"
+                placeholder="+56912345678"
+                type="tel"
+                class="native-input"
+                (focus)="editTelefonoFocused = true"
+                (blur)="editTelefonoFocused = false"
+              />
+            </div>
+            <p class="input-error-msg" *ngIf="getErrorMessage('telefono')">{{ getErrorMessage('telefono') }}</p>
+          </div>
+
+          <!-- Dirección Input -->
+          <div class="input-group">
+            <label class="input-label">Dirección</label>
+            <div class="input-block" [class.input-focused]="editDireccionFocused" [class.input-error]="getErrorMessage('direccion')">
+              <ion-icon name="location-outline" class="input-icon"></ion-icon>
+              <input
+                formControlName="direccion"
+                placeholder="Calle y número"
+                type="text"
+                class="native-input"
+                (focus)="editDireccionFocused = true"
+                (blur)="editDireccionFocused = false"
+              />
+            </div>
+            <p class="input-error-msg" *ngIf="getErrorMessage('direccion')">{{ getErrorMessage('direccion') }}</p>
+          </div>
+
+          <!-- Ciudad Input -->
+          <div class="input-group">
+            <label class="input-label">Ciudad (opcional)</label>
+            <div class="input-block" [class.input-focused]="editCiudadFocused">
+              <ion-icon name="map-outline" class="input-icon"></ion-icon>
+              <input
+                formControlName="ciudad"
+                placeholder="Ciudad"
+                type="text"
+                class="native-input"
+                (focus)="editCiudadFocused = true"
+                (blur)="editCiudadFocused = false"
+              />
+            </div>
+          </div>
+
+          <!-- Código Postal Input -->
+          <div class="input-group">
+            <label class="input-label">Código postal (opcional)</label>
+            <div class="input-block" [class.input-focused]="editCodigoFocused">
+              <ion-icon name="grid-outline" class="input-icon"></ion-icon>
+              <input
+                formControlName="codigoPostal"
+                placeholder="Código postal"
+                type="number"
+                class="native-input"
+                (focus)="editCodigoFocused = true"
+                (blur)="editCodigoFocused = false"
+              />
+            </div>
+          </div>
+
+          <!-- Form Status -->
+          <p class="form-warning" *ngIf="submitted && !profileForm.valid">
+            Por favor corrige los errores antes de guardar
+          </p>
+        </div>
+
+        <!-- Edit Buttons -->
+        <div class="button-group">
+          <button
+            class="btn-chunky-3d btn-chunky-3d-sky"
+            type="submit"
+            [disabled]="submitted && !profileForm.valid"
+          >
+            Guardar Cambios
+          </button>
+          <button class="btn-chunky-3d btn-chunky-3d-gray" type="button" (click)="cancelEdit()">
+            Cancelar
+          </button>
+          <button
+            *ngIf="!profileExists"
+            class="btn-chunky-3d btn-chunky-3d-gray btn-small"
+            type="button"
+            (click)="resetForm()"
+          >
+            Limpiar
+          </button>
+        </div>
+      </div>
+
+    </form>
   </div>
-
-  <!-- Profile Form -->
-  <form
-    *ngIf="!isLoading"
-    [formGroup]="profileForm"
-    (ngSubmit)="onSubmit()"
-    class="profile-form"
-  >
-    <!-- View Mode - Profile Card -->
-    <ion-card *ngIf="profileExists && !isEditing">
-      <ion-card-header>
-        <ion-card-title>Información de Perfil</ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <!-- RUT Display -->
-        <ion-item lines="inset">
-          <ion-label>
-            <p>RUT</p>
-            <h3>{{ profileForm.get('rut')?.value }}</h3>
-          </ion-label>
-        </ion-item>
-
-        <!-- Nombre Display -->
-        <ion-item lines="inset">
-          <ion-label>
-            <p>Nombre</p>
-            <h3>{{ profileForm.get('nombre')?.value }}</h3>
-          </ion-label>
-        </ion-item>
-
-        <!-- Email Display -->
-        <ion-item lines="inset">
-          <ion-label>
-            <p>Email</p>
-            <h3>{{ profileForm.get('email')?.value }}</h3>
-          </ion-label>
-        </ion-item>
-
-        <!-- Teléfono Display -->
-        <ion-item lines="inset">
-          <ion-label>
-            <p>Teléfono</p>
-            <h3>{{ profileForm.get('telefono')?.value }}</h3>
-          </ion-label>
-        </ion-item>
-
-        <!-- Dirección Display -->
-        <ion-item lines="inset">
-          <ion-label>
-            <p>Dirección</p>
-            <h3>{{ profileForm.get('direccion')?.value }}</h3>
-          </ion-label>
-        </ion-item>
-
-        <!-- Ciudad Display -->
-        <ion-item lines="inset" *ngIf="profileForm.get('ciudad')?.value">
-          <ion-label>
-            <p>Ciudad</p>
-            <h3>{{ profileForm.get('ciudad')?.value }}</h3>
-          </ion-label>
-        </ion-item>
-
-        <!-- Código Postal Display -->
-        <ion-item lines="none" *ngIf="profileForm.get('codigoPostal')?.value">
-          <ion-label>
-            <p>Código Postal</p>
-            <h3>{{ profileForm.get('codigoPostal')?.value }}</h3>
-          </ion-label>
-        </ion-item>
-      </ion-card-content>
-    </ion-card>
-
-    <!-- Edit Mode - Form Fields -->
-    <div *ngIf="isEditing">
-      <!-- RUT Input -->
-      <ion-item lines="inset">
-        <ion-label>
-          <p>RUT (Ineditable)</p>
-          <h3>{{ profileForm.get('rut')?.value }}</h3>
-        </ion-label>
-      </ion-item>
-      <ion-text color="danger" *ngIf="getErrorMessage('rut')">
-        <p class="ion-padding-start">{{ getErrorMessage('rut') }}</p>
-      </ion-text>
-
-      <!-- Nombre Input -->
-      <ion-item>
-        <ion-label position="stacked">Nombre Completo</ion-label>
-        <ion-input
-          formControlName="nombre"
-          placeholder="Nombre completo"
-          type="text"
-        >
-        </ion-input>
-      </ion-item>
-      <ion-text color="danger" *ngIf="getErrorMessage('nombre')">
-        <p class="ion-padding-start">{{ getErrorMessage('nombre') }}</p>
-      </ion-text>
-
-      <!-- Email Input -->
-      <ion-item>
-        <ion-label position="stacked">Correo Electrónico</ion-label>
-        <ion-input
-          formControlName="email"
-          placeholder="ejemplo@correo.com"
-          type="email"
-        >
-        </ion-input>
-      </ion-item>
-      <ion-text color="danger" *ngIf="getErrorMessage('email')">
-        <p class="ion-padding-start">{{ getErrorMessage('email') }}</p>
-      </ion-text>
-
-      <!-- Teléfono Input -->
-      <ion-item>
-        <ion-label position="stacked">Teléfono</ion-label>
-        <ion-input
-          formControlName="telefono"
-          placeholder="+56912345678 o 912345678"
-          type="tel"
-        >
-        </ion-input>
-      </ion-item>
-      <ion-text color="danger" *ngIf="getErrorMessage('telefono')">
-        <p class="ion-padding-start">{{ getErrorMessage('telefono') }}</p>
-      </ion-text>
-
-      <!-- Dirección Input -->
-      <ion-item>
-        <ion-label position="stacked">Dirección</ion-label>
-        <ion-input
-          formControlName="direccion"
-          placeholder="Calle y número de residencia"
-          type="text"
-        >
-        </ion-input>
-      </ion-item>
-      <ion-text color="danger" *ngIf="getErrorMessage('direccion')">
-        <p class="ion-padding-start">{{ getErrorMessage('direccion') }}</p>
-      </ion-text>
-
-      <!-- Ciudad Input -->
-      <ion-item>
-        <ion-label position="stacked">Ciudad</ion-label>
-        <ion-input
-          formControlName="ciudad"
-          placeholder="Ciudad (opcional)"
-          type="text"
-        >
-        </ion-input>
-      </ion-item>
-      <ion-text color="danger" *ngIf="getErrorMessage('ciudad')">
-        <p class="ion-padding-start">{{ getErrorMessage('ciudad') }}</p>
-      </ion-text>
-
-      <!-- Código Postal Input -->
-      <ion-item>
-        <ion-label position="stacked">Código Postal</ion-label>
-        <ion-input
-          formControlName="codigoPostal"
-          placeholder="Código postal (opcional)"
-          type="number"
-        >
-        </ion-input>
-      </ion-item>
-      <ion-text color="danger" *ngIf="getErrorMessage('codigoPostal')">
-        <p class="ion-padding-start">{{ getErrorMessage('codigoPostal') }}</p>
-      </ion-text>
-
-      <!-- Form Status -->
-      <ion-text *ngIf="submitted && !profileForm.valid" color="warning">
-        <p class="ion-padding">
-          Por favor corrija los errores en el formulario
-        </p>
-      </ion-text>
-    </div>
-
-    <!-- Action Buttons -->
-    <div class="button-group">
-      <!-- Edit Button (View Mode) -->
-      <ion-button
-        *ngIf="profileExists && !isEditing"
-        expand="block"
-        type="button"
-        (click)="toggleEdit()"
-        class="ion-margin-top"
-      >
-        <ion-icon name="pencil" slot="start"></ion-icon>
-        Editar Perfil
-      </ion-button>
-
-      <!-- Save Button (Edit Mode) -->
-      <ion-button
-        *ngIf="isEditing"
-        expand="block"
-        type="submit"
-        class="ion-margin-top"
-        [disabled]="submitted && !profileForm.valid"
-      >
-        <ion-icon name="checkmark" slot="start"></ion-icon>
-        Guardar Cambios
-      </ion-button>
-
-      <!-- Cancel Button (Edit Mode) -->
-      <ion-button
-        *ngIf="isEditing"
-        expand="block"
-        fill="outline"
-        type="button"
-        (click)="cancelEdit()"
-        class="ion-margin-top"
-      >
-        <ion-icon name="close" slot="start"></ion-icon>
-        Cancelar
-      </ion-button>
-
-      <!-- Delete Button (View Mode) -->
-      <ion-button
-        *ngIf="profileExists && !isEditing"
-        expand="block"
-        color="danger"
-        fill="outline"
-        type="button"
-        (click)="deleteProfile()"
-        class="ion-margin-top"
-      >
-        <ion-icon name="trash" slot="start"></ion-icon>
-        Eliminar Perfil
-      </ion-button>
-
-      <!-- Clear Button (Edit Mode - New Profile) -->
-      <ion-button
-        *ngIf="isEditing && !profileExists"
-        expand="block"
-        fill="outline"
-        type="button"
-        (click)="resetForm()"
-        class="ion-margin-top"
-      >
-        <ion-icon name="refresh" slot="start"></ion-icon>
-        Limpiar
-      </ion-button>
-    </div>
-  </form>
 </ion-content>

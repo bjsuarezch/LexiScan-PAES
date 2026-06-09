@@ -1,327 +1,316 @@
-ion-header {
-  ion-toolbar {
-    background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8c 100%);
-    color: #fff;
-    --border-bottom: none;
+// ============================================================
+// GYM Page — Duolingo Light Theme
+// LexiScan Design System — Chunky 3D
+// ============================================================
 
-    ion-title {
-      font-weight: bold;
-    }
+ion-header ion-toolbar {
+  background: var(--ion-toolbar-background, #ffffff);
+  border-bottom: 1px solid var(--ion-border-color, #e2e8f0);
 
-    ion-back-button {
-      color: #fff;
-    }
+  ion-title {
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--ion-color-primary, #6366f1);
   }
 }
 
 ion-content {
-  --background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8c 100%);
-  --padding-start: 0;
-  --padding-end: 0;
-}
-
-/* Centered content container */
-ion-content > * {
-  margin: 0 auto;
-  max-width: 600px;
-  width: 100%;
-  padding: 0 20px;
-  box-sizing: border-box;
-}
-
-ion-content > .ion-padding {
-  padding: 20px;
+  --background: var(--ion-background-color, #f8fafc);
 }
 
 .gym-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  padding-top: 10px;
+  gap: 16px;
 }
 
+// ============================================================
+// ERROR CARD
+// ============================================================
 .error-card {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 10px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-
-  ion-card-content {
-    padding: 20px;
-    color: #fff;
-
-    .error-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.9rem;
-      margin-bottom: 8px;
-      color: rgba(255, 255, 255, 0.8);
-
-      ion-icon {
-        font-size: 1.2rem;
-        color: #ff9800;
-      }
-    }
-
-    .error-title {
-      margin: 10px 0;
-      font-size: 1rem;
-      font-weight: 600;
-      color: #ffeb3b;
-    }
-
-    .progress-container {
-      margin-top: 15px;
-
-      .progress-bar {
-        width: 100%;
-        height: 12px;
-        background: linear-gradient(90deg, #4CAF50 0%, #FFC107 35%, #FF6B6B 100%);
-        border-radius: 10px;
-        overflow: hidden;
-        margin-bottom: 8px;
-
-        .progress-fill {
-          height: 100%;
-          background: rgba(0, 0, 0, 0.3);
-        }
-      }
-
-      .progress-text {
-        font-size: 0.85rem;
-        color: rgba(255, 255, 255, 0.8);
-      }
-    }
-  }
-}
-
-.chart-card {
-  background: #222;
-  border-radius: 15px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   padding: 20px;
+}
 
-  ion-card-content {
-    padding: 0;
+.error-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+  color: #64748b;
 
-    .radar-chart {
-      width: 100%;
-      height: auto;
-      max-width: 300px;
-      margin: 0 auto;
-    }
-
-    .radar-label {
-      fill: white;
-      font-size: 10px;
-      font-weight: 500;
-    }
-
-    .radar-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+  ion-icon {
+    font-size: 1.3rem;
+    color: #f97316;
   }
 }
 
-.btn-entrenar {
-  --background: #8bc34a;
-  --background-activated: #7cb342;
-  font-weight: 600;
-  font-size: 1rem;
-  padding: 12px 0;
-  border-radius: 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  margin: 10px 0;
+.error-title {
+  margin: 4px 0 16px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e293b;
 }
 
+.progress-container {
+  .progress-bar {
+    width: 100%;
+    height: 14px;
+    background: var(--ion-color-light, #f1f5f9);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 8px;
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #f97316, #fbbf24);
+      border-radius: 10px;
+    }
+  }
+
+  .progress-text {
+    font-size: 0.85rem;
+    color: #64748b;
+  }
+}
+
+// ============================================================
+// RADAR CHART CARD
+// ============================================================
+.chart-card {
+  padding: 16px;
+}
+
+.radar-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.radar-chart {
+  width: 100%;
+  max-width: 300px;
+}
+
+.radar-label {
+  fill: #334155;
+  font-size: 10px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+}
+
+// ============================================================
+// ENTRENAR BUTTON
+// ============================================================
+.btn-entrenar {
+  width: 100%;
+}
+
+// ============================================================
+// COACHING CARD
+// ============================================================
 .coaching-card {
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  padding: 20px;
+}
+
+.coaching-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin-bottom: 20px;
 
-  ion-card-content {
-    padding: 20px;
-    color: rgba(255, 255, 255, 0.95);
+  ion-icon {
+    font-size: 1.5rem;
+    color: #f97316;
+  }
 
-    .coaching-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 20px;
+  .coaching-title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e293b;
+  }
+}
 
-      ion-icon {
-        font-size: 1.5rem;
-        color: #ffc107;
-      }
+.error-info {
+  background: rgba(249, 115, 22, 0.08);
+  border-left: 4px solid #f97316;
+  padding: 14px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
 
-      .coaching-title {
-        margin: 0;
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: #fff;
-      }
-    }
+  .error-label {
+    margin: 6px 0;
+    font-size: 0.9rem;
+    color: #475569;
 
-    .error-info {
-      background: rgba(255, 255, 255, 0.05);
-      border-left: 3px solid #ff9800;
-      padding: 12px;
-      border-radius: 4px;
-      margin-bottom: 15px;
-
-      .error-label {
-        margin: 8px 0;
-        font-size: 0.9rem;
-        color: rgba(255, 255, 255, 0.8);
-
-        strong {
-          color: #ffeb3b;
-        }
-      }
-    }
-
-    .question-section {
-      margin: 20px 0;
-
-      h3 {
-        margin: 10px 0 8px 0;
-        font-size: 0.95rem;
-        color: #fff;
-        font-weight: 600;
-      }
-
-      .question-text {
-        margin: 10px 0;
-        font-size: 0.95rem;
-        line-height: 1.5;
-        color: rgba(255, 255, 255, 0.9);
-      }
-    }
-
-    .alternatives-section {
-      margin: 20px 0;
-
-      h4 {
-        margin: 10px 0 12px 0;
-        font-size: 0.9rem;
-        color: #fff;
-        font-weight: 600;
-      }
-
-      ion-radio-group {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
-
-      ion-item {
-        --background: rgba(255, 255, 255, 0.05);
-        border-radius: 6px;
-        margin-bottom: 4px;
-        --color: rgba(255, 255, 255, 0.9);
-
-        ion-label {
-          font-size: 0.9rem;
-          padding: 8px 0;
-        }
-
-        ion-radio {
-          --color: #4caf50;
-          --color-checked: #4caf50;
-        }
-      }
-    }
-
-    .button-group {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-top: 15px;
-
-      ion-button {
-        --border-radius: 6px;
-        font-weight: 600;
-        font-size: 0.9rem;
-
-        &:first-child {
-          --background: #4caf50;
-          --background-activated: #388e3c;
-        }
-      }
-    }
-
-    .result-section {
-      margin-top: 20px;
-
-      ion-card {
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-
-        &.result-correct {
-          --background: rgba(76, 175, 80, 0.15);
-          border: 1px solid rgba(76, 175, 80, 0.5);
-
-          ion-card-content {
-            padding: 15px;
-
-            .result-text-correct {
-              margin: 0;
-              color: #4caf50;
-              font-weight: 600;
-              text-align: center;
-            }
-          }
-        }
-
-        &.result-incorrect {
-          --background: rgba(244, 67, 54, 0.15);
-          border: 1px solid rgba(244, 67, 54, 0.5);
-
-          ion-card-content {
-            padding: 15px;
-
-            .result-text-incorrect {
-              margin: 0;
-              color: #ff9800;
-              font-weight: 600;
-              text-align: center;
-              line-height: 1.4;
-            }
-          }
-        }
-      }
-    }
-
-    .no-errors {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-      padding: 30px 20px;
-      text-align: center;
-
-      ion-icon {
-        font-size: 2.5rem;
-        color: #4caf50;
-      }
-
-      p {
-        margin: 0;
-        font-size: 1rem;
-        color: rgba(255, 255, 255, 0.9);
-      }
+    strong {
+      color: #1e293b;
     }
   }
 }
 
-ion-card {
-  margin: 0;
+.context-section {
+  margin-bottom: 16px;
+}
+
+.context-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: rgba(249, 115, 22, 0.06);
+  border-radius: 10px 10px 0 0;
+  border: 1px solid #e2e8f0;
+  border-bottom: none;
+
+  ion-icon {
+    font-size: 1.1rem;
+    color: #f97316;
+  }
+
+  span {
+    font-size: 0.82rem;
+    color: #f97316;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+  }
+}
+
+.context-body {
+  padding: 14px 16px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0 0 10px 10px;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #334155;
+
+  p { margin: 0; }
+}
+
+.question-section {
+  margin: 16px 0;
+
+  h3 {
+    margin: 0 0 8px;
+    font-size: 0.95rem;
+    color: #1e293b;
+    font-weight: 700;
+  }
+
+  .question-text {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #334155;
+  }
+}
+
+.alternatives-section {
+  margin: 16px 0;
+
+  h4 {
+    margin: 0 0 12px;
+    font-size: 0.9rem;
+    color: #64748b;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  ion-radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  ion-item {
+    --background: #ffffff;
+    --color: #334155;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    margin-bottom: 0;
+    --min-height: 48px;
+
+    ion-label {
+      font-size: 0.95rem;
+      font-family: 'Nunito', sans-serif;
+    }
+
+    ion-radio {
+      --color: #6366f1;
+      --color-checked: #6366f1;
+    }
+  }
+}
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+// ============================================================
+// RESULTS
+// ============================================================
+.result-section {
+  margin-top: 20px;
+}
+
+.result-correct {
+  background: rgba(56, 189, 248, 0.08);
+  border: 2px solid rgba(56, 189, 248, 0.3);
+  border-radius: 14px;
+
+  .result-text-correct {
+    margin: 0;
+    color: #0ea5e9;
+    font-weight: 700;
+    text-align: center;
+    font-family: 'Fredoka', sans-serif;
+  }
+}
+
+.result-incorrect {
+  background: rgba(248, 113, 113, 0.08);
+  border: 2px solid rgba(248, 113, 113, 0.3);
+  border-radius: 14px;
+
+  .result-text-incorrect {
+    margin: 0;
+    color: #f97316;
+    font-weight: 700;
+    text-align: center;
+    line-height: 1.4;
+    font-family: 'Fredoka', sans-serif;
+  }
+}
+
+.no-errors {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 36px 20px;
+  text-align: center;
+
+  ion-icon {
+    font-size: 3rem;
+    color: #38bdf8;
+  }
+
+  p {
+    margin: 0;
+    font-size: 1rem;
+    color: #475569;
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 600;
+  }
 }

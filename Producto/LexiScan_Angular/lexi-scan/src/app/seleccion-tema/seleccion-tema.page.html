@@ -1,4 +1,4 @@
-<ion-header [translucent]="true">
+<ion-header [translucent]="true" class="ion-no-border">
   <ion-toolbar>
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/home"></ion-back-button>
@@ -17,35 +17,35 @@
   <div class="tema-container">
     <h2>Piscina de Temas</h2>
     <p>Elige uno de estos temas para poder evaluar tus habilidades con 3 textos gratuitos:</p>
-    
+
     <div class="temas-grid">
-      <ion-button 
-        *ngFor="let tema of temas" 
-        expand="block" 
-        color="primary"
-        class="tema-btn"
+      <button
+        *ngFor="let tema of temas"
+        class="btn-chunky-3d btn-chunky-3d-indigo tema-btn"
         [disabled]="loading"
-        (click)="seleccionarTemaFijo(tema.id_tema)">
+        (click)="seleccionarTemaFijo(tema.id_tema)"
+      >
         {{ tema.nombre }}
-      </ion-button>
+      </button>
     </div>
 
-    <div class="custom-tema-section">
+    <div class="custom-tema-section card-elevated">
       <h3>¿Prefieres otro tema?</h3>
       <p>Ingresa tu propio tema y genera textos únicos. Costo: <ion-text color="warning"><strong>50 monedas</strong></ion-text></p>
-      
+
       <ion-item class="custom-input">
         <ion-label position="floating">Escribe tu tema (ej. El origen del sushi)</ion-label>
         <ion-input [(ngModel)]="temaCustom" type="text" [disabled]="loading"></ion-input>
       </ion-item>
-      
-      <ion-button 
-        expand="block" 
-        color="secondary" 
+
+      <button
+        class="btn-chunky-3d btn-chunky-3d-orange"
         [disabled]="!temaCustom || loading"
-        (click)="seleccionarTemaCustom()">
+        (click)="seleccionarTemaCustom()"
+        style="width: 100%; margin-top: 12px;"
+      >
         Crear Tema Personalizado
-      </ion-button>
+      </button>
     </div>
   </div>
 </ion-content>

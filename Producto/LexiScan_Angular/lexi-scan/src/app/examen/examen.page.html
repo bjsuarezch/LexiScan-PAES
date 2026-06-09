@@ -1,4 +1,4 @@
-<ion-header [translucent]="true">
+<ion-header [translucent]="true" class="ion-no-border">
   <ion-toolbar>
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/home"></ion-back-button>
@@ -14,50 +14,46 @@
 
 <ion-content [fullscreen]="true" class="ion-padding">
   <div class="examen-container">
-    <ion-card class="config-card">
-      <ion-card-content>
-        <h2>Simulacro PAES</h2>
+    <div class="config-card">
+      <h2>Simulacro PAES</h2>
 
-        <!-- Question Selection -->
-        <div class="selection-section">
-          <p class="selection-label">Selecciona la cantidad de preguntas:</p>
+      <!-- Question Selection -->
+      <div class="selection-section">
+        <p class="selection-label">Selecciona la cantidad de preguntas:</p>
 
-          <div class="slider-container">
-            <span class="slider-min">10</span>
-            <div
-              class="slider-wrapper"
-              [style.--percent]="'calc(' + ((questionCount - 10) / (65 - 10) * 100) + '% + ' + (22.5 - (questionCount - 10) / (65 - 10) * 45) + 'px)'"
-            >
-              <input
-                type="range"
-                min="10"
-                max="65"
-                [value]="questionCount"
-                (input)="onQuestionCountChange($event)"
-                class="custom-slider"
-              />
-
-              <!-- Este div ahora se moverá siguiendo al thumb -->
-              <div class="slider-value">{{ questionCount }}</div>
-            </div>
-            <span class="slider-max">65</span>
+        <div class="slider-container">
+          <span class="slider-min">10</span>
+          <div
+            class="slider-wrapper"
+            [style.--percent]="'calc(' + ((questionCount - 10) / (65 - 10) * 100) + '% + ' + (22.5 - (questionCount - 10) / (65 - 10) * 45) + 'px)'"
+          >
+            <input
+              type="range"
+              min="10"
+              max="65"
+              [value]="questionCount"
+              (input)="onQuestionCountChange($event)"
+              class="custom-slider"
+            />
+            <div class="slider-value">{{ questionCount }}</div>
           </div>
+          <span class="slider-max">65</span>
         </div>
+      </div>
 
-        <!-- Time Estimate -->
-        <div class="time-section">
-          <ion-icon name="time"></ion-icon>
-          <span>Tiempo estimado: {{ estimatedTime }} min</span>
-        </div>
+      <!-- Time Estimate -->
+      <div class="time-section">
+        <ion-icon name="time"></ion-icon>
+        <span>Tiempo estimado: {{ estimatedTime }} min</span>
+      </div>
 
-        <!-- Divider -->
-        <hr class="divider" />
+      <!-- Divider -->
+      <hr class="divider" />
 
-        <!-- Start Button -->
-        <ion-button expand="block" class="btn-start" (click)="startExam()">
-          Iniciar Examen
-        </ion-button>
-      </ion-card-content>
-    </ion-card>
+      <!-- Start Button -->
+      <button class="btn-chunky-3d btn-chunky-3d-indigo btn-start" (click)="startExam()">
+        Iniciar Examen
+      </button>
+    </div>
   </div>
 </ion-content>

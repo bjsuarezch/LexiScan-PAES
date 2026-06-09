@@ -20,6 +20,14 @@ export class Tab3Page implements OnInit, OnDestroy {
   profileExists = false;
   private destroy$ = new Subject<void>();
 
+  // Focus states for input animations
+  editNombreFocused = false;
+  editEmailFocused = false;
+  editTelefonoFocused = false;
+  editDireccionFocused = false;
+  editCiudadFocused = false;
+  editCodigoFocused = false;
+
   constructor(
     private fb: FormBuilder,
     private profileService: ProfileService,

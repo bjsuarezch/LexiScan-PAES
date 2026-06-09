@@ -34,7 +34,7 @@
 
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import "@ionic/angular/css/palettes/dark.system.css";
+/* @import "@ionic/angular/css/palettes/dark.system.css"; */
 
 /**
  * Global Layout Styles
@@ -65,5 +65,380 @@ ion-content > * {
   &.ion-padding {
     padding: 20px;
   }
+}
+
+// ============================================================
+// LexiScan Atomic Components — Duolingo Style
+// ============================================================
+
+// --- Typography Utilities ---
+h1, h2, h3, h4, h5, h6,
+.heading-1, .heading-2, .heading-3 {
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+body,
+p, span, a, li, td, th,
+.body-text {
+  font-family: 'Nunito', sans-serif;
+}
+
+// --- Botones Chunky 3D ---
+.btn-chunky-3d {
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 12px 24px;
+  border-radius: 16px;
+  border: none;
+  border-bottom: 4px solid rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+  top: 0;
+  text-align: center;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+
+  &:hover {
+    transform: translateY(2px);
+    border-bottom-width: 2px;
+    filter: brightness(1.08);
+  }
+
+  &:active {
+    transform: translateY(4px);
+    border-bottom-width: 0px;
+    filter: brightness(0.95);
+    box-shadow: none;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-bottom-width: 4px;
+    top: 0;
+    transform: none;
+    filter: none;
+
+    &:hover {
+      transform: none;
+      border-bottom-width: 4px;
+      filter: none;
+    }
+  }
+}
+
+// --- Color Variants ---
+.btn-chunky-3d-indigo {
+  @extend .btn-chunky-3d;
+  background: linear-gradient(135deg, #6366f1, #818cf8);
+  color: #ffffff;
+  border-bottom-color: #4f46e5;
+
+  &:hover {
+    background: linear-gradient(135deg, #818cf8, #a5b4fc);
+    border-bottom-color: #6366f1;
+  }
+
+  &:active {
+    background: #4f46e5;
+    border-bottom-color: transparent;
+  }
+}
+
+.btn-chunky-3d-orange {
+  @extend .btn-chunky-3d;
+  background: linear-gradient(135deg, #f97316, #fb923c);
+  color: #ffffff;
+  border-bottom-color: #ea580c;
+
+  &:hover {
+    background: linear-gradient(135deg, #fb923c, #fdba74);
+    border-bottom-color: #f97316;
+  }
+
+  &:active {
+    background: #ea580c;
+    border-bottom-color: transparent;
+  }
+}
+
+.btn-chunky-3d-sky {
+  @extend .btn-chunky-3d;
+  background: linear-gradient(135deg, #38bdf8, #7dd3fc);
+  color: #ffffff;
+  border-bottom-color: #0ea5e9;
+
+  &:hover {
+    background: linear-gradient(135deg, #7dd3fc, #bae6fd);
+    border-bottom-color: #38bdf8;
+  }
+
+  &:active {
+    background: #0ea5e9;
+    border-bottom-color: transparent;
+  }
+}
+
+.btn-chunky-3d-violet {
+  @extend .btn-chunky-3d;
+  background: linear-gradient(135deg, #a78bfa, #c4b5fd);
+  color: #ffffff;
+  border-bottom-color: #8b5cf6;
+
+  &:hover {
+    background: linear-gradient(135deg, #c4b5fd, #ddd6fe);
+    border-bottom-color: #a78bfa;
+  }
+
+  &:active {
+    background: #8b5cf6;
+    border-bottom-color: transparent;
+  }
+}
+
+.btn-chunky-3d-gray {
+  @extend .btn-chunky-3d;
+  background: #f1f5f9;
+  color: #475569;
+  border-bottom-color: #cbd5e1;
+
+  &:hover {
+    background: #e2e8f0;
+    color: #334155;
+    border-bottom-color: #94a3b8;
+  }
+
+  &:active {
+    background: #e2e8f0;
+    border-bottom-color: transparent;
+    color: #1e293b;
+  }
+}
+
+.btn-chunky-3d-primary {
+  @extend .btn-chunky-3d;
+  background-color: var(--ion-color-primary, #6366f1);
+  color: #ffffff;
+  border-bottom-color: var(--ion-color-primary-shade, #4f46e5);
+
+  &:hover {
+    filter: brightness(1.1);
+  }
+
+  &:active {
+    background-color: var(--ion-color-primary-shade, #4f46e5);
+    border-bottom-color: var(--ion-color-primary-dark, #4338ca);
+  }
+}
+
+.btn-chunky-3d-secondary {
+  @extend .btn-chunky-3d;
+  background-color: var(--ion-color-secondary, #f97316);
+  color: #ffffff;
+  border-bottom-color: var(--ion-color-secondary-shade, #ea580c);
+
+  &:hover {
+    filter: brightness(1.1);
+  }
+
+  &:active {
+    background-color: var(--ion-color-secondary-shade, #ea580c);
+    border-bottom-color: var(--ion-color-secondary-dark, #c2410c);
+  }
+}
+
+.btn-chunky-3d-success {
+  @extend .btn-chunky-3d;
+  background-color: var(--ion-color-success, #38bdf8);
+  color: #ffffff;
+  border-bottom-color: var(--ion-color-success-shade, #0ea5e9);
+
+  &:hover {
+    filter: brightness(1.1);
+  }
+
+  &:active {
+    background-color: var(--ion-color-success-shade, #0ea5e9);
+    border-bottom-color: var(--ion-color-success-dark, #0284c7);
+  }
+}
+
+.btn-chunky-3d-danger {
+  @extend .btn-chunky-3d;
+  background-color: var(--ion-color-danger, #f87171);
+  color: #ffffff;
+  border-bottom-color: var(--ion-color-danger-shade, #ef4444);
+
+  &:hover {
+    filter: brightness(1.1);
+  }
+
+  &:active {
+    background-color: var(--ion-color-danger-shade, #ef4444);
+    border-bottom-color: var(--ion-color-danger-dark, #dc2626);
+  }
+}
+
+.btn-chunky-3d-outline {
+  @extend .btn-chunky-3d;
+  background-color: transparent;
+  color: var(--ion-color-primary, #6366f1);
+  border: 2px solid var(--ion-color-primary, #6366f1);
+  border-bottom: 4px solid var(--ion-color-primary-shade, #4f46e5);
+
+  &:hover {
+    background-color: rgba(99, 102, 241, 0.08);
+    transform: translateY(2px);
+    border-bottom-width: 2px;
+  }
+
+  &:active {
+    border-bottom-width: 2px;
+    top: 2px;
+    background-color: rgba(99, 102, 241, 0.15);
+  }
+}
+
+// --- Cards Elevadas ---
+.card-elevated {
+  background: var(--ion-background-color, #ffffff);
+  border-radius: 16px;
+  border: 1px solid var(--ion-border-color, #e2e8f0);
+  border-bottom: 3px solid var(--ion-border-color, #cbd5e1);
+  padding: 16px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: var(--ion-shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.08));
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--ion-shadow-md, 0 4px 12px rgba(0, 0, 0, 0.1));
+  }
+
+  &:active {
+    transform: translateY(1px);
+    box-shadow: none;
+  }
+}
+
+.card-elevated-lg {
+  @extend .card-elevated;
+  border-radius: 20px;
+  padding: 20px;
+  border-bottom-width: 4px;
+  box-shadow: var(--ion-shadow-md, 0 4px 12px rgba(0, 0, 0, 0.1));
+}
+
+// --- Progress Bars Fluidas ---
+ion-progress-bar {
+  --border-radius: 12px;
+  height: 14px;
+  border-radius: 12px;
+  overflow: hidden;
+
+  &::part(track) {
+    border-radius: 12px;
+    background: var(--ion-color-light, #f1f5f9);
+  }
+
+  &::part(progress) {
+    border-radius: 12px;
+    transition: width 0.3s ease-in-out;
+  }
+}
+
+.progress-fluid {
+  --border-radius: 12px;
+  height: 14px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--ion-color-light, #f1f5f9);
+
+  .progress-fluid__fill {
+    height: 100%;
+    border-radius: 12px;
+    background: linear-gradient(90deg, var(--ion-color-primary, #6366f1), var(--ion-color-secondary, #f97316));
+    transition: width 0.3s ease-in-out;
+  }
+}
+
+.progress-fluid-success .progress-fluid__fill {
+  background: linear-gradient(90deg, var(--ion-color-success, #38bdf8), var(--ion-color-info, #a78bfa));
+}
+
+.progress-fluid-danger .progress-fluid__fill {
+  background: linear-gradient(90deg, var(--ion-color-danger, #f87171), var(--ion-color-secondary, #f97316));
+}
+
+// --- Badge / Pill ---
+.badge-chunky {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-primary {
+  @extend .badge-chunky;
+  background: rgba(99, 102, 241, 0.15);
+  color: var(--ion-color-primary, #6366f1);
+}
+
+.badge-secondary {
+  @extend .badge-chunky;
+  background: rgba(249, 115, 22, 0.15);
+  color: var(--ion-color-secondary, #f97316);
+}
+
+.badge-success {
+  @extend .badge-chunky;
+  background: rgba(56, 189, 248, 0.15);
+  color: var(--ion-color-success, #38bdf8);
+}
+
+// --- Text Utilities ---
+.text-primary { color: var(--ion-color-primary, #6366f1); }
+.text-secondary { color: var(--ion-color-secondary, #f97316); }
+.text-success { color: var(--ion-color-success, #38bdf8); }
+.text-danger { color: var(--ion-color-danger, #f87171); }
+.text-muted { color: var(--ion-color-medium, #64748b); }
+
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+
+.font-heading { font-family: 'Fredoka', sans-serif; }
+.font-body { font-family: 'Nunito', sans-serif; }
+
+// --- Spacing Utilities ---
+.gap-sm { gap: 8px; }
+.gap-md { gap: 16px; }
+.gap-lg { gap: 24px; }
+
+// --- Scrollbar ---
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--ion-color-medium, #94a3b8);
+  border-radius: 3px;
 }
 

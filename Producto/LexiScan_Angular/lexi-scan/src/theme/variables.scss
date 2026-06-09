@@ -1,2 +1,163 @@
-// For information on how to create your own theme, please refer to:
-// https://ionicframework.com/docs/theming/
+// ============================================================
+// LexiScan Design System — Variables & Tokens
+// Palette: Índigo #6366F1 + Naranja #F97316
+// Typography: Fredoka (headings) + Nunito (body)
+// ============================================================
+
+// --- Brand Colors ---
+$color-primary: #6366f1;
+$color-primary-light: #818cf8;
+$color-primary-dark: #4f46e5;
+
+$color-secondary: #f97316;
+$color-secondary-light: #fb923c;
+$color-secondary-dark: #ea580c;
+
+// --- Semantic: Feedback (CERO VERDE) ---
+$color-success: #38bdf8;   // sky-400 — azul brillante
+$color-success-light: #7dd3fc;
+$color-success-dark: #0ea5e9;
+
+$color-danger: #f87171;    // coral rojo suave
+$color-danger-light: #fca5a5;
+$color-danger-dark: #ef4444;
+
+$color-warning: #fbbf24;   // ámbar suave
+$color-info: #a78bfa;      // violeta claro
+
+// --- Neutrals ---
+$color-background: #f8fafc;
+$color-background-dark: #0f172a;
+$color-surface: #ffffff;
+$color-surface-dark: #1e293b;
+$color-surface-raised-dark: #334155;
+
+// --- Grays (hierarchical) ---
+$gray-50: #f8fafc;
+$gray-100: #f1f5f9;
+$gray-200: #e2e8f0;
+$gray-300: #cbd5e1;
+$gray-400: #94a3b8;
+$gray-500: #64748b;
+$gray-600: #475569;
+$gray-700: #334155;
+$gray-800: #1e293b;
+$gray-900: #0f172a;
+
+// --- Typography ---
+$font-heading: 'Fredoka', sans-serif;
+$font-body: 'Nunito', sans-serif;
+
+// --- Ionic Color Tokens ---
+:root {
+  // Primary
+  --ion-color-primary: #{$color-primary};
+  --ion-color-primary-rgb: 99, 102, 241;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #{$color-primary-dark};
+  --ion-color-primary-tint: #{$color-primary-light};
+
+  // Secondary
+  --ion-color-secondary: #{$color-secondary};
+  --ion-color-secondary-rgb: 249, 115, 22;
+  --ion-color-secondary-contrast: #ffffff;
+  --ion-color-secondary-contrast-rgb: 255, 255, 255;
+  --ion-color-secondary-shade: #{$color-secondary-dark};
+  --ion-color-secondary-tint: #{$color-secondary-light};
+
+  // Tertiary (violeta info)
+  --ion-color-tertiary: #{$color-info};
+  --ion-color-tertiary-rgb: 167, 139, 250;
+  --ion-color-tertiary-contrast: #ffffff;
+  --ion-color-tertiary-contrast-rgb: 255, 255, 255;
+  --ion-color-tertiary-shade: #7c3aed;
+  --ion-color-tertiary-tint: #c4b5fd;
+
+  // Success (azul brillante — NO verde)
+  --ion-color-success: #{$color-success};
+  --ion-color-success-rgb: 56, 189, 248;
+  --ion-color-success-contrast: #ffffff;
+  --ion-color-success-contrast-rgb: 255, 255, 255;
+  --ion-color-success-shade: #{$color-success-dark};
+  --ion-color-success-tint: #{$color-success-light};
+
+  // Danger
+  --ion-color-danger: #{$color-danger};
+  --ion-color-danger-rgb: 248, 113, 113;
+  --ion-color-danger-contrast: #ffffff;
+  --ion-color-danger-contrast-rgb: 255, 255, 255;
+  --ion-color-danger-shade: #{$color-danger-dark};
+  --ion-color-danger-tint: #{$color-danger-light};
+
+  // Warning
+  --ion-color-warning: #{$color-warning};
+  --ion-color-warning-rgb: 251, 191, 36;
+  --ion-color-warning-contrast: #1e293b;
+  --ion-color-warning-contrast-rgb: 30, 41, 59;
+  --ion-color-warning-shade: #d97706;
+  --ion-color-warning-tint: #fde68a;
+
+  // Medium (gray)
+  --ion-color-medium: #{$gray-500};
+  --ion-color-medium-rgb: 100, 116, 139;
+  --ion-color-medium-contrast: #ffffff;
+  --ion-color-medium-contrast-rgb: 255, 255, 255;
+  --ion-color-medium-shade: #{$gray-600};
+  --ion-color-medium-tint: #{$gray-400};
+
+  // Light
+  --ion-color-light: #{$gray-100};
+  --ion-color-light-rgb: 241, 245, 249;
+  --ion-color-light-contrast: #{$gray-800};
+  --ion-color-light-contrast-rgb: 30, 41, 59;
+  --ion-color-light-shade: #{$gray-200};
+  --ion-color-light-tint: #{$gray-50};
+
+  // Background & Surface
+  --ion-background-color: #{$color-background};
+  --ion-background-color-rgb: 248, 250, 252;
+  --ion-text-color: #{$gray-800};
+  --ion-text-color-rgb: 30, 41, 59;
+  --ion-border-color: #{$gray-200};
+
+  // Toolbar
+  --ion-toolbar-background: #{$color-surface};
+  --ion-toolbar-color: #{$gray-800};
+
+  // Tab bar
+  --ion-tab-bar-background: #{$color-surface};
+  --ion-tab-bar-color: #{$gray-400};
+  --ion-tab-bar-color-selected: #{$color-primary};
+
+  // Typography
+  --ion-font-family: #{$font-body};
+
+  // Shape
+  --ion-border-radius: 12px;
+  --ion-border-radius-sm: 8px;
+  --ion-border-radius-lg: 20px;
+
+  // Shadows
+  --ion-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --ion-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --ion-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+// --- Dark Mode Overrides ---
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ion-background-color: #{$color-background-dark};
+    --ion-background-color-rgb: 15, 23, 42;
+    --ion-text-color: #{$gray-100};
+    --ion-text-color-rgb: 241, 245, 249;
+    --ion-border-color: #{$gray-700};
+
+    --ion-toolbar-background: #{$color-surface-dark};
+    --ion-toolbar-color: #{$gray-100};
+
+    --ion-tab-bar-background: #{$color-surface-dark};
+    --ion-tab-bar-color: #{$gray-500};
+    --ion-tab-bar-color-selected: #{$color-primary-light};
+  }
+}
