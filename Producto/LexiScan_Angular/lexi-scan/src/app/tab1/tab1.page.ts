@@ -35,7 +35,6 @@ export class Tab1Page implements OnInit {
   initializeForm(): void {
     this.loginForm = this.fb.group({
       rut: ['', [Validators.required, this.rutValidator.bind(this)]],
-      email: ['', [Validators.required, Validators.email]],
       contrasena: ['', [Validators.required, Validators.minLength(6)]]
     });
   }
@@ -86,10 +85,6 @@ export class Tab1Page implements OnInit {
       return 'RUT inválido';
     }
 
-    if (fieldName === 'email' && control.errors['email']) {
-      return 'Email inválido';
-    }
-
     if (fieldName === 'contrasena' && control.errors['minlength']) {
       return 'Mínimo 6 caracteres';
     }
@@ -102,16 +97,6 @@ export class Tab1Page implements OnInit {
   }
 
   onSubmit(): void {
-    // TEMPORARY DEVELOPMENT LOGIN — bypass backend auth for dev
-    // TODO: Revert this before production deployment
-    const demoUser = { isLoggedIn: true, user: { nombre: 'Usuario Demo' } };
-    localStorage.setItem('lexiscan_dev_session', JSON.stringify(demoUser));
-    const profile = { rut: '12345678-9', nombre: 'Usuario Demo', email: 'demo@dev.local', telefono: '', direccion: '' };
-    this.profileService.saveProfile(profile);
-    this.router.navigate(['/home']);
-    return;
-
-    /*
     this.submitted = true;
 
     if (this.loginForm.valid) {
@@ -134,16 +119,6 @@ export class Tab1Page implements OnInit {
         }
       });
     }
-    */
-    // END TEMPORARY DEVELOPMENT LOGIN
-  }
-
-  onDemoLogin(): void {
-    const demoUser = { isLoggedIn: true, user: { nombre: 'Usuario Demo' } };
-    localStorage.setItem('lexiscan_dev_session', JSON.stringify(demoUser));
-    const profile = { rut: '12345678-9', nombre: 'Usuario Demo', email: 'demo@dev.local', telefono: '', direccion: '' };
-    this.profileService.saveProfile(profile);
-    this.router.navigate(['/home']);
   }
 
   resetForm(): void {
@@ -153,6 +128,25 @@ export class Tab1Page implements OnInit {
 
   goToCreateAccount(): void {
     this.router.navigate(['/tabs/tab2']);
+  }
+
+  onRutInput(event: any): void {
+    let input = event.target.value;
+    if (!input) return;
+    
+    let clean = input.replace(/[^0-9kK]/g, '').toUpperCase();
+    if (clean.length > 9) {
+      clean = clean.slice(0, 9);
+    }
+    
+    let formatted = clean;
+    if (clean.length > 1) {
+      const body = clean.slice(0, -1);
+      const dv = clean.slice(-1);
+      formatted = `${body}-${dv}`;
+    }
+    
+    this.loginForm.get('rut')?.setValue(formatted, { emitEvent: false });
   }
 
   async openConfigModal(): Promise<void> {

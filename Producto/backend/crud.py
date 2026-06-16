@@ -66,8 +66,9 @@ def create_user(db: Session, rut: str, nombre_completo: str, email: str, contras
         email=email,
         password_hash=password_hash,
         xp_total=0,
-        racha_actual=0,
+        racha_actual=1,
         activo=True,
+        textos_restantes=3,
     )
     db.add(user)
     
@@ -171,11 +172,13 @@ def seleccionar_tema(db: Session, rut: str, tema_id: Optional[int], tema_custom:
     elif tema_custom:
         # Check if they have enough coins
         wallet = db.query(models.EconomiaMonedas).filter(models.EconomiaMonedas.rut_usuario == rut).first()
-        costo = 50
-        if not wallet or wallet.saldo_monedas < costo:
+        # First theme selection (when tema_actual_id is None) is free
+        costo = 0 if user.tema_actual_id is None else 50
+        if costo > 0 and (not wallet or wallet.saldo_monedas < costo):
             raise ValueError("No tienes suficientes monedas para un tema personalizado.")
         
-        wallet.saldo_monedas -= costo
+        if wallet and costo > 0:
+            wallet.saldo_monedas -= costo
         
         # Check if custom theme already exists
         tema = db.query(models.Tema).filter(models.Tema.nombre.ilike(tema_custom)).first()

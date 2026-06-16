@@ -98,3 +98,44 @@ ion-content {
 .btn-full {
   width: 100%;
 }
+
+.save-key-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -6px;
+  margin-bottom: 6px;
+}
+
+.save-key-btn {
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 8px 16px;
+  border-radius: 12px;
+  background: #6366f1;
+  color: #ffffff;
+  border: none;
+  border-bottom: 3px solid #4338ca;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  transition: all 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background: #4f46e5;
+  }
+
+  &:active:not(:disabled) {
+    background: #4338ca;
+    border-bottom-width: 0;
+    transform: translateY(3px);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+

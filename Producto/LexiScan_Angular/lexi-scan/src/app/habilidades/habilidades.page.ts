@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { AlertController } from '@ionic/angular';
+import { Router, ActivatedRoute } from '@angular/router';
+import { AlertController, ModalController } from '@ionic/angular';
 import { ProfileService } from '../services/profile.service';
 import { HabilidadesService } from '../services/habilidades.service';
+import { ConfigModalComponent } from '../config-modal/config-modal.component';
 import {
   DashboardResponse,
   HabilidadData,
@@ -12,6 +13,7 @@ import { IUserProfile } from '../models/auth.model';
 import { DesafiosService } from '../services/desafios.service';
 import { BehaviorSubject, Observable, interval, Subscription } from 'rxjs';
 import { OnDestroy } from '@angular/core';
+
 interface EvaluacionResultado {
   index: number;
   enunciado: string;
@@ -53,7 +55,9 @@ export class HabilidadesPage implements OnInit, OnDestroy {
     private profileService: ProfileService,
     private habilidadesService: HabilidadesService,
     private alertController: AlertController,
-    private desafiosService: DesafiosService
+    private modalController: ModalController,
+    private desafiosService: DesafiosService,
+    private route: ActivatedRoute,
   ) {}
 
   ngOnInit() {
@@ -62,6 +66,27 @@ export class HabilidadesPage implements OnInit, OnDestroy {
       this.profile = profile;
       if (profile?.rut) {
         this.loadHabilidades(profile.rut);
+        this.checkFirstTime();
+      }
+    });
+  }
+
+  checkFirstTime(): void {
+    this.route.queryParams.subscribe(async (params) => {
+      if (params['firstTime'] === 'true') {
+        const alertPopup = await this.alertController.create({
+          header: '¡Veamos cómo son tus habilidades de comprensión lectora!',
+          message: 'Elige un tema para ser evaluado:',
+          buttons: [
+            {
+              text: 'Comenzar',
+              handler: () => {
+                this.router.navigate(['/seleccion-tema']);
+              }
+            }
+          ]
+        });
+        await alertPopup.present();
       }
     });
   }
@@ -113,6 +138,18 @@ export class HabilidadesPage implements OnInit, OnDestroy {
     return 'maestria-baja';
   }
 
+  getSkillDisplayName(name: string): string {
+    const map: { [key: string]: string } = {
+      'Interpretar': 'Interpretar',
+      'Vocabulario': 'Vocabulario',
+      'Tipos_de_Texto': 'Tipos de Texto',
+      'Localizar': 'Localizar',
+      'Lectura_Critica': 'Lectura Crítica',
+      'Evaluar': 'Evaluar',
+    };
+    return map[name] || name.replace(/_/g, ' ');
+  }
+
   selectSkill(skill: string): void {
     this.selectedHabilidad = null;
     this.selectedAnswers = {};
@@ -141,13 +178,18 @@ export class HabilidadesPage implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Error al generar preguntas:', error);
-        alert(error.error?.detail || 'No se pudo generar las preguntas. Inténtalo de nuevo.');
+        const detail = error.error?.detail || '';
+        if (detail.toLowerCase().includes('groq')) {
+          this.handleGroqError();
+        } else {
+          alert(detail || 'No se pudo generar las preguntas. Inténtalo de nuevo.');
+        }
       },
     });
   }
 
   get minSecondsRequired(): number {
-    return this.totalQuestions * 60; // 1 minuto por pregunta (60 seg)
+    return this.totalQuestions * 15; // 15 segundos por pregunta
   }
 
   get isSubmitLocked(): boolean {
@@ -231,6 +273,17 @@ export class HabilidadesPage implements OnInit, OnDestroy {
             this.habilidadesService.getDashboard(this.profile.rut).subscribe());
         }
 
+        // Increment daily goal count
+        const todayStr = new Date().toDateString();
+        const savedDate = localStorage.getItem('daily_goal_date');
+        let count = 0;
+        if (savedDate === todayStr) {
+          count = parseInt(localStorage.getItem('daily_goal_count') || '0', 10);
+        } else {
+          localStorage.setItem('daily_goal_date', todayStr);
+        }
+        localStorage.setItem('daily_goal_count', (count + 1).toString());
+
         // --- Alerta de Rendimiento ---
         if (result.rendimiento_cambio !== undefined) {
            const cambio = result.rendimiento_cambio;
@@ -267,8 +320,14 @@ export class HabilidadesPage implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Error al evaluar respuestas:', error);
-        this.evaluationError =
-          'No se pudo evaluar tus respuestas. Intenta de nuevo más tarde.';
+        const detail = error.error?.detail || '';
+        if (detail.toLowerCase().includes('groq')) {
+          this.handleGroqError();
+          this.evaluationError = 'Error en la comunicación con Groq. Configura la API para resolverlo.';
+        } else {
+          this.evaluationError =
+            detail || 'No se pudo evaluar tus respuestas. Intenta de nuevo más tarde.';
+        }
         this.submitting = false;
       },
     });
@@ -326,5 +385,29 @@ export class HabilidadesPage implements OnInit, OnDestroy {
       return texto;
     }
     return [];
+  }
+
+  async handleGroqError() {
+    const alert = await this.alertController.create({
+      header: 'Error de Comunicación',
+      message: 'Error en la comunicación con Groq. ¿Desea ir a la configuración de la IA para resolverlo?',
+      buttons: [
+        {
+          text: 'No',
+          role: 'cancel'
+        },
+        {
+          text: 'Sí',
+          handler: async () => {
+            const modal = await this.modalController.create({
+              component: ConfigModalComponent,
+              componentProps: {}
+            });
+            await modal.present();
+          }
+        }
+      ]
+    });
+    await alert.present();
   }
 }

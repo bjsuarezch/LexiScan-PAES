@@ -34,7 +34,14 @@ export class ExamenSimulacroPage implements OnInit, OnDestroy {
   private timerSubscription: Subscription | null = null;
 
   // --- Submit state ---
-  isSubmitLocked = false;
+  get minSecondsRequired(): number {
+    return this.totalPreguntas * 15;
+  }
+
+  get isSubmitLocked(): boolean {
+    return this.elapsedSeconds < this.minSecondsRequired;
+  }
+
   submitButtonText = 'Terminar';
 
   groupedQuestions: any[] = [];
@@ -213,6 +220,19 @@ export class ExamenSimulacroPage implements OnInit, OnDestroy {
   // SUBMIT
   // ============================================================
   async finishExam() {
+    if (this.isSubmitLocked) {
+      const remaining = this.minSecondsRequired - this.elapsedSeconds;
+      const m = Math.floor(remaining / 60).toString().padStart(2, '0');
+      const s = (remaining % 60).toString().padStart(2, '0');
+      const alert = await this.alertController.create({
+        header: 'Espera un momento',
+        message: `Debes dedicar al menos 15 segundos por pregunta. Por favor, espera ${m}:${s} para poder entregar tu examen.`,
+        buttons: ['Entendido'],
+      });
+      await alert.present();
+      return;
+    }
+
     const alert = await this.alertController.create({
       header: 'Confirmar',
       message:

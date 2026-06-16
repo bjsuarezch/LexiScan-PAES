@@ -160,7 +160,7 @@ export class ExamenResultadosPage implements OnInit {
     // ── Tabla de Habilidades ─────────────────────────────────────────────────
     if (this.examResult.rendimiento_habilidades && this.examResult.rendimiento_habilidades.length > 0) {
       const tableData = this.examResult.rendimiento_habilidades.map((hab: any) => [
-        hab.nombre_habilidad,
+        this.getSkillDisplayName(hab.nombre_habilidad),
         `${hab.correctas} / ${hab.total}`,
         `${hab.porcentaje}%`
       ]);
@@ -176,5 +176,17 @@ export class ExamenResultadosPage implements OnInit {
     }
 
     doc.save(`LexiScan_Resultados_${new Date().toISOString().slice(0, 10)}.pdf`);
+  }
+
+  getSkillDisplayName(name: string): string {
+    const map: { [key: string]: string } = {
+      'Interpretar': 'Interpretar',
+      'Vocabulario': 'Vocabulario',
+      'Tipos_de_Texto': 'Tipos de Texto',
+      'Localizar': 'Localizar',
+      'Lectura_Critica': 'Lectura Crítica',
+      'Evaluar': 'Evaluar',
+    };
+    return map[name] || name.replace(/_/g, ' ');
   }
 }

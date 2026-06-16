@@ -195,7 +195,7 @@
           <div class="revenge-content">
             <div class="revenge-rank font-heading">{{ i + 1 }}</div>
             <div class="revenge-info">
-              <h3 class="font-heading">{{ error.habilidad }}</h3>
+              <h3 class="font-heading">{{ getSkillDisplayName(error.habilidad) }}</h3>
               <p class="font-body">Fallaste {{ error.veces_fallada }} {{ error.veces_fallada === 1 ? 'vez' : 'veces' }}</p>
             </div>
             <ion-icon name="flame" class="revenge-flame"></ion-icon>
@@ -220,3 +220,28 @@
 
   </div>
 </ion-content>
+
+<ion-footer class="ion-no-border">
+  <ion-tab-bar>
+    <ion-tab-button tab="home" routerLink="/home" routerDirection="root">
+      <ion-icon name="home"></ion-icon>
+      <ion-label>Inicio</ion-label>
+    </ion-tab-button>
+    <ion-tab-button tab="habilidades" routerLink="/habilidades" routerDirection="root">
+      <ion-icon name="book"></ion-icon>
+      <ion-label>Habilidades</ion-label>
+    </ion-tab-button>
+    <ion-tab-button tab="gym" routerLink="/gym" routerDirection="root">
+      <ion-icon name="barbell"></ion-icon>
+      <ion-label>GYM</ion-label>
+    </ion-tab-button>
+    <ion-tab-button tab="stats" routerLink="/stats" routerDirection="root">
+      <ion-icon name="stats-chart" color="primary"></ion-icon>
+      <ion-label color="primary">Stats</ion-label>
+    </ion-tab-button>
+    <ion-tab-button tab="ranking" routerLink="/ranking" routerDirection="root">
+      <ion-icon name="trophy"></ion-icon>
+      <ion-label>Ranking</ion-label>
+    </ion-tab-button>
+  </ion-tab-bar>
+</ion-footer>

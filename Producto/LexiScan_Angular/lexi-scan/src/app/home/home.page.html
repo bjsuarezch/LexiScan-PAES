@@ -29,7 +29,7 @@
     <!-- ============================================ -->
     <section class="hero-section">
       <div class="hero-greeting">
-        <h1 class="font-heading">Hola, {{ profile?.nombre || 'Estudiante' }} 👋</h1>
+        <h1 class="font-heading">Hola, {{ firstName }} 👋</h1>
         <p class="hero-subtitle font-body">¿Listo para subir tu puntaje PAES?</p>
       </div>
 
@@ -62,13 +62,22 @@
       <div class="daily-goal card-elevated">
         <div class="daily-goal-header">
           <span class="font-heading">🎯 Meta diaria</span>
-          <span class="daily-goal-pct font-heading">45%</span>
+          <span class="daily-goal-pct font-heading">{{ getDailyGoalPct() }}%</span>
         </div>
         <div class="daily-goal-bar">
-          <!-- TODO: Bind width to real daily goal progress -->
-          <div class="daily-goal-fill progress-45"></div>
+          <div class="daily-goal-fill" [style.width.%]="getDailyGoalPct()"></div>
         </div>
-        <p class="daily-goal-hint font-body">Vas por buen camino — ¡sigue así!</p>
+        <p class="daily-goal-hint font-body">
+          <ng-container *ngIf="getDailyGoalPct() === 0">
+            Comienza a practicar para cumplir tu meta diaria (completa 2 lecciones de habilidades o sesiones de gym para llegar al 100%).
+          </ng-container>
+          <ng-container *ngIf="getDailyGoalPct() === 50">
+            ¡Vas por la mitad! Completa 1 lección más para cumplir tu meta del día.
+          </ng-container>
+          <ng-container *ngIf="getDailyGoalPct() >= 100">
+            ¡Felicidades! Has alcanzado tu meta diaria hoy. 🎉
+          </ng-container>
+        </p>
       </div>
     </section>
 
@@ -310,7 +319,7 @@
           </div>
           <div class="weakness-text">
             <h3 class="font-heading">Tu debilidad hoy</h3>
-            <p class="font-body">{{ errorFrecuente.nombre_habilidad }}</p>
+            <p class="font-body">{{ getSkillDisplayName(errorFrecuente.nombre_habilidad) }}</p>
           </div>
           <ion-icon name="chevron-forward" class="module-arrow"></ion-icon>
         </div>
@@ -319,3 +328,28 @@
 
   </div>
 </ion-content>
+
+<ion-footer class="ion-no-border">
+  <ion-tab-bar>
+    <ion-tab-button tab="home" routerLink="/home" routerDirection="root">
+      <ion-icon name="home" color="primary"></ion-icon>
+      <ion-label color="primary">Inicio</ion-label>
+    </ion-tab-button>
+    <ion-tab-button tab="habilidades" routerLink="/habilidades" routerDirection="root">
+      <ion-icon name="book"></ion-icon>
+      <ion-label>Habilidades</ion-label>
+    </ion-tab-button>
+    <ion-tab-button tab="gym" routerLink="/gym" routerDirection="root">
+      <ion-icon name="barbell"></ion-icon>
+      <ion-label>GYM</ion-label>
+    </ion-tab-button>
+    <ion-tab-button tab="stats" routerLink="/stats" routerDirection="root">
+      <ion-icon name="stats-chart"></ion-icon>
+      <ion-label>Stats</ion-label>
+    </ion-tab-button>
+    <ion-tab-button tab="ranking" routerLink="/ranking" routerDirection="root">
+      <ion-icon name="trophy"></ion-icon>
+      <ion-label>Ranking</ion-label>
+    </ion-tab-button>
+  </ion-tab-bar>
+</ion-footer>

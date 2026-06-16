@@ -27,6 +27,7 @@
             placeholder="12345678-K"
             type="text"
             autocomplete="username"
+            (input)="onRutInput($event)"
           />
         </div>
       </div>
@@ -34,24 +35,7 @@
         <p class="login-error font-body">{{ getErrorMessage('rut') }}</p>
       </ion-text>
 
-      <!-- Email Input -->
-      <div class="login-field card-elevated">
-        <label class="login-field-label font-heading" for="email">Email</label>
-        <div class="login-input-wrap">
-          <ion-icon name="mail-outline" class="login-field-icon"></ion-icon>
-          <input
-            id="email"
-            class="login-input font-body"
-            formControlName="email"
-            placeholder="ejemplo@correo.com"
-            type="email"
-            autocomplete="email"
-          />
-        </div>
-      </div>
-      <ion-text color="danger" *ngIf="getErrorMessage('email')">
-        <p class="login-error font-body">{{ getErrorMessage('email') }}</p>
-      </ion-text>
+
 
       <!-- Password Input -->
       <div class="login-field card-elevated">
@@ -94,23 +78,7 @@
       </button>
     </form>
 
-    <!-- ============================================ -->
-    <!-- SEPARADOR                                    -->
-    <!-- ============================================ -->
-    <div class="login-divider">
-      <span class="font-body">o</span>
-    </div>
 
-    <!-- ============================================ -->
-    <!-- BOTÓN DEMO                                   -->
-    <!-- ============================================ -->
-    <button
-      type="button"
-      class="btn-chunky-3d login-btn-demo font-heading"
-      (click)="onDemoLogin()"
-    >
-      🔑 Probar con cuenta Demo
-    </button>
 
     <!-- ============================================ -->
     <!-- CREAR CUENTA                                 -->

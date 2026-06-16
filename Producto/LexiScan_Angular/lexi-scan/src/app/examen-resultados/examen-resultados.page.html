@@ -67,7 +67,7 @@
           *ngFor="let hab of examResult.rendimiento_habilidades"
           lines="none"
         >
-          <ion-label>{{ hab.nombre_habilidad }}</ion-label>
+          <ion-label>{{ getSkillDisplayName(hab.nombre_habilidad) }}</ion-label>
           <ion-badge slot="end"
             >{{ hab.correctas }}/{{ hab.total }} ({{ hab.porcentaje
             }}%)</ion-badge

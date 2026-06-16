@@ -25,6 +25,7 @@ CREATE TABLE usuarios (
     racha_actual INTEGER NOT NULL DEFAULT 0,
     fecha_registro TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     activo BOOLEAN NOT NULL DEFAULT TRUE,
+    es_admin BOOLEAN NOT NULL DEFAULT FALSE,
     ultimo_acceso TIMESTAMPTZ
 );
 

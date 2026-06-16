@@ -92,28 +92,36 @@ export class HomePage implements OnInit {
     this.router.navigate(['/']);
   }
 
+  get firstName(): string {
+    if (!this.profile?.nombre) return 'Estudiante';
+    return this.profile.nombre.trim().split(/\s+/)[0];
+  }
+
   getDailyGoalPct(): number {
-    if (!this.dashboard?.habilidades) return 0;
-    const total = this.dashboard.habilidades.length;
-    if (total === 0) return 0;
-    const avg = this.dashboard.habilidades.reduce((s, h) => s + h.nivel_maestria, 0) / total;
-    return Math.round(avg);
+    const todayStr = new Date().toDateString();
+    const savedDate = localStorage.getItem('daily_goal_date');
+    if (savedDate !== todayStr) {
+      localStorage.setItem('daily_goal_date', todayStr);
+      localStorage.setItem('daily_goal_count', '0');
+      return 0;
+    }
+    const count = parseInt(localStorage.getItem('daily_goal_count') || '0', 10);
+    return Math.min(100, count * 50);
   }
 
   getStreak(): number {
-    return 5;
+    return this.dashboard ? this.dashboard.racha_actual : 0;
   }
 
   getCoins(): number {
-    return 120;
+    return this.dashboard ? this.dashboard.saldo_monedas : 0;
   }
 
   getDailyGoalHint(): string {
     const pct = this.getDailyGoalPct();
-    if (pct >= 80) return '¡Excelente! Llevas un ritmo increíble.';
-    if (pct >= 50) return '¡Vas por buen camino! Sigue así.';
-    if (pct >= 20) return 'Buen inicio, mantén la constancia.';
-    return '¡Comienza tu ruta de estudio hoy!';
+    if (pct >= 100) return '¡Felicidades! Has alcanzado tu meta diaria hoy. 🎉';
+    if (pct >= 50) return '¡Vas por la mitad! Completa 1 lección más para cumplir tu meta del día.';
+    return 'Comienza a practicar para cumplir tu meta diaria (completa 2 lecciones de habilidades o sesiones de gym para llegar al 100%).';
   }
 
   onHabilidadesClick(): void {
@@ -246,5 +254,17 @@ export class HomePage implements OnInit {
 
     // Retorna algo como "100,40 127.5,85 ..."
     return points.join(' ');
+  }
+
+  getSkillDisplayName(name: string): string {
+    const map: { [key: string]: string } = {
+      'Interpretar': 'Interpretar',
+      'Vocabulario': 'Vocabulario',
+      'Tipos_de_Texto': 'Tipos de Texto',
+      'Localizar': 'Localizar',
+      'Lectura_Critica': 'Lectura Crítica',
+      'Evaluar': 'Evaluar',
+    };
+    return map[name] || name.replace(/_/g, ' ');
   }
 }

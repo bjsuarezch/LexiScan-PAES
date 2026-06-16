@@ -1,6 +1,5 @@
 export interface ILogin {
   rut: string;
-  email: string;
   contrasena: string;
 }
 

@@ -15,6 +15,7 @@ export class SeleccionTemaPage implements OnInit {
   temaCustom: string = '';
   profile: IUserProfile | null = null;
   saldoMonedas: number = 0;
+  temaActualId: number | null = null;
   loading: boolean = false;
 
   constructor(
@@ -33,6 +34,7 @@ export class SeleccionTemaPage implements OnInit {
       if (this.profile?.rut) {
         this.habilidadesService.getDashboard(this.profile.rut).subscribe(dash => {
           this.saldoMonedas = dash.saldo_monedas;
+          this.temaActualId = dash.tema_actual_id ?? null;
         });
       }
     });
@@ -60,7 +62,8 @@ export class SeleccionTemaPage implements OnInit {
   seleccionarTemaCustom() {
     if (!this.profile?.rut || !this.temaCustom.trim()) return;
     
-    if (this.saldoMonedas < 50) {
+    // First custom theme selection is free (temaActualId is null)
+    if (this.temaActualId !== null && this.saldoMonedas < 50) {
       alert('No tienes suficientes monedas para un tema personalizado. ¡Completa habilidades para ganar más!');
       return;
     }

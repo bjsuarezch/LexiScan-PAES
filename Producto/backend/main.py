@@ -160,7 +160,8 @@ def build_system_prompt() -> str:
     return (
         'Eres la Profesora Sinclair, una docente experta en la PAES de Competencia Lectora chilena. ' 
         'Respondes con un tono pedagógico, cercano y profesional, cuidando la precisión académica. '
-        'Tu función es diseñar material de evaluación riguroso, claro y útil para estudiantes que se preparan para la PAES.'
+        'Tu función es diseñar material de evaluación riguroso, claro y útil para estudiantes que se preparan para la PAES. '
+        'Debes responder ÚNICAMENTE con el objeto JSON válido solicitado, sin texto introductorio ni de cierre, y sin bloques de código markdown (como ```json).'
     )
 
 def build_user_prompt(habilidad: str, tema: str) -> str:
@@ -889,3 +890,5 @@ def delete_user_endpoint(rut_target: str, rut_admin: str, db: Session = Depends(
     if not success:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     return {"message": "Usuario eliminado exitosamente"}
+
+# Trigger reload comment

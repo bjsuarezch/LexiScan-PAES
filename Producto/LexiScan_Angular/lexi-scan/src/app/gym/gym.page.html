@@ -15,7 +15,7 @@
         <ion-icon name="flame"></ion-icon>
         <span>Error frecuente:</span>
       </div>
-      <p class="error-title">{{ errorFrecuente.nombre_habilidad }}</p>
+      <p class="error-title">{{ getSkillDisplayName(errorFrecuente.nombre_habilidad) }}</p>
 
       <div class="progress-container">
         <div class="progress-bar">
@@ -89,7 +89,7 @@
 
       <div class="error-info" *ngIf="errorActual">
         <p class="error-label">
-          <strong>Habilidad:</strong> {{ errorActual.habilidad?.nombre || 'Desconocida' }}
+          <strong>Habilidad:</strong> {{ getSkillDisplayName(errorActual.habilidad?.nombre || 'Desconocida') }}
         </p>
         <p class="error-label">
           <strong>Veces fallada:</strong> {{ errorActual.veces_fallada }}
@@ -167,3 +167,28 @@
     </div>
   </div>
 </ion-content>
+
+<ion-footer class="ion-no-border">
+  <ion-tab-bar>
+    <ion-tab-button tab="home" routerLink="/home" routerDirection="root">
+      <ion-icon name="home"></ion-icon>
+      <ion-label>Inicio</ion-label>
+    </ion-tab-button>
+    <ion-tab-button tab="habilidades" routerLink="/habilidades" routerDirection="root">
+      <ion-icon name="book"></ion-icon>
+      <ion-label>Habilidades</ion-label>
+    </ion-tab-button>
+    <ion-tab-button tab="gym" routerLink="/gym" routerDirection="root">
+      <ion-icon name="barbell" color="primary"></ion-icon>
+      <ion-label color="primary">GYM</ion-label>
+    </ion-tab-button>
+    <ion-tab-button tab="stats" routerLink="/stats" routerDirection="root">
+      <ion-icon name="stats-chart"></ion-icon>
+      <ion-label>Stats</ion-label>
+    </ion-tab-button>
+    <ion-tab-button tab="ranking" routerLink="/ranking" routerDirection="root">
+      <ion-icon name="trophy"></ion-icon>
+      <ion-label>Ranking</ion-label>
+    </ion-tab-button>
+  </ion-tab-bar>
+</ion-footer>
