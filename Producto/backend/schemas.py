@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from datetime import datetime
 from typing import Dict, List, Optional, Union
 
@@ -54,7 +55,7 @@ class PreguntaItem(BaseModel):
     alternativas: Dict[str, str]
     respuesta_correcta: str
     justificacion_cot: str
-    texto_inedito: Optional[str] = None
+    texto_inedito: Optional[Union[str, list]] = None
 
     class Config:
         from_attributes = True
@@ -63,7 +64,7 @@ class PreguntaItem(BaseModel):
 
 class HabilidadDetailResponse(BaseModel):
     nombre_habilidad: str
-    texto_inedito: str
+    texto_inedito: Union[str, list]
     preguntas: List[PreguntaItem]
 
 
@@ -180,7 +181,7 @@ class GuardarResultadosExamenRequest(BaseModel):
 
 class GenerarPreguntasResponse(BaseModel):
     tipo_habilidad: str
-    texto_inedito: list  # JSON Array of blocks
+    texto_inedito: Union[str, list]  # JSON Array of blocks or stringified list
     preguntas: List[GeneratedPreguntaItem]
 
 

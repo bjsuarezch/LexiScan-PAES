@@ -37,13 +37,15 @@
       [attr.fill]="reg.color"
     />
 
-    <!-- 4. Círculos blancos de progreso -->
+    <!-- 4. Círculos de progreso (morados) -->
     <circle
       *ngFor="let p of getRadarPointsArray()"
       [attr.cx]="p.x"
       [attr.cy]="p.y"
-      r="2.5"
-      fill="white"
+      r="3.5"
+      fill="#6366f1"
+      stroke="white"
+      stroke-width="1.5"
     />
 
     <!-- 5. Círculos blancos fijos -->

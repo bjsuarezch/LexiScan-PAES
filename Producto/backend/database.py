@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 
 from sqlalchemy import create_engine
@@ -13,6 +14,13 @@ DATABASE_URL = os.getenv('DATABASE_URL') or (
     f'postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
 )
 
-engine = create_engine(DATABASE_URL, echo=False, future=True)
+# connect_args fuerza UTF-8 en la conexión con PostgreSQL,
+# independientemente del locale del sistema operativo del equipo
+engine = create_engine(
+    DATABASE_URL,
+    echo=False,
+    future=True,
+    connect_args={'client_encoding': 'utf8'},
+)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, future=True)
 Base = declarative_base()
