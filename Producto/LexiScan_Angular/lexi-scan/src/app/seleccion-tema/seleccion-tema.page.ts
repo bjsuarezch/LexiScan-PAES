@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { AlertController } from '@ionic/angular';
 import { HabilidadesService } from '../services/habilidades.service';
 import { ProfileService } from '../services/profile.service';
 import { IUserProfile } from '../models/auth.model';
@@ -21,7 +22,8 @@ export class SeleccionTemaPage implements OnInit {
   constructor(
     private router: Router,
     private habilidadesService: HabilidadesService,
-    private profileService: ProfileService
+    private profileService: ProfileService,
+    private alertController: AlertController
   ) {}
 
   ngOnInit() {
@@ -59,12 +61,17 @@ export class SeleccionTemaPage implements OnInit {
     });
   }
 
-  seleccionarTemaCustom() {
+  async seleccionarTemaCustom() {
     if (!this.profile?.rut || !this.temaCustom.trim()) return;
     
     // First custom theme selection is free (temaActualId is null)
     if (this.temaActualId !== null && this.saldoMonedas < 50) {
-      alert('No tienes suficientes monedas para un tema personalizado. ¡Completa habilidades para ganar más!');
+      const alerta = await this.alertController.create({
+        header: 'Monedas insuficientes',
+        message: 'No tienes suficientes monedas para un tema personalizado. ¡Completa desafíos diarios para ganar más monedas!',
+        buttons: [{ text: 'Entendido', role: 'cancel' }]
+      });
+      await alerta.present();
       return;
     }
 

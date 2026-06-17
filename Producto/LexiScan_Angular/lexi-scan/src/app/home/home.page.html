@@ -69,15 +69,25 @@
         </div>
         <p class="daily-goal-hint font-body">
           <ng-container *ngIf="getDailyGoalPct() === 0">
-            Comienza a practicar para cumplir tu meta diaria (completa 2 lecciones de habilidades o sesiones de gym para llegar al 100%).
+            Completa 2 sesiones de habilidades para ganar <strong>50 monedas</strong>.
           </ng-container>
           <ng-container *ngIf="getDailyGoalPct() === 50">
-            ¡Vas por la mitad! Completa 1 lección más para cumplir tu meta del día.
+            ¡Vas por la mitad! Completa 1 sesión más para reclamar tu recompensa.
           </ng-container>
-          <ng-container *ngIf="getDailyGoalPct() >= 100">
+          <ng-container *ngIf="getDailyGoalPct() >= 100 && !dailyGoalClaimed">
             ¡Felicidades! Has alcanzado tu meta diaria hoy. 🎉
           </ng-container>
+          <ng-container *ngIf="getDailyGoalPct() >= 100 && dailyGoalClaimed">
+            Recompensa ya reclamada hoy. ¡Vuelve mañana!
+          </ng-container>
         </p>
+        <!-- Botón de reclamación de meta diaria -->
+        <button
+          *ngIf="getDailyGoalPct() >= 100 && !dailyGoalClaimed"
+          class="btn-chunky-3d btn-chunky-3d-orange btn-reclamar-meta"
+          (click)="reclamarMetaDiaria()">
+          🎁 Reclamar 50 monedas
+        </button>
       </div>
     </section>
 
@@ -234,77 +244,69 @@
     </section>
 
     <!-- ============================================ -->
-    <!-- DAILY CHALLENGES                             -->
+    <!-- DAILY CHALLENGES (DINÁMICOS)                 -->
     <!-- ============================================ -->
     <section class="challenges-section">
       <h2 class="section-title font-heading">Desafíos diarios</h2>
 
       <div class="challenges-grid">
-        <!-- Challenge 1: Fixed test -->
-        <div class="challenge-card card-elevated">
+        <div
+          *ngFor="let desafio of desafios; let i = index"
+          class="challenge-card card-elevated"
+          [class.challenge-completado]="desafio.completado"
+          [class.challenge-reclamado]="desafio.reclamado">
+
+          <!-- Header: ícono + recompensa -->
           <div class="challenge-card-header">
-            <div class="challenge-card-icon challenge-icon-1">
-              <ion-icon name="flash"></ion-icon>
+            <div class="challenge-card-icon" [ngClass]="'challenge-icon-' + ((i % 3) + 1)">
+              <ion-icon [name]="getChallengeIcon(desafio.tipo)"></ion-icon>
             </div>
             <div class="challenge-card-reward">
               <ion-icon name="star" color="warning"></ion-icon>
-              <span class="font-heading">+50</span>
+              <span class="font-heading">+{{ desafio.recompensa_monedas }}</span>
             </div>
           </div>
-          <h4 class="font-heading">Constancia en Habilidades</h4>
-          <p class="font-body">Practica 15 minutos hoy</p>
+
+          <h4 class="font-heading">{{ desafio.titulo }}</h4>
+          <p class="font-body">{{ desafio.descripcion }}</p>
+
+          <!-- Barra de progreso dinámica -->
           <div class="challenge-card-progress">
             <div class="challenge-card-bar">
-              <!-- TODO: Bind width to real progress -->
-              <div class="challenge-card-fill progress-60"></div>
+              <div
+                class="challenge-card-fill"
+                [style.width.%]="getDesafioPct(desafio)"
+                [style.background]="desafio.completado ? 'var(--ion-color-success)' : 'var(--ion-color-primary)'"
+              ></div>
             </div>
-            <span class="font-body">9 / 15 min</span>
+            <span class="font-body">{{ getDesafioLabel(desafio) }}</span>
           </div>
+
+          <!-- Habilidades practicadas (solo desafío diversidad) -->
+          <div
+            *ngIf="desafio.tipo === 'diversidad_habilidades' && getHabilidadesPracticadas().length > 0"
+            class="habilidades-practicadas">
+            <span
+              *ngFor="let h of getHabilidadesPracticadas()"
+              class="hab-tag">
+              {{ h }}
+            </span>
+          </div>
+
+          <!-- Botón reclamar recompensa -->
+          <button
+            *ngIf="desafio.completado && !desafio.reclamado"
+            class="btn-chunky-3d btn-chunky-3d-orange btn-reclamar"
+            (click)="reclamarRecompensa(desafio.id)">
+            🎁 Reclamar {{ desafio.recompensa_monedas }} monedas
+          </button>
+          <p *ngIf="desafio.reclamado" class="reclamado-label">✅ Recompensa reclamada</p>
         </div>
 
-        <!-- Challenge 2: Fixed test -->
-        <div class="challenge-card card-elevated">
-          <div class="challenge-card-header">
-            <div class="challenge-card-icon challenge-icon-2">
-              <ion-icon name="compass"></ion-icon>
-            </div>
-            <div class="challenge-card-reward">
-              <ion-icon name="star" color="warning"></ion-icon>
-              <span class="font-heading">+60</span>
-            </div>
-          </div>
-          <h4 class="font-heading">Explorador de Habilidades</h4>
-          <p class="font-body">Practica 4 habilidades distintas</p>
-          <div class="challenge-card-progress">
-            <div class="challenge-card-bar">
-              <!-- TODO: Bind width to real progress -->
-              <div class="challenge-card-fill progress-50"></div>
-            </div>
-            <span class="font-body">2 / 4</span>
-          </div>
-        </div>
-
-        <!-- Challenge 3: Fixed test -->
-        <div class="challenge-card card-elevated">
-          <div class="challenge-card-header">
-            <div class="challenge-card-icon challenge-icon-3">
-              <ion-icon name="trophy"></ion-icon>
-            </div>
-            <div class="challenge-card-reward">
-              <ion-icon name="star" color="warning"></ion-icon>
-              <span class="font-heading">+100</span>
-            </div>
-          </div>
-          <h4 class="font-heading">Gym Impecable</h4>
-          <p class="font-body">Resuelve sin errores en GYM</p>
-          <div class="challenge-card-progress">
-            <div class="challenge-card-bar">
-              <!-- TODO: Bind width to real progress -->
-              <div class="challenge-card-fill progress-0"></div>
-            </div>
-            <span class="font-body">Pendiente</span>
-          </div>
-        </div>
+        <!-- Placeholder si no hay desafíos aún -->
+        <p *ngIf="desafios.length === 0" class="font-body" style="color: var(--ion-color-medium); text-align:center;">
+          Cargando desafíos del día...
+        </p>
       </div>
     </section>
 
