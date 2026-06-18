@@ -239,3 +239,60 @@ ion-text {
     padding: 0;
   }
 }
+
+// ============================================================
+// PASSWORD REQUIREMENTS & CONFIRM PASSWORD MATCH
+// ============================================================
+.password-requirements, .confirm-password-match {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 12px 16px;
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 16px;
+}
+
+.requirement-item, .match-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.85rem;
+  color: #94a3b8; // default gray
+  transition: all 0.2s ease;
+
+  ion-icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+  }
+
+  &.met {
+    color: #10b981; // green when met
+    
+    ion-icon {
+      color: #10b981;
+      transform: scale(1.1);
+    }
+  }
+}
+
+.match-item {
+  &.matching {
+    color: #10b981; // green
+    
+    ion-icon {
+      color: #10b981;
+    }
+  }
+  
+  &.mismatch {
+    color: #ef4444; // red
+    
+    ion-icon {
+      color: #ef4444;
+    }
+  }
+}

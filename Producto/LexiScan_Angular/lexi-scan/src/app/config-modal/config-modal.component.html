@@ -18,16 +18,27 @@
         <label class="input-label">API Key de Groq</label>
         <div class="input-block">
           <ion-icon name="key-outline" class="input-icon"></ion-icon>
-          <input
-            formControlName="apiKey"
-            placeholder="Ingresa tu API Key de Groq"
-            type="password"
-            class="native-input"
-          />
+          <input formControlName="apiKey" placeholder="Ingresa tu API Key de Groq"
+            [type]="showPassword ? 'text' : 'password'" class="native-input" />
+          <ion-button fill="clear" slot="end" class="toggle-password-btn" (click)="togglePasswordVisibility()">
+            <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+          </ion-button>
         </div>
         <p class="input-error-msg" *ngIf="configForm.get('apiKey')?.invalid && configForm.get('apiKey')?.touched">
           La API Key es requerida
         </p>
+      </div>
+
+      <div class="save-key-row">
+        <button
+          class="save-key-btn"
+          type="button"
+          [disabled]="configForm.get('apiKey')?.invalid || savingKey"
+          (click)="saveApiKeyOnly()"
+        >
+          <ion-spinner *ngIf="savingKey" name="crescent" color="light" style="width: 16px; height: 16px; margin-right: 6px;"></ion-spinner>
+          <span>Guardar y cargar modelos</span>
+        </button>
       </div>
 
       <!-- Model Selection -->
@@ -43,20 +54,13 @@
       </div>
 
       <!-- Buttons -->
-      <button
-        class="btn-chunky-3d btn-chunky-3d-indigo btn-full"
-        type="submit"
-        [disabled]="configForm.invalid || loading"
-      >
+      <button class="btn-chunky-3d btn-chunky-3d-indigo btn-full" type="submit"
+        [disabled]="configForm.invalid || loading">
         <ion-spinner *ngIf="loading" name="crescent"></ion-spinner>
         Guardar Configuración
       </button>
 
-      <button
-        class="btn-chunky-3d btn-chunky-3d-gray btn-full"
-        type="button"
-        (click)="closeModal()"
-      >
+      <button class="btn-chunky-3d btn-chunky-3d-gray btn-full" type="button" (click)="closeModal()">
         Cancelar
       </button>
     </form>

@@ -1,0 +1,128 @@
+.ranking-content {
+  --background: #f4f5f8;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--ion-color-medium);
+}
+
+.top-three {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  margin-bottom: 30px;
+  margin-top: 20px;
+  gap: 15px;
+
+  .podium-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: white;
+    padding: 15px 10px;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    flex: 1;
+
+    &.first {
+      transform: translateY(-20px);
+      border: 2px solid var(--ion-color-warning);
+      box-shadow: 0 8px 16px rgba(var(--ion-color-warning-rgb), 0.2);
+
+      .avatar {
+        width: 60px;
+        height: 60px;
+        font-size: 30px;
+      }
+    }
+
+    h3 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin: 10px 0 5px;
+      text-align: center;
+      color: var(--ion-color-dark);
+    }
+
+    p {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--ion-color-primary);
+      margin: 0;
+    }
+  }
+
+  .avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 20px;
+    color: white;
+
+    &.gold { background: linear-gradient(135deg, #ffd700, #daa520); }
+    &.silver { background: linear-gradient(135deg, #e0e0e0, #9e9e9e); }
+    &.bronze { background: linear-gradient(135deg, #ff9800, #f57c00); }
+  }
+}
+
+.ranking-list {
+  background: transparent;
+  
+  .ranking-item {
+    --background: white;
+    --padding-start: 16px;
+    --inner-padding-end: 16px;
+    margin-bottom: 10px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    
+    .position {
+      width: 30px;
+      text-align: center;
+      font-weight: 700;
+      color: var(--ion-color-medium);
+      font-size: 1.1rem;
+    }
+
+    h2 {
+      font-weight: 600;
+      color: var(--ion-color-dark);
+    }
+    p {
+      color: var(--ion-color-medium);
+      font-size: 0.8rem;
+    }
+
+    .xp-score {
+      font-weight: 700;
+      color: var(--ion-color-primary);
+    }
+
+    &.is-current {
+      --background: var(--ion-color-primary-tint);
+      border: 1px solid var(--ion-color-primary);
+      
+      .position, h2, .xp-score {
+        color: var(--ion-color-primary-contrast);
+      }
+      p {
+        color: rgba(255,255,255,0.8);
+      }
+    }
+  }
+}
+
+.current-user-card {
+  margin-top: 20px;
+  border-top: 2px dashed var(--ion-color-light-shade);
+  padding-top: 20px;
+}

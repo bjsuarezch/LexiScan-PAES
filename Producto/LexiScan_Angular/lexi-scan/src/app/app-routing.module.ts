@@ -53,7 +53,15 @@ const routes: Routes = [
     path: '',
     loadChildren: () =>
       import('./tabs/tabs.module').then((m) => m.TabsPageModule),
+  },  {
+    path: 'ranking',
+    loadChildren: () => import('./ranking/ranking.module').then( m => m.RankingPageModule)
   },
+  {
+    path: 'admin',
+    loadChildren: () => import('./admin/admin.module').then( m => m.AdminPageModule)
+  },
+
 ];
 @NgModule({
   imports: [

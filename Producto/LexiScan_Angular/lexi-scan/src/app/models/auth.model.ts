@@ -1,6 +1,5 @@
 export interface ILogin {
   rut: string;
-  email: string;
   contrasena: string;
 }
 
@@ -23,6 +22,7 @@ export interface IUserProfile {
   codigoPostal?: string;
   createdAt?: Date;
   updatedAt?: Date;
+  es_admin?: boolean;
 }
 
 export interface IValidationErrors {

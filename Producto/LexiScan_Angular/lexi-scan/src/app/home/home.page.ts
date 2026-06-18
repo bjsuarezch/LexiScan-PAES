@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { AlertController, ViewWillEnter } from '@ionic/angular';
 import { HabilidadesService } from '../services/habilidades.service';
 import { ProfileService } from '../services/profile.service';
-import { DashboardResponse, HabilidadData } from '../models/backend.model';
+import { DashboardResponse, HabilidadData, Desafio } from '../models/backend.model';
 import { IUserProfile } from '../models/auth.model';
 import { DesafiosService } from '../services/desafios.service';
-import { Desafio } from '../models/backend.model';
 
 @Component({
   selector: 'app-home',
@@ -13,7 +13,7 @@ import { Desafio } from '../models/backend.model';
   styleUrls: ['home.page.scss'],
   standalone: false,
 })
-export class HomePage implements OnInit {
+export class HomePage implements OnInit, ViewWillEnter {
   dashboard: DashboardResponse | null = null;
   profile: IUserProfile | null = null;
   loading = false;
@@ -21,12 +21,14 @@ export class HomePage implements OnInit {
   habilidades: HabilidadData[] = [];
   desafios: Desafio[] = [];
   monedasExtra = 0;
+  dailyGoalClaimed = false;
 
   constructor(
     private router: Router,
     private habilidadesService: HabilidadesService,
     private profileService: ProfileService,
-    private desafiosService: DesafiosService
+    private desafiosService: DesafiosService,
+    private alertController: AlertController
   ) {}
 
   ngOnInit() {
@@ -39,7 +41,7 @@ export class HomePage implements OnInit {
     this.habilidadesService.dashboard$.subscribe(
       (data: DashboardResponse | null) => {
         if (data) {
-          this.habilidades = data.habilidades; // Sincronizamos las habilidades
+          this.habilidades = data.habilidades;
         }
       },
     );
@@ -47,6 +49,21 @@ export class HomePage implements OnInit {
       this.desafios = desafios;
     });
     this.monedasExtra = parseInt(localStorage.getItem('monedas_extra') || '0', 10);
+    this.checkDailyGoalClaimed();
+  }
+
+  ionViewWillEnter() {
+    // Refrescar saldo y estado de meta al volver al home
+    this.monedasExtra = parseInt(localStorage.getItem('monedas_extra') || '0', 10);
+    this.checkDailyGoalClaimed();
+    if (this.profile?.rut) {
+      this.loadDashboard(this.profile.rut);
+    }
+  }
+
+  private checkDailyGoalClaimed() {
+    const todayStr = new Date().toDateString();
+    this.dailyGoalClaimed = localStorage.getItem('daily_goal_claimed') === todayStr;
   }
 
   loadDashboard(rut: string): void {
@@ -92,28 +109,36 @@ export class HomePage implements OnInit {
     this.router.navigate(['/']);
   }
 
+  get firstName(): string {
+    if (!this.profile?.nombre) return 'Estudiante';
+    return this.profile.nombre.trim().split(/\s+/)[0];
+  }
+
   getDailyGoalPct(): number {
-    if (!this.dashboard?.habilidades) return 0;
-    const total = this.dashboard.habilidades.length;
-    if (total === 0) return 0;
-    const avg = this.dashboard.habilidades.reduce((s, h) => s + h.nivel_maestria, 0) / total;
-    return Math.round(avg);
+    const todayStr = new Date().toDateString();
+    const savedDate = localStorage.getItem('daily_goal_date');
+    if (savedDate !== todayStr) {
+      localStorage.setItem('daily_goal_date', todayStr);
+      localStorage.setItem('daily_goal_count', '0');
+      return 0;
+    }
+    const count = parseInt(localStorage.getItem('daily_goal_count') || '0', 10);
+    return Math.min(100, count * 50);
   }
 
   getStreak(): number {
-    return 5;
+    return this.dashboard ? this.dashboard.racha_actual : 0;
   }
 
   getCoins(): number {
-    return 120;
+    return this.dashboard ? this.dashboard.saldo_monedas : 0;
   }
 
   getDailyGoalHint(): string {
     const pct = this.getDailyGoalPct();
-    if (pct >= 80) return '¡Excelente! Llevas un ritmo increíble.';
-    if (pct >= 50) return '¡Vas por buen camino! Sigue así.';
-    if (pct >= 20) return 'Buen inicio, mantén la constancia.';
-    return '¡Comienza tu ruta de estudio hoy!';
+    if (pct >= 100) return '¡Felicidades! Has alcanzado tu meta diaria hoy. 🎉';
+    if (pct >= 50) return '¡Vas por la mitad! Completa 1 lección más para cumplir tu meta del día.';
+    return 'Comienza a practicar para cumplir tu meta diaria (completa 2 lecciones de habilidades o sesiones de gym para llegar al 100%).';
   }
 
   onHabilidadesClick(): void {
@@ -128,6 +153,14 @@ export class HomePage implements OnInit {
     this.router.navigate(['/examen']);
   }
 
+  onRankingClick(): void {
+    this.router.navigate(['/ranking']);
+  }
+
+  onAdminClick(): void {
+    this.router.navigate(['/admin']);
+  }
+
   onStatsClick(): void {
     this.router.navigate(['/stats']);
   }
@@ -136,16 +169,91 @@ export class HomePage implements OnInit {
   }
 
   reclamarRecompensa(idDesafio: number) {
+    const desafio = this.desafios.find(d => d.id === idDesafio);
+    if (!desafio || !desafio.completado || desafio.reclamado) return;
+
     this.desafiosService.reclamarRecompensa(idDesafio);
     // Actualizar monedas extra localmente
     this.monedasExtra = parseInt(localStorage.getItem('monedas_extra') || '0', 10);
-    if (this.dashboard) {
-      // Recalcular el saldo total (restando el anterior y sumando el nuevo, o simplemente volviendo a sumar base + extra)
-      // Como dashboard se actualiza solo en loadDashboard, podemos pedir loadDashboard de nuevo
-      if (this.profile?.rut) {
-        this.loadDashboard(this.profile.rut);
-      }
+    if (this.profile?.rut) {
+      this.loadDashboard(this.profile.rut);
     }
+
+    this.alertController.create({
+      header: '¡Recompensa reclamada!',
+      message: `Has ganado ${desafio.recompensa_monedas} monedas. ¡Sigue así!`,
+      buttons: ['Genial 🎉']
+    }).then(a => a.present());
+  }
+
+  async reclamarMetaDiaria() {
+    if (this.dailyGoalClaimed || this.getDailyGoalPct() < 100) return;
+    const todayStr = new Date().toDateString();
+    localStorage.setItem('daily_goal_claimed', todayStr);
+    this.dailyGoalClaimed = true;
+    // Acreditar 50 monedas vía monedas_extra local
+    const prev = parseInt(localStorage.getItem('monedas_extra') || '0', 10);
+    localStorage.setItem('monedas_extra', (prev + 50).toString());
+    this.monedasExtra = prev + 50;
+    if (this.profile?.rut) {
+      this.loadDashboard(this.profile.rut);
+    }
+    const alerta = await this.alertController.create({
+      header: '¡Meta diaria completada!',
+      message: 'Has ganado 50 monedas por cumplir tu meta diaria. ¡Vuelve mañana para ganar más!',
+      buttons: ['¡Genial! 🎉']
+    });
+    await alerta.present();
+  }
+
+  /** Icono según tipo de desafío */
+  getChallengeIcon(tipo: string): string {
+    const icons: Record<string, string> = {
+      'tiempo_habilidades': 'flash',
+      'diversidad_habilidades': 'compass',
+      'habilidad_baja': 'trending-up',
+      'gym_sin_errores': 'trophy',
+      'tiempo_examen': 'document-text',
+    };
+    return icons[tipo] || 'star';
+  }
+
+  /** Porcentaje de progreso del desafío (0-100) */
+  getDesafioPct(desafio: Desafio): number {
+    return Math.min(100, Math.round((desafio.progreso / desafio.meta) * 100));
+  }
+
+  /** Etiqueta de progreso humanizada */
+  getDesafioLabel(desafio: Desafio): string {
+    if (desafio.completado) return '¡Completado!';
+    switch (desafio.tipo) {
+      case 'tiempo_habilidades':
+        return `${Math.round(desafio.progreso)} / ${desafio.meta} min`;
+      case 'tiempo_examen':
+        return `${Math.round(desafio.progreso)} / ${desafio.meta} min`;
+      case 'diversidad_habilidades':
+        return `${desafio.progreso} / ${desafio.meta} habilidades`;
+      case 'habilidad_baja':
+        return `${desafio.progreso} / ${desafio.meta} veces`;
+      case 'gym_sin_errores':
+        return desafio.progreso >= 1 ? '¡Completado!' : 'Pendiente';
+      default:
+        return `${desafio.progreso} / ${desafio.meta}`;
+    }
+  }
+
+  /** Lista de habilidades practicadas hoy (para el desafío de diversidad) */
+  getHabilidadesPracticadas(): string[] {
+    const data = localStorage.getItem('lexiscan_desafios_diarios');
+    if (!data) return [];
+    try {
+      const progreso = JSON.parse(data);
+      const hoy = new Date().toISOString().split('T')[0];
+      if (progreso.fecha !== hoy) return [];
+      return (progreso.habilidadesPracticadas || []).map((h: string) =>
+        h.replace(/_/g, ' ')
+      );
+    } catch { return []; }
   }
 
   // En tu clase del componente
@@ -238,5 +346,17 @@ export class HomePage implements OnInit {
 
     // Retorna algo como "100,40 127.5,85 ..."
     return points.join(' ');
+  }
+
+  getSkillDisplayName(name: string): string {
+    const map: { [key: string]: string } = {
+      'Interpretar': 'Interpretar',
+      'Vocabulario': 'Vocabulario',
+      'Tipos_de_Texto': 'Tipos de Texto',
+      'Localizar': 'Localizar',
+      'Lectura_Critica': 'Lectura Crítica',
+      'Evaluar': 'Evaluar',
+    };
+    return map[name] || name.replace(/_/g, ' ');
   }
 }

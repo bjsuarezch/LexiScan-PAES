@@ -108,6 +108,17 @@ export class GymPage implements OnInit {
         .resolveError(this.errorActual.id_error)
         .subscribe({
           next: () => {
+            // Increment daily goal count
+            const todayStr = new Date().toDateString();
+            const savedDate = localStorage.getItem('daily_goal_date');
+            let count = 0;
+            if (savedDate === todayStr) {
+              count = parseInt(localStorage.getItem('daily_goal_count') || '0', 10);
+            } else {
+              localStorage.setItem('daily_goal_date', todayStr);
+            }
+            localStorage.setItem('daily_goal_count', (count + 1).toString());
+
             // Remove from list
             this.erroresFrecuentes = this.erroresFrecuentes.filter(
               (e) => e.id_error !== this.errorActual.id_error,
@@ -200,5 +211,17 @@ export class GymPage implements OnInit {
     }
 
     return points.join(' ');
+  }
+
+  getSkillDisplayName(name: string): string {
+    const map: { [key: string]: string } = {
+      'Interpretar': 'Interpretar',
+      'Vocabulario': 'Vocabulario',
+      'Tipos_de_Texto': 'Tipos de Texto',
+      'Localizar': 'Localizar',
+      'Lectura_Critica': 'Lectura Crítica',
+      'Evaluar': 'Evaluar',
+    };
+    return map[name] || name.replace(/_/g, ' ');
   }
 }

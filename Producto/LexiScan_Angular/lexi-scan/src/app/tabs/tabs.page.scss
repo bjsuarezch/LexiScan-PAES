@@ -3,6 +3,7 @@
 // ============================================================
 
 ion-tab-bar {
+  display: none !important;
   background: var(--ion-toolbar-background, #ffffff);
   border-top: 1px solid var(--ion-border-color, #e2e8f0);
   box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.06);

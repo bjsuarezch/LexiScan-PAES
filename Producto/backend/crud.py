@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import hashlib
 from datetime import date, datetime, timedelta, timezone
 import bcrypt
@@ -66,8 +67,9 @@ def create_user(db: Session, rut: str, nombre_completo: str, email: str, contras
         email=email,
         password_hash=password_hash,
         xp_total=0,
-        racha_actual=0,
+        racha_actual=1,
         activo=True,
+        textos_restantes=3,
     )
     db.add(user)
     
@@ -115,7 +117,27 @@ def build_display_habilidad(item: models.HistorialHabilidades) -> dict:
     }
 
 
+def apply_engagement_penalty(db: Session, rut: str) -> None:
+    habilidades = db.query(models.HistorialHabilidades).filter(models.HistorialHabilidades.rut_usuario == rut).all()
+    now = datetime.now(timezone.utc)
+    updated = False
+    
+    for hab in habilidades:
+        if hab.ultima_actualizacion:
+            dias_transcurridos = (now.date() - hab.ultima_actualizacion.date()).days
+            if dias_transcurridos > 0:
+                penalizacion = dias_transcurridos * 5.0
+                nuevo_nivel = max(0.0, float(hab.nivel_maestria) - penalizacion)
+                hab.nivel_maestria = nuevo_nivel
+                hab.ultima_actualizacion = now
+                updated = True
+    
+    if updated:
+        db.commit()
+
+
 def get_dashboard_data(db: Session, rut: str) -> Optional[dict]:
+    apply_engagement_penalty(db, rut)
     user = get_user_by_rut(db, rut)
     if not user:
         return None
@@ -151,11 +173,13 @@ def seleccionar_tema(db: Session, rut: str, tema_id: Optional[int], tema_custom:
     elif tema_custom:
         # Check if they have enough coins
         wallet = db.query(models.EconomiaMonedas).filter(models.EconomiaMonedas.rut_usuario == rut).first()
-        costo = 50
-        if not wallet or wallet.saldo_monedas < costo:
+        # First theme selection (when tema_actual_id is None) is free
+        costo = 0 if user.tema_actual_id is None else 50
+        if costo > 0 and (not wallet or wallet.saldo_monedas < costo):
             raise ValueError("No tienes suficientes monedas para un tema personalizado.")
         
-        wallet.saldo_monedas -= costo
+        if wallet and costo > 0:
+            wallet.saldo_monedas -= costo
         
         # Check if custom theme already exists
         tema = db.query(models.Tema).filter(models.Tema.nombre.ilike(tema_custom)).first()
@@ -235,9 +259,9 @@ def update_user_racha(db: Session, user: models.Usuario) -> None:
     db.commit()
 
 
-def update_user_skill_results(db: Session, rut: str, habilidad: str, correct_count: int, total_questions: int) -> int:
+def update_user_skill_results(db: Session, rut: str, habilidad: str, correct_count: int, total_questions: int) -> dict:
     if total_questions <= 0:
-        return 0
+        return {'xp_ganada': 0, 'rendimiento_cambio': 0.0}
 
     user = get_user_by_rut(db, rut)
     if not user:
@@ -255,16 +279,23 @@ def update_user_skill_results(db: Session, rut: str, habilidad: str, correct_cou
     xp_ganada = correct_count * 10
     user.xp_total += xp_ganada
 
+    incorrect_count = total_questions - correct_count
     porcentaje_aciertos = correct_count / total_questions
-    incremento = int(round(porcentaje_aciertos * 15))
-    habilidad_record.nivel_maestria = min(100.0, float(habilidad_record.nivel_maestria) + incremento)
+    incremento_base = int(round(porcentaje_aciertos * 15))
+    decremento = incorrect_count * 3
+    cambio_neto = incremento_base - decremento
+
+    nuevo_nivel = max(0.0, min(100.0, float(habilidad_record.nivel_maestria) + cambio_neto))
+    rendimiento_cambio = nuevo_nivel - float(habilidad_record.nivel_maestria)
+
+    habilidad_record.nivel_maestria = nuevo_nivel
     habilidad_record.ultima_actualizacion = datetime.now(timezone.utc)
 
     db.add(user)
     db.add(habilidad_record)
     db.commit()
 
-    return xp_ganada
+    return {'xp_ganada': xp_ganada, 'rendimiento_cambio': round(rendimiento_cambio, 2)}
 
 
 def create_exam_session(db: Session, rut: str, cantidad_preguntas: int) -> Optional[dict]:
@@ -752,3 +783,74 @@ def get_random_questions(db: Session, cantidad: int, id_habilidad: Optional[int]
         query = query.filter(models.BancoPreguntas.id_habilidad == id_habilidad)
 
     return query.order_by(func.random()).limit(cantidad).all()
+
+
+def get_ranking(db: Session, limit: int = 10, rut_actual: Optional[str] = None) -> dict:
+    usuarios = db.query(models.Usuario).filter(models.Usuario.activo == True).order_by(models.Usuario.xp_total.desc()).limit(limit).all()
+    
+    ranking_list = []
+    usuario_actual_data = None
+    
+    for idx, u in enumerate(usuarios):
+        # Format name to "First LastInitial."
+        parts = u.nombre_completo.split()
+        if len(parts) > 1:
+            name_display = f"{parts[0]} {parts[1][0]}."
+        else:
+            name_display = parts[0]
+
+        item = {
+            "posicion": idx + 1,
+            "nombre_completo": name_display,
+            "xp_total": u.xp_total,
+            "rut_parcial": u.rut[:4] + "***"
+        }
+        ranking_list.append(item)
+        if rut_actual and u.rut == rut_actual:
+            usuario_actual_data = item
+            
+    # If the user is not in the top N, find their position
+    if rut_actual and not usuario_actual_data:
+        u_actual = get_user_by_rut(db, rut_actual)
+        if u_actual:
+            posicion_real = db.query(models.Usuario).filter(
+                models.Usuario.activo == True,
+                models.Usuario.xp_total > u_actual.xp_total
+            ).count() + 1
+            
+            parts = u_actual.nombre_completo.split()
+            if len(parts) > 1:
+                name_display = f"{parts[0]} {parts[1][0]}."
+            else:
+                name_display = parts[0]
+                
+            usuario_actual_data = {
+                "posicion": posicion_real,
+                "nombre_completo": name_display,
+                "xp_total": u_actual.xp_total,
+                "rut_parcial": u_actual.rut[:4] + "***"
+            }
+            
+    return {
+        "ranking": ranking_list,
+        "usuario_actual": usuario_actual_data
+    }
+
+def get_all_users_admin(db: Session):
+    return db.query(models.Usuario).order_by(models.Usuario.fecha_registro.desc()).all()
+
+def toggle_user_status(db: Session, rut: str) -> bool:
+    user = db.query(models.Usuario).filter(models.Usuario.rut == rut).first()
+    if not user:
+        return False
+    user.activo = not user.activo
+    db.commit()
+    return True
+
+def delete_user(db: Session, rut: str) -> bool:
+    user = db.query(models.Usuario).filter(models.Usuario.rut == rut).first()
+    if not user:
+        return False
+    db.delete(user)
+    db.commit()
+    return True

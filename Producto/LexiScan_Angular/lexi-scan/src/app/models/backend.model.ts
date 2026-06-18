@@ -83,6 +83,7 @@ export interface EvaluarRespuestasResponse {
   total_preguntas: number;
   puntaje: number;
   xp_ganada: number;
+  rendimiento_cambio?: number;
   mensaje: string;
 }
 
@@ -111,4 +112,26 @@ export interface DesafioProgresoLocal {
   desafiosActivos: Desafio[];
   habilidadesPracticadas: string[];
   vecesHabilidadBajaPracticada: number;
+}
+
+export interface RankingUserItem {
+  posicion: number;
+  nombre_completo: string;
+  xp_total: number;
+  rut_parcial: string;
+}
+
+export interface RankingResponse {
+  ranking: RankingUserItem[];
+  usuario_actual?: RankingUserItem;
+}
+
+export interface AdminUsuarioItem {
+  rut: string;
+  nombre_completo: string;
+  email: string;
+  activo: boolean;
+  es_admin: boolean;
+  xp_total: number;
+  racha_actual: number;
 }

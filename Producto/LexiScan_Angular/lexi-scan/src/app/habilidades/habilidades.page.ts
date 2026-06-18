@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { AlertController } from '@ionic/angular';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
+import { AlertController, ModalController, IonicSafeString, ViewWillEnter } from '@ionic/angular';
 import { ProfileService } from '../services/profile.service';
 import { HabilidadesService } from '../services/habilidades.service';
+import { ConfigModalComponent } from '../config-modal/config-modal.component';
 import {
   DashboardResponse,
   HabilidadData,
@@ -11,7 +12,8 @@ import {
 import { IUserProfile } from '../models/auth.model';
 import { DesafiosService } from '../services/desafios.service';
 import { BehaviorSubject, Observable, interval, Subscription } from 'rxjs';
-import { OnDestroy } from '@angular/core';
+
+
 interface EvaluacionResultado {
   index: number;
   enunciado: string;
@@ -27,7 +29,7 @@ interface EvaluacionResultado {
   styleUrls: ['habilidades.page.scss'],
   standalone: false,
 })
-export class HabilidadesPage implements OnInit, OnDestroy {
+export class HabilidadesPage implements OnInit, OnDestroy, ViewWillEnter {
   habilidades: HabilidadData[] = [];
   selectedHabilidad: GeneratedHabilidadDetail | null = null;
   profile: IUserProfile | null = null;
@@ -53,7 +55,9 @@ export class HabilidadesPage implements OnInit, OnDestroy {
     private profileService: ProfileService,
     private habilidadesService: HabilidadesService,
     private alertController: AlertController,
-    private desafiosService: DesafiosService
+    private modalController: ModalController,
+    private desafiosService: DesafiosService,
+    private route: ActivatedRoute,
   ) {}
 
   ngOnInit() {
@@ -62,6 +66,46 @@ export class HabilidadesPage implements OnInit, OnDestroy {
       this.profile = profile;
       if (profile?.rut) {
         this.loadHabilidades(profile.rut);
+        this.checkFirstTime();
+      }
+    });
+  }
+
+  /**
+   * ionViewWillEnter se ejecuta cada vez que la página aparece en pantalla,
+   * incluso cuando Angular reutiliza la instancia (ej: volver desde selección de tema).
+   * Refresca el contador de textos y el dashboard sin mostrar alertas.
+   */
+  ionViewWillEnter() {
+    if (this.profile?.rut) {
+      this.refreshTextosRestantes();
+    } else {
+      // Si el perfil aun no cargó, esperar al suscriptor de ngOnInit
+      this.profileService.getProfile().subscribe((profile) => {
+        if (profile?.rut) {
+          this.profile = profile;
+          this.refreshTextosRestantes();
+        }
+      });
+    }
+  }
+
+  checkFirstTime(): void {
+    this.route.queryParams.subscribe(async (params) => {
+      if (params['firstTime'] === 'true') {
+        const alertPopup = await this.alertController.create({
+          header: '¡Veamos cómo son tus habilidades de comprensión lectora!',
+          message: 'Elige un tema para ser evaluado:',
+          buttons: [
+            {
+              text: 'Comenzar',
+              handler: () => {
+                this.router.navigate(['/seleccion-tema']);
+              }
+            }
+          ]
+        });
+        await alertPopup.present();
       }
     });
   }
@@ -76,30 +120,28 @@ export class HabilidadesPage implements OnInit, OnDestroy {
 
   loadHabilidades(rut: string) {
     this.habilidadesService.getDashboard(rut).subscribe({
-      next: async (data) => {
+      next: (data) => {
         this.habilidades = data.habilidades;
         this.textosRestantes = data.textos_restantes ?? 0;
         this.temaActualId = data.tema_actual_id ?? null;
-        
-        if (this.textosRestantes <= 0) {
-          const alert = await this.alertController.create({
-            header: '¡Se acabaron tus textos!',
-            message: 'Se le han acabado los 3 textos personalizados, supera los desafios del dia para ganar puntos y mas oportunidades de escoger temas personalizados!',
-            buttons: [
-              {
-                text: 'Elegir nuevo tema',
-                handler: () => {
-                  this.router.navigate(['/seleccion-tema']);
-                }
-              }
-            ]
-          });
-          await alert.present();
-        }
+        // El popup de textos agotados NO va aquí — solo se muestra al hacer click en una habilidad.
       },
       error: (error) => {
         console.error('Error al cargar habilidades:', error);
       },
+    });
+  }
+
+  /** Refresca solo el contador de textos restantes sin mostrar ninguna alerta. */
+  private refreshTextosRestantes() {
+    if (!this.profile?.rut) return;
+    this.habilidadesService.getDashboard(this.profile.rut).subscribe({
+      next: (data) => {
+        this.textosRestantes = data.textos_restantes ?? 0;
+        this.temaActualId = data.tema_actual_id ?? null;
+        this.habilidades = data.habilidades;
+      },
+      error: () => { /* silencioso */ }
     });
   }
 
@@ -113,7 +155,35 @@ export class HabilidadesPage implements OnInit, OnDestroy {
     return 'maestria-baja';
   }
 
+  getSkillDisplayName(name: string): string {
+    const map: { [key: string]: string } = {
+      'Interpretar': 'Interpretar',
+      'Vocabulario': 'Vocabulario',
+      'Tipos_de_Texto': 'Tipos de Texto',
+      'Localizar': 'Localizar',
+      'Lectura_Critica': 'Lectura Crítica',
+      'Evaluar': 'Evaluar',
+    };
+    return map[name] || name.replace(/_/g, ' ');
+  }
+
   selectSkill(skill: string): void {
+    // --- PROBLEMA 3: El popup de textos agotados SOLO se muestra aquí ---
+    if (this.textosRestantes <= 0) {
+      this.alertController.create({
+        header: '¡Se acabaron tus textos!',
+        message: 'Se te han acabado los 3 textos personalizados. Supera los desafíos del día para ganar oportunidades de escoger nuevos temas.',
+        buttons: [
+          { text: 'Cancelar', role: 'cancel' },
+          {
+            text: 'Elegir nuevo tema',
+            handler: () => this.router.navigate(['/seleccion-tema'])
+          }
+        ]
+      }).then(a => a.present());
+      return; // No llamar a la API
+    }
+
     this.selectedHabilidad = null;
     this.selectedAnswers = {};
     this.evaluationResults = [];
@@ -125,29 +195,42 @@ export class HabilidadesPage implements OnInit, OnDestroy {
 
     if (!this.profile?.rut) return;
 
-    // We can't know for sure the name of the custom theme, but if we have an ID it's a fixed or custom theme.
-    // The backend uses 'tema' as string. We should just pass es_fijo=false for now or true if it's fixed.
-    // Wait, backend expects 'tema' string, but if we don't pass it, it uses user.tema_actual_id for DB lookup.
-    // Actually, backend needs 'tema' for the prompt! But wait, backend prompt uses 'request.tema'.
-    // If request.tema is empty, it chooses random. But if they selected a theme, we should probably fetch the tema name.
-    // Or just let the backend handle it! Wait, we don't know the tema name.
-    // It's okay, we'll just pass es_fijo = false for now since backend already knows the ID and for the prompt it would be nice to have it, but let's see. 
-    
     this.habilidadesService.generarPreguntas(this.profile.rut, skill, null, false).subscribe({
       next: (data) => {
         this.selectedHabilidad = data;
         this.totalQuestions = data.preguntas.length;
         this.startTimer();
+        // --- PROBLEMA 1: Refrescar el contador DESPUÉS de generar preguntas ---
+        this.refreshTextosRestantes();
       },
       error: (error) => {
         console.error('Error al generar preguntas:', error);
-        alert(error.error?.detail || 'No se pudo generar las preguntas. Inténtalo de nuevo.');
+        const detail = error.error?.detail || '';
+        if (detail.toLowerCase().includes('groq')) {
+          this.handleGroqError();
+        } else if (detail.toLowerCase().includes('textos')) {
+          // El backend confirmó que no quedan textos: refrescar y mostrar popup
+          this.refreshTextosRestantes();
+          this.alertController.create({
+            header: '¡Se acabaron tus textos!',
+            message: detail,
+            buttons: [
+              { text: 'Cancelar', role: 'cancel' },
+              {
+                text: 'Elegir nuevo tema',
+                handler: () => this.router.navigate(['/seleccion-tema'])
+              }
+            ]
+          }).then(a => a.present());
+        } else {
+          alert(detail || 'No se pudo generar las preguntas. Inténtalo de nuevo.');
+        }
       },
     });
   }
 
   get minSecondsRequired(): number {
-    return this.totalQuestions * 60; // 1 minuto por pregunta (60 seg)
+    return this.totalQuestions * 15; // 15 segundos por pregunta
   }
 
   get isSubmitLocked(): boolean {
@@ -226,9 +309,38 @@ export class HabilidadesPage implements OnInit, OnDestroy {
         this.submitting = false;
         this.isSubmitted = true;
 
+        // Refrescar habilidades y contador silenciosamente tras entregar respuestas
         if (this.profile?.rut) {
-          (this.loadHabilidades(this.profile.rut),
-            this.habilidadesService.getDashboard(this.profile.rut).subscribe());
+          this.loadHabilidades(this.profile.rut);
+        }
+
+        // Increment daily goal count
+        const todayStr = new Date().toDateString();
+        const savedDate = localStorage.getItem('daily_goal_date');
+        let count = 0;
+        if (savedDate === todayStr) {
+          count = parseInt(localStorage.getItem('daily_goal_count') || '0', 10);
+        } else {
+          localStorage.setItem('daily_goal_date', todayStr);
+        }
+        localStorage.setItem('daily_goal_count', (count + 1).toString());
+
+        // --- Alerta de Rendimiento ---
+        if (result.rendimiento_cambio !== undefined) {
+           const cambio = result.rendimiento_cambio;
+           const isPositive = cambio > 0;
+           const isNegative = cambio < 0;
+           const prefix = isPositive ? 'Subió' : isNegative ? 'Bajó' : 'Se mantuvo';
+           const symbol = isPositive ? '+' : '';
+           // We use css styles directly or ion-text-color classes if they exist, but standard CSS works in message.
+           const colorHtml = isPositive ? 'color: var(--ion-color-success);' : isNegative ? 'color: var(--ion-color-danger);' : 'color: var(--ion-color-medium);';
+           
+           this.alertController.create({
+             header: 'Rendimiento de Habilidad',
+             subHeader: 'Resultados de tu práctica',
+             message: new IonicSafeString(`Tu rendimiento en la habilidad ${this.selectedHabilidad?.tipo_habilidad} <strong style="${colorHtml}">${prefix} ${symbol}${cambio.toFixed(2)}%</strong>.`),
+             buttons: ['Entendido']
+           }).then(alert => alert.present());
         }
 
         // --- Desafios Report ---
@@ -249,8 +361,14 @@ export class HabilidadesPage implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Error al evaluar respuestas:', error);
-        this.evaluationError =
-          'No se pudo evaluar tus respuestas. Intenta de nuevo más tarde.';
+        const detail = error.error?.detail || '';
+        if (detail.toLowerCase().includes('groq')) {
+          this.handleGroqError();
+          this.evaluationError = 'Error en la comunicación con Groq. Configura la API para resolverlo.';
+        } else {
+          this.evaluationError =
+            detail || 'No se pudo evaluar tus respuestas. Intenta de nuevo más tarde.';
+        }
         this.submitting = false;
       },
     });
@@ -308,5 +426,29 @@ export class HabilidadesPage implements OnInit, OnDestroy {
       return texto;
     }
     return [];
+  }
+
+  async handleGroqError() {
+    const alert = await this.alertController.create({
+      header: 'Error de Comunicación',
+      message: 'Error en la comunicación con Groq. ¿Desea ir a la configuración de la IA para resolverlo?',
+      buttons: [
+        {
+          text: 'No',
+          role: 'cancel'
+        },
+        {
+          text: 'Sí',
+          handler: async () => {
+            const modal = await this.modalController.create({
+              component: ConfigModalComponent,
+              componentProps: {}
+            });
+            await modal.present();
+          }
+        }
+      ]
+    });
+    await alert.present();
   }
 }

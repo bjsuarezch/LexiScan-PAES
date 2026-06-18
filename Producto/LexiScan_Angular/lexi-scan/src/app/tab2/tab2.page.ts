@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AlertController } from '@ionic/angular';
 import { IRegistro, IUserProfile } from '../models/auth.model';
 import { HabilidadesService } from '../services/habilidades.service';
 import { ProfileService } from '../services/profile.service';
@@ -29,6 +30,7 @@ export class Tab2Page implements OnInit {
     private router: Router,
     private habilidadesService: HabilidadesService,
     private profileService: ProfileService,
+    private alertController: AlertController,
   ) {
     this.initializeForm();
   }
@@ -107,6 +109,37 @@ export class Tab2Page implements OnInit {
     return password.value === confirmPassword.value ? null : { 'passwordMismatch': true };
   }
 
+  ionViewWillEnter(): void {
+    this.resetForm();
+  }
+
+  get hasMinLength(): boolean {
+    const val = this.registroForm?.get('contrasena')?.value || '';
+    return val.length >= 6;
+  }
+
+  get hasUpperCase(): boolean {
+    const val = this.registroForm?.get('contrasena')?.value || '';
+    return /[A-Z]/.test(val);
+  }
+
+  get hasLowerCase(): boolean {
+    const val = this.registroForm?.get('contrasena')?.value || '';
+    return /[a-z]/.test(val);
+  }
+
+  get hasNumeric(): boolean {
+    const val = this.registroForm?.get('contrasena')?.value || '';
+    return /[0-9]/.test(val);
+  }
+
+  get confirmPasswordState(): 'empty' | 'matching' | 'mismatch' {
+    const password = this.registroForm?.get('contrasena')?.value || '';
+    const confirmPassword = this.registroForm?.get('confirmarContrasena')?.value || '';
+    if (!confirmPassword) return 'empty';
+    return password === confirmPassword ? 'matching' : 'mismatch';
+  }
+
   getErrorMessage(fieldName: string): string {
     const control = this.registroForm.get(fieldName);
 
@@ -178,7 +211,7 @@ export class Tab2Page implements OnInit {
         email: registroData.email,
         contrasena: registroData.contrasena,
       }).subscribe({
-        next: response => {
+        next: async response => {
           const profile: IUserProfile = {
             rut: response.rut,
             nombre: response.nombre_completo,
@@ -187,14 +220,50 @@ export class Tab2Page implements OnInit {
             direccion: '',
           };
           this.profileService.saveProfile(profile);
-          this.router.navigate(['/home']);
+
+          const alertPopup = await this.alertController.create({
+            header: '¡Registro de usuario exitoso!',
+            message: 'Tu cuenta ha sido registrada con éxito.',
+            buttons: [
+              {
+                text: 'Aceptar',
+                handler: () => {
+                  this.router.navigate(['/habilidades'], { queryParams: { firstTime: true } });
+                }
+              }
+            ]
+          });
+          await alertPopup.present();
         },
         error: error => {
           console.error('Error de registro:', error);
-          alert('Registro fallido: ' + (error.error?.detail || 'Revisa tus datos'));
+          let detailMsg = error.error?.detail || 'Revisa tus datos';
+          if (detailMsg === 'El RUT ya existe') {
+            detailMsg = 'Ya se encuentra un usuario registrado con ese RUT.';
+          }
+          alert('Registro fallido: ' + detailMsg);
         }
       });
     }
+  }
+
+  onRutInput(event: any): void {
+    let input = event.target.value;
+    if (!input) return;
+    
+    let clean = input.replace(/[^0-9kK]/g, '').toUpperCase();
+    if (clean.length > 9) {
+      clean = clean.slice(0, 9);
+    }
+    
+    let formatted = clean;
+    if (clean.length > 1) {
+      const body = clean.slice(0, -1);
+      const dv = clean.slice(-1);
+      formatted = `${body}-${dv}`;
+    }
+    
+    this.registroForm.get('rut')?.setValue(formatted, { emitEvent: false });
   }
 
   resetForm(): void {

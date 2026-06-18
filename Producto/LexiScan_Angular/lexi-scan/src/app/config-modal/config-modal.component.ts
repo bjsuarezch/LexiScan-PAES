@@ -21,6 +21,8 @@ export class ConfigModalComponent implements OnInit {
   configForm!: FormGroup;
   availableModels: string[] = [];
   loading = false;
+  showPassword = false;
+  savingKey = false;
 
   private readonly MODELO_RECOMENDADO = 'llama-3.1-70b-versatile';
 
@@ -115,6 +117,32 @@ export class ConfigModalComponent implements OnInit {
       } finally {
         this.loading = false;
       }
+    }
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
+  }
+
+  async saveApiKeyOnly(): Promise<void> {
+    const apiKey = this.configForm.get('apiKey')?.value;
+    if (!apiKey) return;
+
+    this.savingKey = true;
+    try {
+      await this.habilidadesService.setConfiguracion({
+        clave: 'GROQ_API_KEY',
+        valor: apiKey,
+        descripcion: 'API Key para Groq'
+      }).toPromise();
+
+      // Successfully saved, reload the models dropdown
+      await this.loadModels();
+    } catch (error) {
+      console.error('Error saving API Key:', error);
+      alert('Error al guardar la API Key y cargar modelos.');
+    } finally {
+      this.savingKey = false;
     }
   }
 

@@ -5,6 +5,9 @@
     </ion-title>
 
     <ion-buttons slot="end">
+      <ion-button *ngIf="profile?.es_admin" color="warning" class="btn-icon" (click)="onAdminClick()">
+        <ion-icon name="shield-checkmark" slot="icon-only"></ion-icon>
+      </ion-button>
       <ion-button class="btn-icon" (click)="onLogout()">
         <ion-icon name="log-out-outline" slot="icon-only"></ion-icon>
       </ion-button>
@@ -26,7 +29,7 @@
     <!-- ============================================ -->
     <section class="hero-section">
       <div class="hero-greeting">
-        <h1 class="font-heading">Hola, {{ profile?.nombre || 'Estudiante' }} 👋</h1>
+        <h1 class="font-heading">Hola, {{ firstName }} 👋</h1>
         <p class="hero-subtitle font-body">¿Listo para subir tu puntaje PAES?</p>
       </div>
 
@@ -59,13 +62,32 @@
       <div class="daily-goal card-elevated">
         <div class="daily-goal-header">
           <span class="font-heading">🎯 Meta diaria</span>
-          <span class="daily-goal-pct font-heading">45%</span>
+          <span class="daily-goal-pct font-heading">{{ getDailyGoalPct() }}%</span>
         </div>
         <div class="daily-goal-bar">
-          <!-- TODO: Bind width to real daily goal progress -->
-          <div class="daily-goal-fill progress-45"></div>
+          <div class="daily-goal-fill" [style.width.%]="getDailyGoalPct()"></div>
         </div>
-        <p class="daily-goal-hint font-body">Vas por buen camino — ¡sigue así!</p>
+        <p class="daily-goal-hint font-body">
+          <ng-container *ngIf="getDailyGoalPct() === 0">
+            Completa 2 sesiones de habilidades para ganar <strong>50 monedas</strong>.
+          </ng-container>
+          <ng-container *ngIf="getDailyGoalPct() === 50">
+            ¡Vas por la mitad! Completa 1 sesión más para reclamar tu recompensa.
+          </ng-container>
+          <ng-container *ngIf="getDailyGoalPct() >= 100 && !dailyGoalClaimed">
+            ¡Felicidades! Has alcanzado tu meta diaria hoy. 🎉
+          </ng-container>
+          <ng-container *ngIf="getDailyGoalPct() >= 100 && dailyGoalClaimed">
+            Recompensa ya reclamada hoy. ¡Vuelve mañana!
+          </ng-container>
+        </p>
+        <!-- Botón de reclamación de meta diaria -->
+        <button
+          *ngIf="getDailyGoalPct() >= 100 && !dailyGoalClaimed"
+          class="btn-chunky-3d btn-chunky-3d-orange btn-reclamar-meta"
+          (click)="reclamarMetaDiaria()">
+          🎁 Reclamar 50 monedas
+        </button>
       </div>
     </section>
 
@@ -122,6 +144,18 @@
             <span class="module-btn-desc font-body">Puntaje, tendencia y dominio</span>
           </div>
           <ion-icon name="chevron-forward" class="module-btn-arrow"></ion-icon>
+        </button>
+
+        <!-- RANKING -->
+        <button class="module-btn module-btn-ranking" (click)="onRankingClick()" style="background: linear-gradient(135deg, #ffd700, #ffb300);">
+          <div class="module-btn-icon" style="color: #fff; background: rgba(0,0,0,0.1);">
+            <ion-icon name="trophy"></ion-icon>
+          </div>
+          <div class="module-btn-info" style="color: #fff;">
+            <span class="module-btn-title font-heading" style="color: #fff;">Ranking</span>
+            <span class="module-btn-desc font-body" style="color: rgba(255,255,255,0.9);">Compara tus resultados con otros</span>
+          </div>
+          <ion-icon name="chevron-forward" class="module-btn-arrow" style="color: #fff;"></ion-icon>
         </button>
       </div>
     </section>
@@ -210,77 +244,69 @@
     </section>
 
     <!-- ============================================ -->
-    <!-- DAILY CHALLENGES                             -->
+    <!-- DAILY CHALLENGES (DINÁMICOS)                 -->
     <!-- ============================================ -->
     <section class="challenges-section">
       <h2 class="section-title font-heading">Desafíos diarios</h2>
 
       <div class="challenges-grid">
-        <!-- Challenge 1: Fixed test -->
-        <div class="challenge-card card-elevated">
+        <div
+          *ngFor="let desafio of desafios; let i = index"
+          class="challenge-card card-elevated"
+          [class.challenge-completado]="desafio.completado"
+          [class.challenge-reclamado]="desafio.reclamado">
+
+          <!-- Header: ícono + recompensa -->
           <div class="challenge-card-header">
-            <div class="challenge-card-icon challenge-icon-1">
-              <ion-icon name="flash"></ion-icon>
+            <div class="challenge-card-icon" [ngClass]="'challenge-icon-' + ((i % 3) + 1)">
+              <ion-icon [name]="getChallengeIcon(desafio.tipo)"></ion-icon>
             </div>
             <div class="challenge-card-reward">
               <ion-icon name="star" color="warning"></ion-icon>
-              <span class="font-heading">+50</span>
+              <span class="font-heading">+{{ desafio.recompensa_monedas }}</span>
             </div>
           </div>
-          <h4 class="font-heading">Constancia en Habilidades</h4>
-          <p class="font-body">Practica 15 minutos hoy</p>
+
+          <h4 class="font-heading">{{ desafio.titulo }}</h4>
+          <p class="font-body">{{ desafio.descripcion }}</p>
+
+          <!-- Barra de progreso dinámica -->
           <div class="challenge-card-progress">
             <div class="challenge-card-bar">
-              <!-- TODO: Bind width to real progress -->
-              <div class="challenge-card-fill progress-60"></div>
+              <div
+                class="challenge-card-fill"
+                [style.width.%]="getDesafioPct(desafio)"
+                [style.background]="desafio.completado ? 'var(--ion-color-success)' : 'var(--ion-color-primary)'"
+              ></div>
             </div>
-            <span class="font-body">9 / 15 min</span>
+            <span class="font-body">{{ getDesafioLabel(desafio) }}</span>
           </div>
+
+          <!-- Habilidades practicadas (solo desafío diversidad) -->
+          <div
+            *ngIf="desafio.tipo === 'diversidad_habilidades' && getHabilidadesPracticadas().length > 0"
+            class="habilidades-practicadas">
+            <span
+              *ngFor="let h of getHabilidadesPracticadas()"
+              class="hab-tag">
+              {{ h }}
+            </span>
+          </div>
+
+          <!-- Botón reclamar recompensa -->
+          <button
+            *ngIf="desafio.completado && !desafio.reclamado"
+            class="btn-chunky-3d btn-chunky-3d-orange btn-reclamar"
+            (click)="reclamarRecompensa(desafio.id)">
+            🎁 Reclamar {{ desafio.recompensa_monedas }} monedas
+          </button>
+          <p *ngIf="desafio.reclamado" class="reclamado-label">✅ Recompensa reclamada</p>
         </div>
 
-        <!-- Challenge 2: Fixed test -->
-        <div class="challenge-card card-elevated">
-          <div class="challenge-card-header">
-            <div class="challenge-card-icon challenge-icon-2">
-              <ion-icon name="compass"></ion-icon>
-            </div>
-            <div class="challenge-card-reward">
-              <ion-icon name="star" color="warning"></ion-icon>
-              <span class="font-heading">+60</span>
-            </div>
-          </div>
-          <h4 class="font-heading">Explorador de Habilidades</h4>
-          <p class="font-body">Practica 4 habilidades distintas</p>
-          <div class="challenge-card-progress">
-            <div class="challenge-card-bar">
-              <!-- TODO: Bind width to real progress -->
-              <div class="challenge-card-fill progress-50"></div>
-            </div>
-            <span class="font-body">2 / 4</span>
-          </div>
-        </div>
-
-        <!-- Challenge 3: Fixed test -->
-        <div class="challenge-card card-elevated">
-          <div class="challenge-card-header">
-            <div class="challenge-card-icon challenge-icon-3">
-              <ion-icon name="trophy"></ion-icon>
-            </div>
-            <div class="challenge-card-reward">
-              <ion-icon name="star" color="warning"></ion-icon>
-              <span class="font-heading">+100</span>
-            </div>
-          </div>
-          <h4 class="font-heading">Gym Impecable</h4>
-          <p class="font-body">Resuelve sin errores en GYM</p>
-          <div class="challenge-card-progress">
-            <div class="challenge-card-bar">
-              <!-- TODO: Bind width to real progress -->
-              <div class="challenge-card-fill progress-0"></div>
-            </div>
-            <span class="font-body">Pendiente</span>
-          </div>
-        </div>
+        <!-- Placeholder si no hay desafíos aún -->
+        <p *ngIf="desafios.length === 0" class="font-body" style="color: var(--ion-color-medium); text-align:center;">
+          Cargando desafíos del día...
+        </p>
       </div>
     </section>
 
@@ -295,7 +321,7 @@
           </div>
           <div class="weakness-text">
             <h3 class="font-heading">Tu debilidad hoy</h3>
-            <p class="font-body">{{ errorFrecuente.nombre_habilidad }}</p>
+            <p class="font-body">{{ getSkillDisplayName(errorFrecuente.nombre_habilidad) }}</p>
           </div>
           <ion-icon name="chevron-forward" class="module-arrow"></ion-icon>
         </div>
@@ -304,3 +330,28 @@
 
   </div>
 </ion-content>
+
+<ion-footer class="ion-no-border">
+  <ion-tab-bar>
+    <ion-tab-button tab="home" routerLink="/home" routerDirection="root">
+      <ion-icon name="home" color="primary"></ion-icon>
+      <ion-label color="primary">Inicio</ion-label>
+    </ion-tab-button>
+    <ion-tab-button tab="habilidades" routerLink="/habilidades" routerDirection="root">
+      <ion-icon name="book"></ion-icon>
+      <ion-label>Habilidades</ion-label>
+    </ion-tab-button>
+    <ion-tab-button tab="gym" routerLink="/gym" routerDirection="root">
+      <ion-icon name="barbell"></ion-icon>
+      <ion-label>GYM</ion-label>
+    </ion-tab-button>
+    <ion-tab-button tab="stats" routerLink="/stats" routerDirection="root">
+      <ion-icon name="stats-chart"></ion-icon>
+      <ion-label>Stats</ion-label>
+    </ion-tab-button>
+    <ion-tab-button tab="ranking" routerLink="/ranking" routerDirection="root">
+      <ion-icon name="trophy"></ion-icon>
+      <ion-label>Ranking</ion-label>
+    </ion-tab-button>
+  </ion-tab-bar>
+</ion-footer>

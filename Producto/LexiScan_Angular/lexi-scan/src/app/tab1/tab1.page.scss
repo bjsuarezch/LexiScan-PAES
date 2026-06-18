@@ -171,54 +171,7 @@ ion-content {
   font-size: 1.15rem;
 }
 
-// --- Demo ---
-.login-btn-demo {
-  width: 100%;
-  padding: 16px 24px;
-  background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
-  color: #475569;
-  border-bottom: 4px solid #cbd5e1;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  font-size: 1rem;
-  transition: all 0.15s ease;
 
-  &:hover {
-    background: linear-gradient(135deg, #e2e8f0, #f1f5f9);
-    color: #334155;
-    transform: translateY(2px);
-    border-bottom-width: 2px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-  }
-
-  &:active {
-    background: #f1f5f9;
-    border-bottom-width: 0px;
-    transform: translateY(4px);
-    box-shadow: none;
-  }
-}
-
-// --- Divider ---
-.login-divider {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin: 24px 0 20px;
-
-  &::before,
-  &::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: #e2e8f0;
-  }
-
-  span {
-    font-size: 0.85rem;
-    color: #94a3b8;
-    flex-shrink: 0;
-  }
-}
 
 // --- Link ---
 .login-link-btn {

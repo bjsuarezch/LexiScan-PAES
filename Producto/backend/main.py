@@ -1,6 +1,15 @@
+# -*- coding: utf-8 -*-
 import os
+import sys
 import json
 from pathlib import Path
+
+# Forzar UTF-8 en stdout/stderr para evitar errores en Windows con codepage CP1252/CP850
+if sys.stdout.encoding != 'utf-8':
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+if sys.stderr.encoding != 'utf-8':
+    sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+
 
 import requests
 from dotenv import load_dotenv  # <--- NUEVO
@@ -160,19 +169,38 @@ def build_system_prompt() -> str:
     return (
         'Eres la Profesora Sinclair, una docente experta en la PAES de Competencia Lectora chilena. ' 
         'Respondes con un tono pedagógico, cercano y profesional, cuidando la precisión académica. '
-        'Tu función es diseñar material de evaluación riguroso, claro y útil para estudiantes que se preparan para la PAES.'
+        'Tu función es diseñar material de evaluación riguroso, claro y útil para estudiantes que se preparan para la PAES. '
+        'Debes responder ÚNICAMENTE con el objeto JSON válido solicitado, sin texto introductorio ni de cierre, y sin bloques de código markdown (como ```json).'
     )
 
 def build_user_prompt(habilidad: str, tema: str) -> str:
+    import random
     num_preguntas = 4
     if habilidad == "Tipos_de_Texto" or habilidad == "Tipos de Texto":
         num_preguntas = 1
     
     tema_instruccion = f"El tema central del texto debe ser sobre: '{tema}'." if tema else "Elige un tema educativo y muy interesante al azar."
 
+    # Semilla aleatoria para forzar diversidad en cada llamada
+    variante_seed = random.randint(1000, 9999)
+    subtemas_variantes = [
+        "un aspecto poco conocido",
+        "una perspectiva histórica",
+        "implicancias actuales",
+        "datos sorprendentes",
+        "un enfoque científico",
+        "una dimensión social",
+        "consecuencias futuras",
+        "una comparación internacional",
+    ]
+    angulo = subtemas_variantes[variante_seed % len(subtemas_variantes)]
+
     return (
-        f"Genera un ejercicio completo para la habilidad de Comprension Lectora PAES '{habilidad}'. "
-        f"{tema_instruccion}\n\n"
+        f"[VARIANTE #{variante_seed}] "
+        f"Genera un ejercicio NUEVO y ÚNICO de Comprension Lectora PAES para la habilidad '{habilidad}'. "
+        f"{tema_instruccion} "
+        f"Enfoca el texto desde {angulo} del tema. "
+        f"NO repitas estructuras, ejemplos ni ideas de ejercicios anteriores sobre este tema.\n\n"
         "Tu tarea es generar un texto inédito de al menos 2 párrafos.\n\n"
         f"CANTIDAD DE PREGUNTAS A GENERAR: {num_preguntas}.\n\n"
         f"basándote exclusivamente en ese texto inedito y en la habilidad a evaluar, genera exactamente {num_preguntas} pregunta(s) de selección múltiple.\n"
@@ -193,6 +221,7 @@ def build_user_prompt(habilidad: str, tema: str) -> str:
         "Puedes usar varios 'parrafo'. Si aplica, añade 'dato_clave' y un 'grafico_barra'. SIEMPRE incluye un bloque 'imagen' con un concepto clave en inglés. "
         "Las preguntas deben ser imposibles de responder sin leer el texto inédito. "
     )
+
 
 
 
@@ -223,18 +252,17 @@ def build_evaluation_prompt(tipo_habilidad: str, preguntas: list[dict]) -> str:
         'Para cada respuesta, explica de forma directa por qué la correcta es la que es y por qué la del usuario (si es incorrecta) falla.',
         'NO uses formatos estructurados ni listas como "1. Premisa, 2. Análisis, 3. Conclusión". Escribe un solo párrafo conversacional, como un humano hablando con un alumno.',
         'NO menciones que falta la premisa del texto o que asumes algo. Sé asertiva y directa.',
-        'Devuelve SOLO un objeto JSON estricto con: {"resultados": [{"pregunta_index": int, "feedback": "string"}]}',
+        f'Debes generar exactamente {len(preguntas)} objetos en "resultados", uno por cada pregunta, en el mismo orden.',
+        'IMPORTANTE: pregunta_index empieza en 0. Primera pregunta = 0, segunda = 1, etc.',
+        'Devuelve SOLO un objeto JSON estricto con: {"resultados": [{"pregunta_index": 0, "feedback": "string"}, {"pregunta_index": 1, "feedback": "string"}, ...]}',
         f"Habilidad: {tipo_habilidad}",
         '---'
     ]
 
     for index, pregunta in enumerate(preguntas):
-        # Enviamos solo lo necesario para que la IA "razone"
-        prompt_lines.append(f"P{index + 1}: {pregunta['enunciado']}")
+        prompt_lines.append(f"[pregunta_index={index}] {pregunta['enunciado']}")
         prompt_lines.append(f"Usuario marcó: {pregunta['respuesta_usuario']}")
         prompt_lines.append(f"Correcta es: {pregunta['respuesta_correcta']}")
-        # IMPORTANTE: No enviamos las alternativas completas para ahorrar tokens, 
-        # la IA ya sabe de qué trata la habilidad y el texto.
         prompt_lines.append('')
 
     return '\n'.join(prompt_lines)
@@ -292,7 +320,11 @@ def call_groq_feedback(tipo_habilidad: str, preguntas: list[dict], db: Session) 
     for item in resultados:
         if isinstance(item, dict) and 'pregunta_index' in item and 'feedback' in item:
             try:
-                feedback_map[int(item['pregunta_index'])] = str(item['feedback'])
+                idx = int(item['pregunta_index'])
+                # Normalizar: si el LLM usó base-1 (índice máximo = len(preguntas)), convertir a base-0
+                if idx >= len(preguntas) and idx > 0:
+                    idx = idx - 1
+                feedback_map[idx] = str(item['feedback'])
             except (ValueError, TypeError):
                 continue
     return feedback_map
@@ -484,9 +516,23 @@ def generar_preguntas(request: schemas.GenerarPreguntasRequest, db: Session = De
                 preguntas_seleccionadas = preguntas_banco[:4] if len(preguntas_banco) >= 4 else preguntas_banco
                 texto_inedito_json = preguntas_seleccionadas[0].texto_inedito
                 
+                # Normalizar texto_inedito
+                if isinstance(texto_inedito_json, str):
+                    try:
+                        import json
+                        texto_inedito_list = json.loads(texto_inedito_json)
+                        if not isinstance(texto_inedito_list, list):
+                            texto_inedito_list = [texto_inedito_list]
+                    except Exception:
+                        texto_inedito_list = [{"tipo": "parrafo", "contenido": texto_inedito_json}]
+                elif isinstance(texto_inedito_json, list):
+                    texto_inedito_list = texto_inedito_json
+                else:
+                    texto_inedito_list = [{"tipo": "parrafo", "contenido": str(texto_inedito_json or "Sin texto")}]
+
                 resp = {
                     "tipo_habilidad": habilidad_valida,
-                    "texto_inedito": texto_inedito_json,
+                    "texto_inedito": texto_inedito_list,
                     "preguntas": []
                 }
                 for p in preguntas_seleccionadas:
@@ -519,7 +565,22 @@ def generar_preguntas(request: schemas.GenerarPreguntasRequest, db: Session = De
     preguntas_guardadas_ids = []
     
     try:
-        texto_inedito = generacion.get('texto_inedito', [{"tipo": "parrafo", "contenido": "Sin texto"}])
+        texto_inedito_raw = generacion.get('texto_inedito', [{"tipo": "parrafo", "contenido": "Sin texto"}])
+        
+        # Normalizar texto_inedito
+        if isinstance(texto_inedito_raw, str):
+            try:
+                import json
+                texto_inedito = json.loads(texto_inedito_raw)
+                if not isinstance(texto_inedito, list):
+                    texto_inedito = [texto_inedito]
+            except Exception:
+                texto_inedito = [{"tipo": "parrafo", "contenido": texto_inedito_raw}]
+        elif isinstance(texto_inedito_raw, list):
+            texto_inedito = texto_inedito_raw
+        else:
+            texto_inedito = [{"tipo": "parrafo", "contenido": str(texto_inedito_raw or "Sin texto")}]
+
         # Intentar obtener el tema actual
         tema = db.query(models.Tema).filter(models.Tema.nombre.ilike(request.tema)).first() if request.tema else None
         
@@ -546,8 +607,10 @@ def generar_preguntas(request: schemas.GenerarPreguntasRequest, db: Session = De
         db.rollback()
         print(f"Error al persistir preguntas en la DB: {str(e)}")
         # Opcional: podrías lanzar una excepción o simplemente devolver las preguntas sin IDs
+        texto_inedito = [{"tipo": "parrafo", "contenido": "Sin texto debido a error de persistencia"}]
     
     generacion['tipo_habilidad'] = habilidad_valida
+    generacion['texto_inedito'] = texto_inedito
     return generacion
 
 
@@ -597,13 +660,10 @@ def evaluar_preguntas(request: schemas.EvaluarRespuestasRequest, db: Session = D
         if correcta:
             total_correct += 1
 
-        # Intenta buscar el índice de todas las formas posibles para evitar el desfase
+        # Buscar feedback por índice 0-based (normalizado en call_groq_feedback)
         feedback = (
-            feedback_map.get(index) or 
-            feedback_map.get(str(index)) or 
-            feedback_map.get(index + 1) or 
-            feedback_map.get(str(index + 1)) or 
-            'Revisa la justificación pedagógica y vuelve a intentarlo si es necesario.'
+            feedback_map.get(index) or
+            'Sin retroalimentación disponible para esta pregunta.'
         )
         if isinstance(feedback, dict):
             feedback = feedback.get('logica_pedagogica') or feedback.get('feedback') or str(feedback)
@@ -637,8 +697,11 @@ def evaluar_preguntas(request: schemas.EvaluarRespuestasRequest, db: Session = D
                 print(f"Error registrando fallo en pregunta {index}: {str(e)}")
 
     xp_ganada = 0
+    rendimiento_cambio = 0.0
     try:
-        xp_ganada = crud.update_user_skill_results(db, request.rut, habilidad_db, total_correct, len(request.preguntas))
+        resultado_skill = crud.update_user_skill_results(db, request.rut, habilidad_db, total_correct, len(request.preguntas))
+        xp_ganada = resultado_skill['xp_ganada']
+        rendimiento_cambio = resultado_skill['rendimiento_cambio']
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
 
@@ -648,6 +711,7 @@ def evaluar_preguntas(request: schemas.EvaluarRespuestasRequest, db: Session = D
         'total_preguntas': len(request.preguntas),
         'puntaje': total_correct,
         'xp_ganada': xp_ganada,
+        'rendimiento_cambio': rendimiento_cambio,
         'mensaje': 'Evaluación almacenada correctamente.',
     }
 
@@ -841,3 +905,49 @@ async def obtener_umbral_impulsividad(
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f'Error al calcular umbral de impulsividad: {str(e)}')
+
+
+@app.get('/ranking', response_model=schemas.RankingResponse)
+def get_ranking(rut: str = None, limit: int = 10, db: Session = Depends(get_db)):
+    try:
+        return crud.get_ranking(db, limit, rut)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f'Error al obtener el ranking: {str(e)}')
+
+
+# --- ADMIN ENDPOINTS ---
+
+def verificar_admin(rut: str, db: Session):
+    user = db.query(models.Usuario).filter(models.Usuario.rut == rut).first()
+    if not user or not getattr(user, 'es_admin', False):
+        raise HTTPException(status_code=403, detail="No tienes permisos de administrador")
+    return user
+
+@app.get('/admin/usuarios', response_model=list[schemas.AdminUsuarioItem])
+def get_admin_usuarios(rut_admin: str, db: Session = Depends(get_db)):
+    verificar_admin(rut_admin, db)
+    return crud.get_all_users_admin(db)
+
+@app.put('/admin/usuarios/{rut_target}/toggle-status')
+def toggle_user_status_endpoint(rut_target: str, rut_admin: str, db: Session = Depends(get_db)):
+    verificar_admin(rut_admin, db)
+    if rut_target == rut_admin:
+        raise HTTPException(status_code=400, detail="No puedes desactivarte a ti mismo")
+    
+    success = crud.toggle_user_status(db, rut_target)
+    if not success:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    return {"message": "Estado del usuario actualizado exitosamente"}
+
+@app.delete('/admin/usuarios/{rut_target}')
+def delete_user_endpoint(rut_target: str, rut_admin: str, db: Session = Depends(get_db)):
+    verificar_admin(rut_admin, db)
+    if rut_target == rut_admin:
+        raise HTTPException(status_code=400, detail="No puedes eliminarte a ti mismo")
+    
+    success = crud.delete_user(db, rut_target)
+    if not success:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    return {"message": "Usuario eliminado exitosamente"}
+
+# Trigger reload comment

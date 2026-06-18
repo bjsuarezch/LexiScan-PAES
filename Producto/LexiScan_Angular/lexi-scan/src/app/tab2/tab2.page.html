@@ -23,6 +23,7 @@
         [formGroup]="registroForm"
         (ngSubmit)="onSubmit()"
         class="registro-form"
+        autocomplete="off"
       >
 
         <!-- RUT Input -->
@@ -37,6 +38,9 @@
               class="native-input"
               (focus)="rutFocused = true"
               (blur)="rutFocused = false"
+              (input)="onRutInput($event)"
+              autocomplete="off"
+              name="registro_rut"
             />
           </div>
           <p class="input-error-msg" *ngIf="getErrorMessage('rut')">{{ getErrorMessage('rut') }}</p>
@@ -44,16 +48,18 @@
 
         <!-- Nombre Input -->
         <div class="input-group">
-          <label class="input-label">Nombre completo</label>
+          <label class="input-label">Nombre y Apellido</label>
           <div class="input-block" [class.input-focused]="nombreFocused" [class.input-error]="getErrorMessage('nombre')">
             <ion-icon name="person-outline" class="input-icon"></ion-icon>
             <input
               formControlName="nombre"
-              placeholder="Tu nombre completo"
+              placeholder="Tu nombre y apellido"
               type="text"
               class="native-input"
               (focus)="nombreFocused = true"
               (blur)="nombreFocused = false"
+              autocomplete="off"
+              name="registro_nombre"
             />
           </div>
           <p class="input-error-msg" *ngIf="getErrorMessage('nombre')">{{ getErrorMessage('nombre') }}</p>
@@ -71,6 +77,8 @@
               class="native-input"
               (focus)="emailFocused = true"
               (blur)="emailFocused = false"
+              autocomplete="off"
+              name="registro_email"
             />
           </div>
           <p class="input-error-msg" *ngIf="getErrorMessage('email')">{{ getErrorMessage('email') }}</p>
@@ -79,7 +87,7 @@
         <!-- Password Input -->
         <div class="input-group">
           <label class="input-label">Contraseña</label>
-          <div class="input-block" [class.input-focused]="passwordFocused" [class.input-error]="getErrorMessage('contrasena')">
+          <div class="input-block" [class.input-focused]="passwordFocused" [class.input-error]="submitted && registroForm.get('contrasena')?.invalid">
             <ion-icon name="lock-closed-outline" class="input-icon"></ion-icon>
             <input
               formControlName="contrasena"
@@ -88,18 +96,39 @@
               class="native-input"
               (focus)="passwordFocused = true"
               (blur)="passwordFocused = false"
+              autocomplete="new-password"
+              name="registro_contrasena"
             />
             <button type="button" class="eye-toggle" (click)="togglePasswordVisibility('password')">
               <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
             </button>
           </div>
-          <p class="input-error-msg" *ngIf="getErrorMessage('contrasena')">{{ getErrorMessage('contrasena') }}</p>
+          
+          <!-- Checklist de Requisitos en Tiempo Real -->
+          <div class="password-requirements font-body">
+            <div class="requirement-item" [class.met]="hasMinLength">
+              <ion-icon [name]="hasMinLength ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>
+              <span>Mínimo 6 caracteres</span>
+            </div>
+            <div class="requirement-item" [class.met]="hasUpperCase">
+              <ion-icon [name]="hasUpperCase ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>
+              <span>Una letra mayúscula</span>
+            </div>
+            <div class="requirement-item" [class.met]="hasLowerCase">
+              <ion-icon [name]="hasLowerCase ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>
+              <span>Una letra minúscula</span>
+            </div>
+            <div class="requirement-item" [class.met]="hasNumeric">
+              <ion-icon [name]="hasNumeric ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>
+              <span>Un número</span>
+            </div>
+          </div>
         </div>
 
         <!-- Confirm Password Input -->
         <div class="input-group">
           <label class="input-label">Confirmar contraseña</label>
-          <div class="input-block" [class.input-focused]="confirmFocused" [class.input-error]="getErrorMessage('confirmarContrasena')">
+          <div class="input-block" [class.input-focused]="confirmFocused" [class.input-error]="submitted && registroForm.errors?.['passwordMismatch']">
             <ion-icon name="shield-checkmark-outline" class="input-icon"></ion-icon>
             <input
               formControlName="confirmarContrasena"
@@ -108,12 +137,23 @@
               class="native-input"
               (focus)="confirmFocused = true"
               (blur)="confirmFocused = false"
+              autocomplete="new-password"
+              name="registro_confirmarContrasena"
             />
             <button type="button" class="eye-toggle" (click)="togglePasswordVisibility('confirmPassword')">
               <ion-icon [name]="showConfirmPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
             </button>
           </div>
-          <p class="input-error-msg" *ngIf="getErrorMessage('confirmarContrasena')">{{ getErrorMessage('confirmarContrasena') }}</p>
+
+          <!-- Estado de coincidencia de contraseña en tiempo real -->
+          <div class="confirm-password-match font-body" *ngIf="confirmPasswordState !== 'empty'">
+            <div class="match-item" [class.matching]="confirmPasswordState === 'matching'" [class.mismatch]="confirmPasswordState === 'mismatch'">
+              <ion-icon [name]="confirmPasswordState === 'matching' ? 'checkmark-circle' : 'close-circle'"></ion-icon>
+              <span>
+                {{ confirmPasswordState === 'matching' ? 'Las contraseñas coinciden' : 'Las contraseñas no coinciden' }}
+              </span>
+            </div>
+          </div>
         </div>
 
         <!-- Form Status -->

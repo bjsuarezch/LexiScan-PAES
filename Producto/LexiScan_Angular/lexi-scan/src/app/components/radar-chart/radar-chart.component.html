@@ -4,24 +4,24 @@
     <polygon
       points="125,80 143,90 143,110 125,120 107,110 107,90"
       fill="none"
-      stroke="#e2e8f0"
+      stroke="#cbd5e1"
       stroke-width="1"
     />
     <polygon
       points="125,60 161,80 161,120 125,140 89,120 89,80"
       fill="none"
-      stroke="#e2e8f0"
+      stroke="#cbd5e1"
       stroke-width="1"
     />
     <polygon
       points="125,40 180,70 180,130 125,160 70,130 70,70"
       fill="#f1f5f9"
-      stroke="#cbd5e1"
+      stroke="#94a3b8"
       stroke-width="1"
     />
 
     <!-- 2. Líneas de los ejes -->
-    <g stroke="#cbd5e1" stroke-width="1">
+    <g stroke="#94a3b8" stroke-width="1">
       <line x1="125" y1="100" x2="125" y2="40" />
       <line x1="125" y1="100" x2="180" y2="70" />
       <line x1="125" y1="100" x2="180" y2="130" />
@@ -37,13 +37,15 @@
       [attr.fill]="reg.color"
     />
 
-    <!-- 4. Círculos blancos de progreso -->
+    <!-- 4. Círculos de progreso (morados) -->
     <circle
       *ngFor="let p of getRadarPointsArray()"
       [attr.cx]="p.x"
       [attr.cy]="p.y"
-      r="2.5"
-      fill="white"
+      r="3.5"
+      fill="#6366f1"
+      stroke="white"
+      stroke-width="1.5"
     />
 
     <!-- 5. Círculos blancos fijos -->

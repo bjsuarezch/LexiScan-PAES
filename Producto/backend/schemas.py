@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from datetime import datetime
 from typing import Dict, List, Optional, Union
 
@@ -23,6 +24,7 @@ class UserResponse(BaseModel):
     xp_total: int
     racha_actual: int
     activo: bool
+    es_admin: bool
     ultimo_acceso: Optional[datetime] = None
     tema_actual_id: Optional[int] = None
     textos_restantes: int = 0
@@ -53,7 +55,7 @@ class PreguntaItem(BaseModel):
     alternativas: Dict[str, str]
     respuesta_correcta: str
     justificacion_cot: str
-    texto_inedito: Optional[str] = None
+    texto_inedito: Optional[Union[str, list]] = None
 
     class Config:
         from_attributes = True
@@ -62,7 +64,7 @@ class PreguntaItem(BaseModel):
 
 class HabilidadDetailResponse(BaseModel):
     nombre_habilidad: str
-    texto_inedito: str
+    texto_inedito: Union[str, list]
     preguntas: List[PreguntaItem]
 
 
@@ -123,6 +125,11 @@ class EvaluarResultadoItem(BaseModel):
 class EvaluarRespuestasResponse(BaseModel):
     resultados: List[EvaluarResultadoItem]
     total_correct: int
+    total_preguntas: int
+    puntaje: int
+    xp_ganada: int
+    rendimiento_cambio: float
+    mensaje: str
 
 
 class ExamenRequest(BaseModel):
@@ -174,7 +181,7 @@ class GuardarResultadosExamenRequest(BaseModel):
 
 class GenerarPreguntasResponse(BaseModel):
     tipo_habilidad: str
-    texto_inedito: list  # JSON Array of blocks
+    texto_inedito: Union[str, list]  # JSON Array of blocks or stringified list
     preguntas: List[GeneratedPreguntaItem]
 
 
@@ -261,6 +268,28 @@ class UmbralImpulsividadResponse(BaseModel):
     mensaje_usuario: str = Field(
         ..., description="Mensaje descriptivo para mostrar al usuario (ej: 'Lee detenidamente...')"
     )
+
+    class Config:
+        from_attributes = True
+
+class RankingUserItem(BaseModel):
+    posicion: int
+    nombre_completo: str
+    xp_total: int
+    rut_parcial: str
+
+class RankingResponse(BaseModel):
+    ranking: List[RankingUserItem]
+    usuario_actual: Optional[RankingUserItem] = None
+
+class AdminUsuarioItem(BaseModel):
+    rut: str
+    nombre_completo: str
+    email: str
+    activo: bool
+    es_admin: bool
+    xp_total: int
+    racha_actual: int
 
     class Config:
         from_attributes = True
