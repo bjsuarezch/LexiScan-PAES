@@ -29,15 +29,16 @@
     <!-- ============================================ -->
     <!-- TEXT CONTEXTUAL (si existe)                  -->
     <!-- ============================================ -->
-    <div class="text-context" *ngIf="getCurrentGrupo()?.texto">
+    <div class="text-context" *ngIf="getCurrentGrupo()?.textoPlano">
       <div class="text-context-header">
         <ion-icon name="document-text-outline"></ion-icon>
         <span class="font-heading">Lectura Contextual</span>
       </div>
       <div class="text-context-body font-body">
-        {{ getCurrentGrupo()?.texto }}
+        <p *ngFor="let parrafo of getParrafosGrupoActual()" class="text-parrafo">{{ parrafo }}</p>
       </div>
     </div>
+
 
     <!-- ============================================ -->
     <!-- PREGUNTA ACTUAL                             -->

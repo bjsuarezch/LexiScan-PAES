@@ -613,13 +613,14 @@ def evaluar_examen(eval_request: schemas.EvaluarExamenRequest, db: Session = Dep
         raise HTTPException(status_code=400, detail=str(exc))
 
 
-@app.post('/guardar-resultados-examen')
+@app.post('/guardar-resultados-examen', response_model=schemas.GuardarResultadosExamenResponse)
 def guardar_resultados_examen(request: schemas.GuardarResultadosExamenRequest, db: Session = Depends(get_db)):
     try:
         result = crud.save_exam_results(db, request.rut, request.id_examen)
         return result
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
+
 
 
 @app.get('/temas', response_model=list[schemas.TemaResponse])

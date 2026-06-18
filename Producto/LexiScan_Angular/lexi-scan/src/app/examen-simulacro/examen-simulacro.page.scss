@@ -108,10 +108,15 @@ ion-progress-bar {
   font-size: 1rem;
   line-height: 1.65;
   color: var(--ion-text-color, #334155);
-  white-space: pre-wrap;
-  max-height: 300px;
+  max-height: 320px;
   overflow-y: auto;
+
+  .text-parrafo {
+    margin: 0 0 0.9em 0;
+    &:last-child { margin-bottom: 0; }
+  }
 }
+
 
 // ============================================================
 // QUESTION CARD

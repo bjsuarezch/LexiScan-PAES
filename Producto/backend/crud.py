@@ -740,13 +740,12 @@ def evaluate_exam_session(db: Session, id_examen: int, respuestas: List[dict]) -
 
 
 def save_exam_results(db: Session, rut: str, id_examen: int) -> dict:
-    """Guarda los resultados del examen actualizando el progreso del usuario."""
-    # Obtener el examen
+    """Guarda los resultados del examen actualizando el progreso del usuario.
+    Devuelve los cambios de nivel de maestría por habilidad para mostrar popup."""
     examen = db.query(models.SesionExamen).filter(models.SesionExamen.id_examen == id_examen).first()
     if not examen or examen.rut_usuario != rut:
         raise ValueError('Examen no encontrado o no pertenece al usuario')
 
-    # Obtener rendimiento del examen
     rendimiento_examen = {}
     preguntas_examen = db.query(models.SesionPreguntas).filter(
         models.SesionPreguntas.id_examen == id_examen
@@ -773,27 +772,39 @@ def save_exam_results(db: Session, rut: str, id_examen: int) -> dict:
         if pregunta_sesion.es_correcta:
             rendimiento_examen[nombre_habilidad]['correctas'] += 1
 
-    # Calcular porcentajes del examen
     porcentajes_examen = {}
     for nombre, data in rendimiento_examen.items():
         porcentajes_examen[nombre] = (data['correctas'] / data['total']) * 100 if data['total'] > 0 else 0
 
-    # Obtener progreso actual del usuario
     habilidades_usuario = db.query(models.HistorialHabilidades).filter(
         models.HistorialHabilidades.rut_usuario == rut
     ).all()
 
-    # Calcular promedio: (progreso_actual + rendimiento_examen) / 2
+    # Calcular cambios y actualizar, SOLO para habilidades que tuvieron preguntas en el examen
+    cambios = []
     for hab in habilidades_usuario:
         nombre_norm = normalize_habilidad_name(str(hab.nombre_habilidad))
-        rendimiento_examen_pct = porcentajes_examen.get(nombre_norm, 0)
+        if nombre_norm not in porcentajes_examen:
+            continue  # Saltar habilidades sin preguntas en este examen
+
+        nivel_antes = round(float(hab.nivel_maestria), 1)
+        rendimiento_examen_pct = porcentajes_examen[nombre_norm]
         nuevo_progreso = (float(hab.nivel_maestria) + rendimiento_examen_pct) / 2
         hab.nivel_maestria = min(100.0, nuevo_progreso)
         hab.ultima_actualizacion = datetime.now(timezone.utc)
 
+        nivel_despues = round(float(hab.nivel_maestria), 1)
+        cambios.append({
+            'nombre_habilidad': hab.nombre_habilidad,
+            'nivel_antes': nivel_antes,
+            'nivel_despues': nivel_despues,
+            'cambio': round(nivel_despues - nivel_antes, 1)
+        })
+
     db.commit()
 
-    return {"message": "Resultados guardados exitosamente"}
+    return {"message": "Resultados guardados exitosamente", "cambios_habilidades": cambios}
+
 
 
 def get_random_questions(db: Session, cantidad: int, id_habilidad: Optional[int] = None) -> List[models.BancoPreguntas]:

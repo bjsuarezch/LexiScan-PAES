@@ -92,21 +92,52 @@ export class ExamenSimulacroPage implements OnInit, OnDestroy {
   // ============================================================
   // QUESTION NAVIGATION
   // ============================================================
+  /** Extrae texto plano legible desde un texto_inedito (puede ser string o array de bloques JSON). */
+  extractTextoPlano(textoInedito: any): string {
+    if (!textoInedito) return 'Sin texto de contexto';
+    if (typeof textoInedito === 'string') {
+      // Puede ser un JSON string que representa un array
+      try {
+        const parsed = JSON.parse(textoInedito);
+        if (Array.isArray(parsed)) return this.extractTextoPlano(parsed);
+      } catch { /* es string puro */ }
+      return textoInedito;
+    }
+    if (Array.isArray(textoInedito)) {
+      return textoInedito
+        .filter((b: any) => b.tipo === 'parrafo' || b.tipo === 'dato_clave')
+        .map((b: any) => b.contenido || '')
+        .join('\n\n');
+    }
+    return String(textoInedito);
+  }
+
+  /** Devuelve los parrafos del texto del grupo actual para renderizado en HTML. */
+  getParrafosGrupoActual(): string[] {
+    const grupo = this.getCurrentGrupo();
+    if (!grupo) return [];
+    return (grupo.textoPlano as string).split('\n\n').filter((p: string) => p.trim());
+  }
+
   organizeQuestions() {
     const groups: { [key: string]: any } = {};
     let globalCounter = 1;
 
     this.examData?.preguntas.forEach((pregunta: any) => {
-      const texto = pregunta.texto_inedito || 'Sin texto de contexto';
+      const textoRaw = pregunta.texto_inedito;
+      // Clave estable: primeros 120 chars del texto plano extraído
+      const textoPlano = this.extractTextoPlano(textoRaw);
+      const textoKey = textoPlano.substring(0, 120);
 
-      if (!groups[texto]) {
-        groups[texto] = {
-          texto,
+      if (!groups[textoKey]) {
+        groups[textoKey] = {
+          textoRaw,       // bloques originales (para uso futuro)
+          textoPlano,     // texto legible para UI y PDF
           preguntas: [],
         };
       }
 
-      groups[texto].preguntas.push({
+      groups[textoKey].preguntas.push({
         ...pregunta,
         globalIndex: globalCounter++,
       });
@@ -365,7 +396,8 @@ export class ExamenSimulacroPage implements OnInit, OnDestroy {
       doc.text(`LECTURA CONTEXTUAL ${grupoIdx + 1}`, marginL + 2, y);
       y += 5;
 
-      addWrappedText(grupo.texto, marginL, 10, 'normal', [40, 40, 40], 1.45);
+      // Usar textoPlano (texto legible extraído de los bloques JSON)
+      addWrappedText(grupo.textoPlano || 'Sin texto disponible', marginL, 10, 'normal', [40, 40, 40], 1.45);
       y += 5;
 
       doc.setDrawColor(220, 220, 220);

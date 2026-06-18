@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { AlertController } from '@ionic/angular';
+import { AlertController, IonicSafeString } from '@ionic/angular';
 import { HabilidadesService } from '../services/habilidades.service';
 import { ProfileService } from '../services/profile.service';
 
@@ -37,27 +37,23 @@ export class ExamenResultadosPage implements OnInit {
     });
   }
 
+  // ============================================================
+  // RADAR CHART
+  // ============================================================
   getRadarPoints(): string {
     if (!this.examResult?.rendimiento_habilidades) return '';
 
     const center = { x: 100, y: 100 };
     const vertices: { [key: string]: { x: number; y: number } } = {
-      Interpretar: { x: 100, y: 30 },
-      Vocabulario: { x: 150, y: 55 },
-      Tipos_de_Texto: { x: 150, y: 130 },
-      Localizar: { x: 100, y: 170 },
-      Lectura_Critica: { x: 50, y: 130 },
-      Evaluar: { x: 50, y: 55 },
+      Interpretar:     { x: 100, y: 30 },
+      Vocabulario:     { x: 150, y: 55 },
+      Tipos_de_Texto:  { x: 150, y: 130 },
+      Localizar:       { x: 100, y: 170 },
+      Lectura_Critica: { x: 50,  y: 130 },
+      Evaluar:         { x: 50,  y: 55 },
     };
 
-    const order = [
-      'Interpretar',
-      'Vocabulario',
-      'Tipos_de_Texto',
-      'Localizar',
-      'Lectura_Critica',
-      'Evaluar',
-    ];
+    const order = ['Interpretar','Vocabulario','Tipos_de_Texto','Localizar','Lectura_Critica','Evaluar'];
     const points: string[] = [];
 
     for (const skill of order) {
@@ -70,10 +66,12 @@ export class ExamenResultadosPage implements OnInit {
       const y = center.y + (vertex.y - center.y) * percent;
       points.push(`${x.toFixed(1)},${y.toFixed(1)}`);
     }
-
     return points.join(' ');
   }
 
+  // ============================================================
+  // SAVE RESULTS — con popup de cambios por habilidad
+  // ============================================================
   async saveResults() {
     if (!this.profile?.rut) return;
 
@@ -81,84 +79,321 @@ export class ExamenResultadosPage implements OnInit {
     this.habilidadesService
       .guardarResultadosExamen(this.profile.rut, this.examResult.id_examen)
       .subscribe({
-        next: () => {
+        next: async (res: any) => {
           this.loading = false;
-          alert('Resultados guardados exitosamente.');
-          this.router.navigate(['/home']);
+
+          // Construir mensaje HTML con cambios por habilidad
+          const cambios: any[] = res.cambios_habilidades ?? [];
+
+          let msgHtml = '';
+          if (cambios.length === 0) {
+            msgHtml = '<p>No hubo cambios en el nivel de maestría.</p>';
+          } else {
+            msgHtml = '<div style="font-size:13px;line-height:1.6">';
+            for (const c of cambios) {
+              const nombre = this.getSkillDisplayName(c.nombre_habilidad);
+              const flecha = c.cambio > 0 ? '▲' : c.cambio < 0 ? '▼' : '—';
+              const color  = c.cambio > 0 ? '#22c55e' : c.cambio < 0 ? '#ef4444' : '#94a3b8';
+              const signo  = c.cambio > 0 ? '+' : '';
+              msgHtml += `
+                <div style="display:flex;justify-content:space-between;
+                            border-bottom:1px solid #e2e8f0;padding:4px 0;">
+                  <span style="font-weight:600">${nombre}</span>
+                  <span style="color:${color};font-weight:700">
+                    ${c.nivel_antes}% → ${c.nivel_despues}%
+                    &nbsp;(${flecha} ${signo}${c.cambio}%)
+                  </span>
+                </div>`;
+            }
+            msgHtml += '</div>';
+          }
+
+          const popup = await this.alertController.create({
+            header: '📊 Progreso actualizado',
+            subHeader: 'Cambios en nivel de maestría',
+            message: new IonicSafeString(msgHtml),
+            buttons: [{
+              text: 'Ir al inicio',
+              handler: () => {
+                // Refrescar dashboard para que saldoMonedas$ se actualice
+                if (this.profile?.rut) {
+                  this.habilidadesService.getDashboard(this.profile.rut).subscribe();
+                }
+                this.router.navigate(['/home']);
+              }
+            }],
+            cssClass: 'skill-progress-alert'
+          });
+          await popup.present();
         },
-        error: (error) => {
+        error: (error: any) => {
           console.error('Error guardando resultados:', error);
           this.loading = false;
-          alert('Error al guardar resultados.');
+          this.alertController.create({
+            header: 'Error',
+            message: 'No se pudieron guardar los resultados. Inténtalo de nuevo.',
+            buttons: ['Aceptar']
+          }).then(a => a.present());
         },
       });
   }
 
+  // ============================================================
+  // DISCARD
+  // ============================================================
   async discardExam() {
     const alert = await this.alertController.create({
       header: 'Descartar Examen',
-      message:
-        '¿Estás seguro de que quieres descartar este examen? Los resultados no afectarán tu progreso.',
+      message: '¿Estás seguro de que quieres descartar este examen? Los resultados no afectarán tu progreso.',
       buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel',
-        },
-        {
-          text: 'Descartar',
-          handler: () => {
-            this.router.navigate(['/home']);
-          },
-        },
+        { text: 'Cancelar', role: 'cancel' },
+        { text: 'Descartar', handler: () => { this.router.navigate(['/home']); } },
       ],
     });
     await alert.present();
   }
 
-  async downloadResultsPDF() {
-    if (!this.examResult) return;
+  // ============================================================
+  // HELPERS
+  // ============================================================
+  getSkillDisplayName(name: string): string {
+    const map: { [key: string]: string } = {
+      'Interpretar':     'Interpretar',
+      'Vocabulario':     'Vocabulario',
+      'Tipos_de_Texto':  'Tipos de Texto',
+      'Localizar':       'Localizar',
+      'Lectura_Critica': 'Lectura Crítica',
+      'Evaluar':         'Evaluar',
+    };
+    return map[name] || name.replace(/_/g, ' ');
+  }
 
-    // Importación dinámica para no afectar el bundle inicial
+  /** Extrae texto plano desde texto_inedito (string o array de bloques JSON). */
+  extractTextoPlano(textoInedito: any): string {
+    if (!textoInedito) return 'Sin texto de contexto';
+    if (typeof textoInedito === 'string') {
+      try {
+        const parsed = JSON.parse(textoInedito);
+        if (Array.isArray(parsed)) return this.extractTextoPlano(parsed);
+      } catch { /* string puro */ }
+      return textoInedito;
+    }
+    if (Array.isArray(textoInedito)) {
+      return textoInedito
+        .filter((b: any) => b.tipo === 'parrafo' || b.tipo === 'dato_clave')
+        .map((b: any) => b.contenido || '')
+        .join('\n\n');
+    }
+    return String(textoInedito);
+  }
+
+  /** Agrupa las preguntas del examen por texto contextual único (igual que simulacro). */
+  private buildGroupedForPDF(): any[] {
+    if (!this.examData?.preguntas) return [];
+    const groups: { [key: string]: any } = {};
+    let globalCounter = 1;
+
+    this.examData.preguntas.forEach((pregunta: any) => {
+      const textoPlano = this.extractTextoPlano(pregunta.texto_inedito);
+      const textoKey = textoPlano.substring(0, 120);
+
+      if (!groups[textoKey]) {
+        groups[textoKey] = { textoPlano, preguntas: [] };
+      }
+      groups[textoKey].preguntas.push({ ...pregunta, globalIndex: globalCounter++ });
+    });
+
+    return Object.values(groups);
+  }
+
+  private getAlternativesArray(alternativas: any): Array<{ key: string; value: string }> {
+    if (!alternativas) return [];
+    return Object.entries(alternativas)
+      .map(([key, value]) => ({ key, value: value as string }))
+      .sort((a, b) => a.key.localeCompare(b.key));
+  }
+
+  // ============================================================
+  // PDF — Examen completo + Informe de resultados
+  // ============================================================
+  async downloadResultsPDF() {
+    if (!this.examResult || !this.examData) return;
+
     const { jsPDF } = await import('jspdf');
     const autoTableModule = await import('jspdf-autotable');
     const autoTable = autoTableModule.default ? autoTableModule.default : (autoTableModule as any);
 
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const marginL = 18;
+    const marginR = 18;
+    const marginT = 20;
+    const marginB = 20;
+    const usableW = pageW - marginL - marginR;
+    let y = marginT;
 
-    // ── Encabezado ───────────────────────────────────────────────────────────
-    doc.setFillColor(58, 90, 148);
-    doc.rect(0, 0, pageW, 15, 'F');
-    doc.setFontSize(14);
+    const checkNewPage = (neededH: number) => {
+      if (y + neededH > pageH - marginB) { doc.addPage(); y = marginT; }
+    };
+
+    const addWrappedText = (
+      text: string, x: number, fontSize: number,
+      fontStyle: 'normal' | 'bold',
+      color: [number, number, number] = [30, 30, 30],
+      lineSpacing = 1.3
+    ) => {
+      doc.setFontSize(fontSize);
+      doc.setFont('helvetica', fontStyle);
+      doc.setTextColor(...color);
+      const lines: string[] = doc.splitTextToSize(text, usableW);
+      const lineH = fontSize * 0.3528 * lineSpacing;
+      lines.forEach((line: string) => {
+        checkNewPage(lineH);
+        doc.text(line, x, y);
+        y += lineH;
+      });
+    };
+
+    // ── Portada / Encabezado ─────────────────────────────────────────────────
+    doc.setFillColor(99, 102, 241);
+    doc.rect(0, 0, pageW, 14, 'F');
+    doc.setFontSize(13);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(255, 255, 255);
-    doc.text('LexiScan PAES - Reporte de Resultados', 15, 10);
+    doc.text('LexiScan PAES — Examen y Resultados', marginL, 9.5);
 
-    // ── Datos del Estudiante ─────────────────────────────────────────────────
+    y = 22;
+    addWrappedText('Simulacro PAES', marginL, 16, 'bold', [30, 30, 30]);
+    y += 1;
+
+    const nombre = this.profile?.nombre_completo || this.profile?.nombre || 'Estudiante';
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Estudiante: ${nombre}  |  Fecha: ${new Date().toLocaleDateString('es-CL')}`, marginL, y);
+    y += 4;
+    doc.text(`Puntaje: ${this.examResult.total_correctas}/${this.examResult.total_preguntas}  (${this.examResult.porcentaje}%)`, marginL, y);
+    y += 5;
+    doc.setDrawColor(200, 200, 200);
+    doc.line(marginL, y, pageW - marginR, y);
+    y += 5;
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'italic');
+    doc.setTextColor(80, 80, 80);
+    doc.text('Instrucciones: Lee atentamente cada texto y selecciona la alternativa correcta.', marginL, y, { maxWidth: usableW });
+    y += 9;
+
+    // ── PARTE 1: Textos + Preguntas completas ────────────────────────────────
+    const grouped = this.buildGroupedForPDF();
+    grouped.forEach((grupo, grupoIdx) => {
+      checkNewPage(20);
+
+      // Encabezado de lectura contextual
+      doc.setFillColor(240, 244, 255);
+      doc.roundedRect(marginL, y - 4, usableW, 7, 1.5, 1.5, 'F');
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(99, 102, 241);
+      doc.text(`LECTURA CONTEXTUAL ${grupoIdx + 1}`, marginL + 2, y);
+      y += 5;
+
+      // Texto contextual
+      addWrappedText(grupo.textoPlano || 'Sin texto disponible', marginL, 10, 'normal', [40, 40, 40], 1.45);
+      y += 5;
+
+      doc.setDrawColor(220, 220, 220);
+      doc.setLineDashPattern([2, 2], 0);
+      doc.line(marginL, y, pageW - marginR, y);
+      doc.setLineDashPattern([], 0);
+      y += 5;
+
+      // Preguntas
+      grupo.preguntas.forEach((pregunta: any) => {
+        const alts = this.getAlternativesArray(pregunta.alternativas);
+        checkNewPage(Math.ceil(pregunta.enunciado.length / 80) * 5 + alts.length * 6 + 10);
+
+        // Número de pregunta
+        doc.setFillColor(99, 102, 241);
+        doc.circle(marginL + 3.5, y - 1.5, 3.5, 'F');
+        doc.setFontSize(8.5);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(255, 255, 255);
+        doc.text(String(pregunta.globalIndex), marginL + 3.5, y - 0.8, { align: 'center' });
+
+        // Enunciado
+        doc.setFontSize(10.5);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(30, 30, 30);
+        const enunciadoLines: string[] = doc.splitTextToSize(pregunta.enunciado, usableW - 10);
+        enunciadoLines.forEach((line: string, li: number) => {
+          doc.text(line, marginL + 9, y);
+          y += li === 0 ? 5 : 4.8;
+        });
+        y += 2;
+
+        // Alternativas
+        alts.forEach((alt) => {
+          checkNewPage(8);
+          doc.setDrawColor(140, 140, 140);
+          doc.setFillColor(255, 255, 255);
+          doc.circle(marginL + 11, y - 1.5, 2.8, 'FD');
+          doc.setFontSize(9.5);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(99, 102, 241);
+          doc.text(alt.key, marginL + 11, y - 0.8, { align: 'center' });
+
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(50, 50, 50);
+          const altLines: string[] = doc.splitTextToSize(alt.value, usableW - 20);
+          altLines.forEach((line: string) => {
+            checkNewPage(5);
+            doc.text(line, marginL + 16, y);
+            y += 4.8;
+          });
+          y += 0.5;
+        });
+        y += 5;
+      });
+
+      y += 4; // Espacio entre grupos
+    });
+
+    // ── PARTE 2: Informe de Resultados ───────────────────────────────────────
+    doc.addPage();
+    y = marginT;
+
+    doc.setFillColor(58, 90, 148);
+    doc.rect(0, 0, pageW, 14, 'F');
+    doc.setFontSize(13);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(255, 255, 255);
+    doc.text('Informe de Resultados', marginL, 9.5);
+
+    y = 22;
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(30, 30, 30);
-    doc.text('Datos del Estudiante', 15, 25);
+    doc.text('Datos del Estudiante', marginL, y);
+    y += 8;
 
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
-    const nombre = this.profile?.nombre || 'Estudiante';
-    const rut = this.profile?.rut || 'No disponible';
-    doc.text(`Nombre: ${nombre}`, 15, 32);
-    doc.text(`RUT: ${rut}`, 15, 38);
+    doc.text(`Nombre: ${nombre}`, marginL, y); y += 6;
+    doc.text(`RUT: ${this.profile?.rut || 'No disponible'}`, marginL, y); y += 6;
+    doc.text(`Fecha: ${new Date().toLocaleDateString('es-CL')}`, marginL, y); y += 10;
 
-    // ── Resumen de Resultados ────────────────────────────────────────────────
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
-    doc.text('Resumen del Examen', 15, 50);
+    doc.text('Resumen del Examen', marginL, y); y += 8;
 
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Puntaje: ${this.examResult.total_correctas} / ${this.examResult.total_preguntas}`, 15, 57);
-    doc.text(`Porcentaje de logro: ${this.examResult.porcentaje}%`, 15, 63);
+    doc.text(`Puntaje: ${this.examResult.total_correctas} / ${this.examResult.total_preguntas}`, marginL, y); y += 6;
+    doc.text(`Porcentaje de logro: ${this.examResult.porcentaje}%`, marginL, y); y += 10;
 
-    // ── Tabla de Habilidades ─────────────────────────────────────────────────
-    if (this.examResult.rendimiento_habilidades && this.examResult.rendimiento_habilidades.length > 0) {
+    if (this.examResult.rendimiento_habilidades?.length > 0) {
       const tableData = this.examResult.rendimiento_habilidades.map((hab: any) => [
         this.getSkillDisplayName(hab.nombre_habilidad),
         `${hab.correctas} / ${hab.total}`,
@@ -166,27 +401,28 @@ export class ExamenResultadosPage implements OnInit {
       ]);
 
       autoTable(doc, {
-        startY: 75,
+        startY: y,
         head: [['Habilidad', 'Puntaje', 'Porcentaje']],
         body: tableData,
         theme: 'striped',
-        headStyles: { fillColor: [58, 90, 148] },
+        headStyles: { fillColor: [99, 102, 241] },
         styles: { font: 'helvetica', fontSize: 10 }
       });
     }
 
-    doc.save(`LexiScan_Resultados_${new Date().toISOString().slice(0, 10)}.pdf`);
-  }
+    // ── Paginación ───────────────────────────────────────────────────────────
+    const totalPages = (doc.internal as any).getNumberOfPages();
+    for (let p = 1; p <= totalPages; p++) {
+      doc.setPage(p);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(150, 150, 150);
+      doc.text(
+        `LexiScan PAES — Página ${p} de ${totalPages}`,
+        pageW / 2, pageH - 8, { align: 'center' }
+      );
+    }
 
-  getSkillDisplayName(name: string): string {
-    const map: { [key: string]: string } = {
-      'Interpretar': 'Interpretar',
-      'Vocabulario': 'Vocabulario',
-      'Tipos_de_Texto': 'Tipos de Texto',
-      'Localizar': 'Localizar',
-      'Lectura_Critica': 'Lectura Crítica',
-      'Evaluar': 'Evaluar',
-    };
-    return map[name] || name.replace(/_/g, ' ');
+    doc.save(`LexiScan_Examen_Resultados_${new Date().toISOString().slice(0, 10)}.pdf`);
   }
 }

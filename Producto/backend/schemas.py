@@ -184,10 +184,19 @@ class EvaluarExamenResponse(BaseModel):
 class GuardarResultadosExamenRequest(BaseModel):
     rut: str
     id_examen: int
-    #total_preguntas: int
-    #puntaje: int
-    #xp_ganada: int
-    #mensaje: str
+
+
+class CambioHabilidad(BaseModel):
+    nombre_habilidad: str
+    nivel_antes: float
+    nivel_despues: float
+    cambio: float
+
+
+class GuardarResultadosExamenResponse(BaseModel):
+    message: str
+    cambios_habilidades: List[CambioHabilidad]
+
 
 
 class GenerarPreguntasResponse(BaseModel):
