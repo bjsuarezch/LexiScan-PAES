@@ -28,6 +28,10 @@ export class SeleccionTemaPage implements OnInit {
 
   ngOnInit() {
     this.cargarDatos();
+    // Suscripción reactiva al saldo de monedas (fuente única: DB)
+    this.habilidadesService.saldoMonedas$.subscribe(saldo => {
+      this.saldoMonedas = saldo;
+    });
   }
 
   cargarDatos() {
@@ -35,8 +39,8 @@ export class SeleccionTemaPage implements OnInit {
       this.profile = profile;
       if (this.profile?.rut) {
         this.habilidadesService.getDashboard(this.profile.rut).subscribe(dash => {
-          this.saldoMonedas = dash.saldo_monedas;
           this.temaActualId = dash.tema_actual_id ?? null;
+          // saldoMonedas se actualiza automáticamente por el BehaviorSubject
         });
       }
     });
@@ -52,6 +56,10 @@ export class SeleccionTemaPage implements OnInit {
     this.habilidadesService.seleccionarTema(this.profile.rut, id_tema, null).subscribe({
       next: () => {
         this.loading = false;
+        // Refresca el dashboard para actualizar el saldo y el tema actual
+        if (this.profile?.rut) {
+          this.habilidadesService.getDashboard(this.profile.rut).subscribe();
+        }
         this.router.navigate(['/habilidades']);
       },
       error: (err) => {
@@ -100,6 +108,10 @@ export class SeleccionTemaPage implements OnInit {
     this.habilidadesService.seleccionarTema(this.profile.rut, null, this.temaCustom.trim()).subscribe({
       next: () => {
         this.loading = false;
+        // Refresca el dashboard para actualizar el saldo descontado
+        if (this.profile?.rut) {
+          this.habilidadesService.getDashboard(this.profile.rut).subscribe();
+        }
         this.router.navigate(['/habilidades']);
       },
       error: async (err) => {

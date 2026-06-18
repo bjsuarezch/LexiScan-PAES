@@ -234,14 +234,13 @@ export class DesafiosService {
         if (profile?.rut) {
           this.habilidadesService.acreditarMonedas(profile.rut, monedasGanadas).subscribe({
             next: (res) => {
-              // Forzar refresh del dashboard para que el saldo se actualice en toda la app
+              // Actualizar el BehaviorSubject de saldo inmediatamente con el valor real de la DB
+              this.habilidadesService.actualizarSaldoMonedas(res.saldo_nuevo);
+              // También forzar refresh del dashboard completo
               this.habilidadesService.getDashboard(profile.rut).subscribe();
             },
             error: (err) => {
-              // Fallback: guardar en localStorage si el backend falla
-              console.warn('No se pudo acreditar monedas en backend, guardando localmente', err);
-              const prev = parseInt(localStorage.getItem('monedas_extra') || '0', 10);
-              localStorage.setItem('monedas_extra', (prev + monedasGanadas).toString());
+              console.warn('No se pudo acreditar monedas en backend:', err);
             }
           });
         }

@@ -71,6 +71,10 @@ export class HabilidadesPage implements OnInit, OnDestroy, ViewWillEnter {
         this.checkFirstTime();
       }
     });
+    // Suscripción reactiva al saldo de monedas (fuente única: DB)
+    this.habilidadesService.saldoMonedas$.subscribe(saldo => {
+      this.saldoMonedas = saldo;
+    });
   }
 
   /**

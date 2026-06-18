@@ -24,6 +24,10 @@ export class HabilidadesService {
   );
   dashboard$ = this.dashboardSubject.asObservable();
 
+  /** Fuente única de verdad para el saldo de monedas. Se actualiza tras cada llamada al dashboard. */
+  private saldoMonedasSubject = new BehaviorSubject<number>(0);
+  saldoMonedas$ = this.saldoMonedasSubject.asObservable();
+
   constructor(private http: HttpClient) {}
 
   login(data: Pick<ILogin, 'rut' | 'contrasena'>): Observable<any> {
@@ -42,7 +46,15 @@ export class HabilidadesService {
   getDashboard(rut: string): Observable<DashboardResponse> {
     return this.http
       .get<DashboardResponse>(`${this.baseUrl}/dashboard/${rut}`)
-      .pipe(tap((data) => this.dashboardSubject.next(data)));
+      .pipe(tap((data) => {
+        this.dashboardSubject.next(data);
+        this.saldoMonedasSubject.next(data.saldo_monedas ?? 0);
+      }));
+  }
+
+  /** Actualiza el saldo de monedas en el BehaviorSubject sin refrescar todo el dashboard. */
+  actualizarSaldoMonedas(nuevoSaldo: number): void {
+    this.saldoMonedasSubject.next(nuevoSaldo);
   }
 
   getHabilidadDetail(

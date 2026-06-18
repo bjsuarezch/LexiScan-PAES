@@ -20,7 +20,7 @@ export class HomePage implements OnInit, ViewWillEnter {
   errorFrecuente: any = null;
   habilidades: HabilidadData[] = [];
   desafios: Desafio[] = [];
-  monedasExtra = 0;
+  saldoMonedas: number = 0;
   dailyGoalClaimed = false;
 
   constructor(
@@ -45,16 +45,18 @@ export class HomePage implements OnInit, ViewWillEnter {
         }
       },
     );
+    // Suscripción reactiva al saldo de monedas (fuente única: DB)
+    this.habilidadesService.saldoMonedas$.subscribe(saldo => {
+      this.saldoMonedas = saldo;
+    });
     this.desafiosService.desafiosDiarios$.subscribe(desafios => {
       this.desafios = desafios;
     });
-    this.monedasExtra = parseInt(localStorage.getItem('monedas_extra') || '0', 10);
     this.checkDailyGoalClaimed();
   }
 
   ionViewWillEnter() {
     // Refrescar saldo y estado de meta al volver al home
-    this.monedasExtra = parseInt(localStorage.getItem('monedas_extra') || '0', 10);
     this.checkDailyGoalClaimed();
     if (this.profile?.rut) {
       this.loadDashboard(this.profile.rut);
@@ -71,9 +73,6 @@ export class HomePage implements OnInit, ViewWillEnter {
     this.habilidadesService.getDashboard(rut).subscribe({
       next: (dashboard) => {
         this.dashboard = dashboard;
-        if (this.dashboard) {
-          this.dashboard.saldo_monedas += this.monedasExtra;
-        }
         this.loading = false;
       },
       error: (error) => {
@@ -131,7 +130,7 @@ export class HomePage implements OnInit, ViewWillEnter {
   }
 
   getCoins(): number {
-    return this.dashboard ? this.dashboard.saldo_monedas : 0;
+    return this.saldoMonedas;
   }
 
   getDailyGoalHint(): string {
@@ -173,10 +172,10 @@ export class HomePage implements OnInit, ViewWillEnter {
     if (!desafio || !desafio.completado || desafio.reclamado) return;
 
     this.desafiosService.reclamarRecompensa(idDesafio);
-    // Actualizar monedas extra localmente
-    this.monedasExtra = parseInt(localStorage.getItem('monedas_extra') || '0', 10);
+    // El servicio llama al backend y actualiza el saldoMonedas$ reactivamente
     if (this.profile?.rut) {
-      this.loadDashboard(this.profile.rut);
+      // Refresca el dashboard tras un breve delay para asegurar que el backend ya persistó
+      setTimeout(() => this.loadDashboard(this.profile!.rut!), 800);
     }
 
     this.alertController.create({
@@ -188,16 +187,25 @@ export class HomePage implements OnInit, ViewWillEnter {
 
   async reclamarMetaDiaria() {
     if (this.dailyGoalClaimed || this.getDailyGoalPct() < 100) return;
+    if (!this.profile?.rut) return;
+
     const todayStr = new Date().toDateString();
     localStorage.setItem('daily_goal_claimed', todayStr);
     this.dailyGoalClaimed = true;
-    // Acreditar 50 monedas vía monedas_extra local
-    const prev = parseInt(localStorage.getItem('monedas_extra') || '0', 10);
-    localStorage.setItem('monedas_extra', (prev + 50).toString());
-    this.monedasExtra = prev + 50;
-    if (this.profile?.rut) {
-      this.loadDashboard(this.profile.rut);
-    }
+
+    // Acreditar 50 monedas directamente en la DB
+    this.habilidadesService.acreditarMonedas(this.profile.rut, 50).subscribe({
+      next: (res) => {
+        // Actualizar el BehaviorSubject con el nuevo saldo real
+        this.habilidadesService.actualizarSaldoMonedas(res.saldo_nuevo);
+        // También refrescar el dashboard completo
+        this.loadDashboard(this.profile!.rut!);
+      },
+      error: (err) => {
+        console.error('No se pudieron acreditar las monedas de la meta diaria:', err);
+      }
+    });
+
     const alerta = await this.alertController.create({
       header: '¡Meta diaria completada!',
       message: 'Has ganado 50 monedas por cumplir tu meta diaria. ¡Vuelve mañana para ganar más!',
