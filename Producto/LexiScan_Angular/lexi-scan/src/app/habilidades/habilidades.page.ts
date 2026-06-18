@@ -146,13 +146,17 @@ export class HabilidadesPage implements OnInit, OnDestroy, ViewWillEnter {
   }
 
   getClass(nivel: number): string {
-    if (nivel === 100) {
-      return 'maestria-full';
-    }
-    if (nivel >= 50) {
-      return 'maestria-media';
-    }
-    return 'maestria-baja';
+    if (nivel === 0) return 'maestria-0';
+    if (nivel <= 10) return 'maestria-10';
+    if (nivel <= 20) return 'maestria-20';
+    if (nivel <= 30) return 'maestria-30';
+    if (nivel <= 40) return 'maestria-40';
+    if (nivel <= 50) return 'maestria-50';
+    if (nivel <= 60) return 'maestria-60';
+    if (nivel <= 70) return 'maestria-70';
+    if (nivel <= 80) return 'maestria-80';
+    if (nivel <= 90) return 'maestria-90';
+    return 'maestria-100';
   }
 
   getSkillDisplayName(name: string): string {

@@ -31,14 +31,14 @@ ion-content {
     margin: 0;
     font-family: 'Fredoka', sans-serif;
     font-size: 1.3rem;
-    color: #1e293b;
+    color: var(--ion-text-color, #1e293b);
     text-align: center;
   }
 
   p {
     margin: 0;
     text-align: center;
-    color: #64748b;
+    color: var(--ion-color-medium, #64748b);
     font-size: 0.95rem;
     line-height: 1.5;
     font-family: 'Nunito', sans-serif;
@@ -70,12 +70,12 @@ ion-content {
     margin: 0 0 8px;
     font-family: 'Fredoka', sans-serif;
     font-size: 1.1rem;
-    color: #1e293b;
+    color: var(--ion-text-color, #1e293b);
   }
 
   p {
     margin: 0;
-    color: #64748b;
+    color: var(--ion-color-medium, #64748b);
     font-size: 0.95rem;
     text-align: left;
     line-height: 1.5;
@@ -84,8 +84,8 @@ ion-content {
 
   .custom-input {
     margin: 16px 0;
-    --background: #f8fafc;
+    --background: var(--ion-color-light, #f8fafc);
     --border-radius: 12px;
-    --border-color: #e2e8f0;
+    --border-color: var(--ion-border-color, #e2e8f0);
   }
 }
