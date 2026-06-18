@@ -1,0 +1,83 @@
+# ============================================================
+# Python
+# ============================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+.Python
+*.pyc
+
+# Entornos virtuales
+venv/
+env/
+.venv/
+ENV/
+
+# Distribución / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+
+# pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# mypy / tipo checking
+.mypy_cache/
+.dmypy.json
+
+# ============================================================
+# Variables de entorno — NUNCA subir al repositorio
+# ============================================================
+.env
+.env.*
+!.env.example
+
+# ============================================================
+# Node.js / npm
+# ============================================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ============================================================
+# Angular / Ionic
+# ============================================================
+# Build outputs
+Producto/LexiScan_Angular/lexi-scan/dist/
+Producto/LexiScan_Angular/lexi-scan/www/
+
+# Angular cache
+.angular/
+
+# Ionic / Capacitor
+Producto/LexiScan_Angular/lexi-scan/android/
+Producto/LexiScan_Angular/lexi-scan/ios/
+Producto/LexiScan_Angular/lexi-scan/.cache/
+
+# ============================================================
+# Editores e IDEs
+# ============================================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ============================================================
+# Docker
+# ============================================================
+# No ignorar docker-compose.yml — es parte del proyecto
+
+# ============================================================
+# Logs
+# ============================================================
+*.log
+logs/
