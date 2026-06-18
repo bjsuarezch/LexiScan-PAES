@@ -305,13 +305,13 @@ ion-progress-bar {
 }
 
 .feedback-correct {
-  background: linear-gradient(180deg, rgba(56, 189, 248, 0.15) 0%, rgba(255, 255, 255, 1) 100%);
+  background: linear-gradient(180deg, rgba(56, 189, 248, 0.15) 0%, var(--ion-background-color, #ffffff) 100%);
   border-top: 4px solid var(--ion-color-success, #38bdf8);
   box-shadow: 0 -6px 30px rgba(56, 189, 248, 0.2);
 }
 
 .feedback-incorrect {
-  background: linear-gradient(180deg, rgba(248, 113, 113, 0.15) 0%, rgba(255, 255, 255, 1) 100%);
+  background: linear-gradient(180deg, rgba(248, 113, 113, 0.15) 0%, var(--ion-background-color, #ffffff) 100%);
   border-top: 4px solid var(--ion-color-danger, #f87171);
   box-shadow: 0 -6px 30px rgba(248, 113, 113, 0.2);
 }

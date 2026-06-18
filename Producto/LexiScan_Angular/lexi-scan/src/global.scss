@@ -310,7 +310,7 @@ p, span, a, li, td, th,
 
 // --- Cards Elevadas ---
 .card-elevated {
-  background: var(--ion-background-color, #ffffff);
+  background: var(--ion-surface, var(--ion-background-color, #ffffff));
   border-radius: 16px;
   border: 1px solid var(--ion-border-color, #e2e8f0);
   border-bottom: 3px solid var(--ion-border-color, #cbd5e1);
@@ -335,6 +335,19 @@ p, span, a, li, td, th,
   padding: 20px;
   border-bottom-width: 4px;
   box-shadow: var(--ion-shadow-md, 0 4px 12px rgba(0, 0, 0, 0.1));
+}
+
+// ============================================================
+// MODULE BACKGROUND GRADIENT
+// Subtle indigo gradient at top of main module pages
+// ============================================================
+.module-gradient-bg {
+  --background: linear-gradient(
+    180deg,
+    rgba(99, 102, 241, 0.06) 0%,
+    rgba(99, 102, 241, 0.02) 30%,
+    var(--ion-background-color, #f8fafc) 100%
+  ) !important;
 }
 
 // --- Progress Bars Fluidas ---

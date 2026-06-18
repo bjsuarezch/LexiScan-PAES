@@ -1,5 +1,5 @@
 .admin-content {
-  --background: #f4f5f8;
+  --background: var(--ion-background-color, #f8fafc);
 }
 
 .loading-container {
@@ -18,7 +18,7 @@
   
   .stat-box {
     flex: 1;
-    background: white;
+    background: var(--ion-surface, #ffffff);
     padding: 15px;
     border-radius: 12px;
     text-align: center;
@@ -42,12 +42,12 @@
 }
 
 .user-item {
-  --background: white;
+  --background: var(--ion-surface, #ffffff);
   margin-bottom: 8px;
   border-radius: 8px;
   
   &.inactive {
-    --background: #fdfdfd;
+    --background: var(--ion-color-light, #fdfdfd);
     opacity: 0.7;
     h2 { color: var(--ion-color-medium); }
   }

@@ -147,17 +147,60 @@ $font-body: 'Nunito', sans-serif;
 // --- Dark Mode Overrides ---
 @media (prefers-color-scheme: dark) {
   :root {
+    // Core surfaces
     --ion-background-color: #{$color-background-dark};
-    --ion-background-color-rgb: 15, 23, 42;
+    --ion-background-color-rgb: #{red($color-background-dark)}, #{green($color-background-dark)}, #{blue($color-background-dark)};
     --ion-text-color: #{$gray-100};
-    --ion-text-color-rgb: 241, 245, 249;
-    --ion-border-color: #{$gray-700};
+    --ion-text-color-rgb: #{red($gray-100)}, #{green($gray-100)}, #{blue($gray-100)};
+    --ion-border-color: #{$color-surface-raised-dark};
 
+    // Toolbar & Tab bar
     --ion-toolbar-background: #{$color-surface-dark};
     --ion-toolbar-color: #{$gray-100};
-
     --ion-tab-bar-background: #{$color-surface-dark};
-    --ion-tab-bar-color: #{$gray-500};
+    --ion-tab-bar-color: #{$gray-400};
     --ion-tab-bar-color-selected: #{$color-primary-light};
+
+    // Surface tokens for cards
+    --ion-surface: #{$color-surface-dark};
+    --ion-surface-rgb: #{red($color-surface-dark)}, #{green($color-surface-dark)}, #{blue($color-surface-dark)};
+
+    // Primary
+    --ion-color-primary: #{$color-primary-light};
+    --ion-color-primary-rgb: #{red($color-primary-light)}, #{green($color-primary-light)}, #{blue($color-primary-light)};
+    --ion-color-primary-contrast: #{$gray-900};
+    --ion-color-primary-shade: #{$color-primary};
+    --ion-color-primary-tint: #{$color-primary};
+
+    // Secondary
+    --ion-color-secondary: #{$color-secondary-light};
+    --ion-color-secondary-rgb: #{red($color-secondary-light)}, #{green($color-secondary-light)}, #{blue($color-secondary-light)};
+    --ion-color-secondary-contrast: #{$gray-900};
+    --ion-color-secondary-shade: #{$color-secondary};
+    --ion-color-secondary-tint: #{$color-secondary};
+
+    // Tertiary
+    --ion-color-tertiary: #{$color-info};
+    --ion-color-tertiary-rgb: #{red($color-info)}, #{green($color-info)}, #{blue($color-info)};
+    --ion-color-tertiary-contrast: #{$gray-900};
+
+    // Semantic
+    --ion-color-success: #{$color-success};
+    --ion-color-success-rgb: #{red($color-success)}, #{green($color-success)}, #{blue($color-success)};
+    --ion-color-danger: #{$color-danger};
+    --ion-color-danger-rgb: #{red($color-danger)}, #{green($color-danger)}, #{blue($color-danger)};
+    --ion-color-warning: #{$color-warning};
+    --ion-color-warning-rgb: #{red($color-warning)}, #{green($color-warning)}, #{blue($color-warning)};
+
+    // Medium & Light (inverted for dark mode)
+    --ion-color-medium: #{$gray-300};
+    --ion-color-medium-rgb: #{red($gray-300)}, #{green($gray-300)}, #{blue($gray-300)};
+    --ion-color-light: #{$gray-700};
+    --ion-color-light-rgb: #{red($gray-700)}, #{green($gray-700)}, #{blue($gray-700)};
+
+    // Component backgrounds
+    --ion-item-background: #{$color-surface-dark};
+    --ion-list-background: #{$color-surface-dark};
+    --ion-card-background: #{$color-surface-dark};
   }
 }
