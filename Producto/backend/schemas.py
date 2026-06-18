@@ -45,8 +45,19 @@ class DashboardResponse(BaseModel):
     racha_actual: int
     saldo_monedas: int
     tema_actual_id: Optional[int] = None
+    tema_actual_nombre: Optional[str] = None
     textos_restantes: int = 0
     habilidades: List[HabilidadData]
+
+
+class AcreditarMonedasRequest(BaseModel):
+    rut: str
+    cantidad: int
+
+
+class AcreditarMonedasResponse(BaseModel):
+    saldo_nuevo: int
+    cantidad_acreditada: int
 
 
 class PreguntaItem(BaseModel):

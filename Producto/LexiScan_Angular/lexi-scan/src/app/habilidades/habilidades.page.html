@@ -5,13 +5,33 @@
     </ion-buttons>
     <ion-title>Habilidades</ion-title>
     <ion-buttons slot="end">
+      <!-- Tema actual seleccionado -->
+      <ion-chip color="primary" *ngIf="temaActualNombre" routerLink="/seleccion-tema" style="max-width: 130px;">
+        <ion-icon name="bookmark"></ion-icon>
+        <ion-label style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ temaActualNombre }}</ion-label>
+      </ion-chip>
+      <ion-chip color="medium" *ngIf="!temaActualNombre" routerLink="/seleccion-tema">
+        <ion-icon name="add-circle-outline"></ion-icon>
+        <ion-label>Sin tema</ion-label>
+      </ion-chip>
+      <!-- Textos restantes -->
       <ion-chip color="tertiary" *ngIf="textosRestantes !== undefined" routerLink="/seleccion-tema">
         <ion-icon name="book"></ion-icon>
         <ion-label>{{ textosRestantes }} restantes</ion-label>
       </ion-chip>
     </ion-buttons>
   </ion-toolbar>
+  <!-- Banner de monedas y tema debajo de la toolbar -->
+  <div class="tema-info-bar" *ngIf="temaActualNombre || saldoMonedas > 0">
+    <span *ngIf="temaActualNombre" class="tema-info-label">
+      <ion-icon name="bookmark-outline"></ion-icon> Tema: <strong>{{ temaActualNombre }}</strong>
+    </span>
+    <span class="monedas-info-label">
+      <ion-icon name="logo-bitcoin"></ion-icon> <strong>{{ saldoMonedas }}</strong> monedas
+    </span>
+  </div>
 </ion-header>
+
 
 <ion-content [fullscreen]="true" class="ion-padding module-gradient-bg">
   <div class="habilidades-container">

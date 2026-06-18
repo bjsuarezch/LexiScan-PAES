@@ -145,6 +145,13 @@ def get_dashboard_data(db: Session, rut: str) -> Optional[dict]:
     wallet = db.query(models.EconomiaMonedas).filter(models.EconomiaMonedas.rut_usuario == rut).first()
     habilidades = db.query(models.HistorialHabilidades).filter(models.HistorialHabilidades.rut_usuario == rut).all()
 
+    # Resolver nombre del tema actual
+    tema_actual_nombre = None
+    if user.tema_actual_id:
+        tema = db.query(models.Tema).filter(models.Tema.id_tema == user.tema_actual_id).first()
+        if tema:
+            tema_actual_nombre = tema.nombre
+
     return {
         'rut': user.rut,
         'nombre_completo': user.nombre_completo,
@@ -152,12 +159,27 @@ def get_dashboard_data(db: Session, rut: str) -> Optional[dict]:
         'racha_actual': user.racha_actual,
         'saldo_monedas': wallet.saldo_monedas if wallet else 0,
         'tema_actual_id': user.tema_actual_id,
+        'tema_actual_nombre': tema_actual_nombre,
         'textos_restantes': user.textos_restantes,
         'habilidades': [build_display_habilidad(h) for h in habilidades],
     }
 
 def get_temas(db: Session):
     return db.query(models.Tema).filter(models.Tema.activo == True).all()
+
+
+def add_monedas(db: Session, rut: str, cantidad: int) -> int:
+    """Acredita `cantidad` monedas al saldo del usuario. Devuelve el saldo nuevo."""
+    wallet = db.query(models.EconomiaMonedas).filter(models.EconomiaMonedas.rut_usuario == rut).first()
+    if not wallet:
+        raise ValueError("Wallet no encontrada para el usuario")
+    wallet.saldo_monedas += cantidad
+    wallet.total_acumulado += cantidad
+    from datetime import datetime, timezone
+    wallet.ultima_transaccion = datetime.now(timezone.utc)
+    db.commit()
+    db.refresh(wallet)
+    return wallet.saldo_monedas
 
 def seleccionar_tema(db: Session, rut: str, tema_id: Optional[int], tema_custom: Optional[str]):
     user = get_user_by_rut(db, rut)

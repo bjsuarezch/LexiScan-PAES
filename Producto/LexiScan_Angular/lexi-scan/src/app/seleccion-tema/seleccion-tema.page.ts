@@ -64,15 +64,36 @@ export class SeleccionTemaPage implements OnInit {
   async seleccionarTemaCustom() {
     if (!this.profile?.rut || !this.temaCustom.trim()) return;
     
+    const esPrimeroGratis = this.temaActualId === null;
+
     // First custom theme selection is free (temaActualId is null)
-    if (this.temaActualId !== null && this.saldoMonedas < 50) {
+    if (!esPrimeroGratis && this.saldoMonedas < 50) {
       const alerta = await this.alertController.create({
         header: 'Monedas insuficientes',
-        message: 'No tienes suficientes monedas para un tema personalizado. ¡Completa desafíos diarios para ganar más monedas!',
+        message: `Necesitas 50 monedas para un tema personalizado. Tienes ${this.saldoMonedas} monedas. ¡Completa desafíos diarios para ganar más!`,
         buttons: [{ text: 'Entendido', role: 'cancel' }]
       });
       await alerta.present();
       return;
+    }
+
+    // Popup de confirmación si cuesta monedas
+    if (!esPrimeroGratis) {
+      const confirmar = await this.alertController.create({
+        header: 'Confirmar tema personalizado',
+        message: `Se descontarán <strong>50 monedas</strong> de tu saldo (tienes ${this.saldoMonedas}) para usar el tema "<strong>${this.temaCustom.trim()}</strong>". ¿Continuar?`,
+        buttons: [
+          { text: 'Cancelar', role: 'cancel' },
+          {
+            text: 'Confirmar (−50 🪙)',
+            role: 'confirm',
+            handler: () => true
+          }
+        ]
+      });
+      await confirmar.present();
+      const { role } = await confirmar.onDidDismiss();
+      if (role !== 'confirm') return;
     }
 
     this.loading = true;
@@ -81,9 +102,14 @@ export class SeleccionTemaPage implements OnInit {
         this.loading = false;
         this.router.navigate(['/habilidades']);
       },
-      error: (err) => {
+      error: async (err) => {
         this.loading = false;
-        alert(err.error?.detail || 'Error al seleccionar tema personalizado');
+        const errAlert = await this.alertController.create({
+          header: 'Error',
+          message: err.error?.detail || 'Error al seleccionar tema personalizado',
+          buttons: ['Aceptar']
+        });
+        await errAlert.present();
       }
     });
   }

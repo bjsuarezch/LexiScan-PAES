@@ -228,12 +228,24 @@ export class DesafiosService {
     if (monedasGanadas > 0) {
       this.guardarProgreso(progresoLocal);
       this.desafiosDiariosSubject.next(progresoLocal.desafiosActivos);
-      
-      // Sumar monedas al saldo local para que la UI lo refleje temporalmente.
-      // Ya que el saldo real viene de getDashboard, guardaremos las monedas reclamadas
-      // localmente y las sumaremos al saldo mostrado en la app.
-      const monedasGuardadas = parseInt(localStorage.getItem('monedas_extra') || '0', 10);
-      localStorage.setItem('monedas_extra', (monedasGuardadas + monedasGanadas).toString());
+
+      // Persistir en la DB real via el backend
+      this.profileService.getProfile().subscribe(profile => {
+        if (profile?.rut) {
+          this.habilidadesService.acreditarMonedas(profile.rut, monedasGanadas).subscribe({
+            next: (res) => {
+              // Forzar refresh del dashboard para que el saldo se actualice en toda la app
+              this.habilidadesService.getDashboard(profile.rut).subscribe();
+            },
+            error: (err) => {
+              // Fallback: guardar en localStorage si el backend falla
+              console.warn('No se pudo acreditar monedas en backend, guardando localmente', err);
+              const prev = parseInt(localStorage.getItem('monedas_extra') || '0', 10);
+              localStorage.setItem('monedas_extra', (prev + monedasGanadas).toString());
+            }
+          });
+        }
+      });
     }
   }
 }

@@ -43,6 +43,8 @@ export class HabilidadesPage implements OnInit, OnDestroy, ViewWillEnter {
   evaluationError: string | null = null;
   textosRestantes: number = 0;
   temaActualId: number | null = null;
+  temaActualNombre: string | null = null;
+  saldoMonedas: number = 0;
   
   private enterTime: number = 0;
   
@@ -124,6 +126,8 @@ export class HabilidadesPage implements OnInit, OnDestroy, ViewWillEnter {
         this.habilidades = data.habilidades;
         this.textosRestantes = data.textos_restantes ?? 0;
         this.temaActualId = data.tema_actual_id ?? null;
+        this.temaActualNombre = data.tema_actual_nombre ?? null;
+        this.saldoMonedas = data.saldo_monedas ?? 0;
         // El popup de textos agotados NO va aquí — solo se muestra al hacer click en una habilidad.
       },
       error: (error) => {
@@ -139,6 +143,8 @@ export class HabilidadesPage implements OnInit, OnDestroy, ViewWillEnter {
       next: (data) => {
         this.textosRestantes = data.textos_restantes ?? 0;
         this.temaActualId = data.tema_actual_id ?? null;
+        this.temaActualNombre = data.tema_actual_nombre ?? null;
+        this.saldoMonedas = data.saldo_monedas ?? 0;
         this.habilidades = data.habilidades;
       },
       error: () => { /* silencioso */ }

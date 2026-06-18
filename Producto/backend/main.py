@@ -634,6 +634,18 @@ def seleccionar_tema(request: schemas.SeleccionarTemaRequest, db: Session = Depe
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+@app.post('/acreditar-monedas', response_model=schemas.AcreditarMonedasResponse)
+def acreditar_monedas(request: schemas.AcreditarMonedasRequest, db: Session = Depends(get_db)):
+    """Acredita monedas ganadas por desafíos/meta diaria al saldo real del usuario en la DB."""
+    if request.cantidad <= 0:
+        raise HTTPException(status_code=400, detail='La cantidad debe ser mayor a 0')
+    try:
+        saldo_nuevo = crud.add_monedas(db, request.rut, request.cantidad)
+        return {'saldo_nuevo': saldo_nuevo, 'cantidad_acreditada': request.cantidad}
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
 @app.post('/generar-preguntas', response_model=schemas.GenerarPreguntasResponse)
 def generar_preguntas(request: schemas.GenerarPreguntasRequest, db: Session = Depends(get_db)):
     habilidad_valida = normalize_habilidad_type(request.habilidad)

@@ -10,6 +10,7 @@ export interface DashboardResponse {
   racha_actual: number;
   saldo_monedas: number;
   tema_actual_id?: number;
+  tema_actual_nombre?: string;
   textos_restantes?: number;
   habilidades: HabilidadData[];
 }

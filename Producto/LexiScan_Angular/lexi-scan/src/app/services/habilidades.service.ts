@@ -148,4 +148,12 @@ export class HabilidadesService {
   getGroqModels(): Observable<GroqModelsResponse> {
     return this.http.get<GroqModelsResponse>(`${this.baseUrl}/groq-models`);
   }
+
+  /** Persiste monedas ganadas por desafíos/meta diaria en la DB del usuario. */
+  acreditarMonedas(rut: string, cantidad: number): Observable<{ saldo_nuevo: number; cantidad_acreditada: number }> {
+    return this.http.post<{ saldo_nuevo: number; cantidad_acreditada: number }>(
+      `${this.baseUrl}/acreditar-monedas`,
+      { rut, cantidad }
+    );
+  }
 }
