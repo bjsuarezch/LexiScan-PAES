@@ -1,708 +1,174 @@
 # LexiScan-PAES 📚
 
-Aplicación diseñada para que estudiantes puedan prepararse y obtener un excelente puntaje en la PAES de Comprensión Lectora. La plataforma ofrece un entorno interactivo con exámenes simulados, seguimiento de habilidades y un "Gimnasio de Práctica" personalizado con IA.
+Plataforma de preparación para la PAES de Comprensión Lectora con IA.
 
 ---
 
-## 📱 Descripción del Proyecto
+## ⚡ Requisitos previos
 
-LexiScan-PAES es una solución full-stack que combina:
+Instala esto antes de empezar:
 
-- **Backend**: API REST robusta construida con **FastAPI**.
-- **Frontend**: Aplicación móvil híbrida desarrollada con **Ionic (Angular)**.
-- **Inteligencia Artificial**: Generación dinámica de textos y preguntas mediante **Groq (Llama 3)** y **Gemini**.
-- **Base de Datos**: Soporte híbrido para **PostgreSQL** (Producción) y **SQLite** (Desarrollo rápido).
+| Herramienta | Versión mínima | Descarga |
+|---|---|---|
+| Python | **3.12.x** (no uses 3.13+) | [python.org](https://www.python.org/downloads/) |
+| Node.js | 18+ | [nodejs.org](https://nodejs.org/) |
+| Docker Desktop | Cualquiera | [docker.com](https://www.docker.com/products/docker-desktop/) |
 
----
-
-## ✨ Funcionalidades
-
-### 1. **Autenticación de Usuarios**
-
-- Registro con validación de RUT y email
-- Login seguro con credenciales
-- Gestión de sesiones
-
-### 2. **Exámenes PAES**
-
-- Banco de preguntas de comprensión lectora
-- Modo examen simulado
-- Retroalimentación instantánea
-- Corrección automática
-
-### 3. **Seguimiento de Habilidades**
-
-- Análisis de desempeño por habilidad
-- Identificación de áreas débiles
-- Recomendaciones personalizadas
-
-### 4. **Gimnasio de Práctica**
-
-- Ejercicios orientados por dificultad
-- Práctica temática
-- Estadísticas de progreso
-
-### 5. **Dashboard del Estudiante**
-
-- Resumen de avance
-- Historial de exámenes
-- Metas y logros
+> ⚠️ **Python 3.12 obligatorio.** Las versiones 3.13+ rompen las dependencias binarias (psycopg2, bcrypt).
 
 ---
 
-## 🔧 Requisitos Previos
+## 🚀 Cómo correr la app (3 terminales)
 
-Para asegurar el funcionamiento correcto en cualquier entorno (especialmente en Windows), se requieren las siguientes versiones:
-
-- **Python 3.12.x** (⚠️ **IMPORTANTE**: Evitar Python 3.15 experimental, ya que causa incompatibilidades con librerías binarias).
-- **Node.js** (v18.0 o superior) y **npm**.
-- **Docker & Docker Compose** (Para la base de datos PostgreSQL).
-- **PostgreSQL 16+**
+Necesitas **3 terminales abiertas al mismo tiempo**. Sigue el orden exacto.
 
 ---
 
-### Verificar instalaciones:
+### Terminal 1 — Base de datos
+
+1. Abre Docker Desktop y espera a que diga **"Engine running"**.
+2. Abre una terminal y ejecuta:
 
 ```bash
-docker --version
-docker-compose --version
-node --version
-npm --version
-```
-
----
-
-## 🚀 Instalación y Configuración
-
-### **Paso 1: Clonar/Descargar el Proyecto**
-
-```bash
-https://github.com/bjsuarezch/LexiScan-PAES.git
-```
-
-### **Paso 2: Levantando la Base de Datos con Docker**
-
-La base de datos PostgreSQL se levanta automáticamente con Docker Compose:
-
-```bash
-# Abrir Docker-Desktop y verificar que se vea Engine running dentro de docker-desktop
-```
-
-```bash
-# Navegar a la carpeta Producto
 cd Producto
-
-# Levantar los contenedores (PostgreSQL)
 docker-compose up -d
 ```
 
-Este comando:
-
-- ✅ Crea un contenedor de PostgreSQL
-- ✅ Carga automáticamente el esquema desde `lexiscan_schema.sql`
-- ✅ Expone la base de datos en `localhost:5432`
-
-**Credenciales de la BD:**
-
-- Usuario: `user_lexiscan`
-- Contraseña: `password123`
-- Base de datos: `lexiscan_db`
-- Puerto: `5432`
-
-Verificar que la base de datos está corriendo:
-
-```bash
-docker ps
-```
-
-Deberías ver algo como: `lexiscan_db_container`
+✅ Listo cuando veas `lexiscan_db_container` al correr `docker ps`.
 
 ---
 
-### **Paso 3: Configurar e Instalar el Backend (FastAPI)**
+### Terminal 2 — Backend
+
+**Primero: desbloquear PowerShell (solo la primera vez en Windows)**
+
+Si al activar el entorno virtual te aparece el error `"la ejecución de scripts está deshabilitada"`, corre esto **antes** de cualquier otro comando:
+
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
+```
+
+Luego ejecuta todo esto en orden:
 
 ```bash
-# Desde la carpeta Producto
-cd backend
+cd Producto/backend
 
-# Crear un entorno virtual (usando Python 3.12)
+# Crear entorno virtual con Python 3.12
 py -3.12 -m venv venv
 
-# Activar el entorno virtual
-# En Windows:
-venv\Scripts\activate
-# En macOS/Linux:
-source venv/bin/activate
+# Activar entorno virtual (Windows)
+.\venv\Scripts\activate
 
 # Instalar dependencias
 pip install -r requirements.txt
-```
 
-**Dependencias del Backend:**
-
-- FastAPI
-- Uvicorn
-- SQLAlchemy
-- psycopg2-binary
-- python-dotenv
-- requests
-- pydantic
-
-### **Variables de entorno recomendadas**
-
-Crea un archivo `.env` en `Producto/backend/` con:
-
-```ini
-GROQ_API_KEY=tu_clave_groq_aqui
-GEMINI_API_KEY=tu_clave_gemini_aqui
-```
-
-Verificar la instalación:
-
-```bash
-pip list
-```
-
----
-
-### **Paso 4: Ejecutar el Backend**
-
-```bash
-# Desde la carpeta backend (con el entorno virtual activado)
+# Iniciar el servidor
+$env:PYTHONIOENCODING="utf-8"
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-Salida esperada:
+✅ Listo cuando veas: `Uvicorn running on http://0.0.0.0:8000`
 
-```
-INFO:     Uvicorn running on http://127.0.0.1:8000
-INFO:     Application startup complete
-```
-
-El backend estará disponible en: **http://localhost:8000**
-
-**Documentación interactiva:**
-
-- Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
+> ⚠️ **No cierres esta terminal.** El backend debe seguir corriendo mientras usas la app.
 
 ---
 
-### **Paso 5: Instalar y Configurar el Frontend (Ionic/Angular)**
+### Terminal 3 — Frontend
 
-En **otra terminal**, navega a la carpeta del frontend:
+Abre **otra terminal nueva** y ejecuta:
 
 ```bash
 cd Producto/LexiScan_Angular/lexi-scan
-
-# Instalar dependencias
 npm install
-
-# Instalar Ionic CLI globalmente (si no lo tienes)
-npm install -g @ionic/cli
-```
-
-Verificar instalación de Ionic:
-
-```bash
-ionic --version
-```
-
----
-
-### **Paso 6: Ejecutar el Frontend en Desarrollo**
-
-```bash
-# Desde Producto/LexiScan_Angular/lexi-scan
 npm start
-# o
-ionic serve
 ```
 
-Salida esperada:
+✅ Listo cuando veas: `http://localhost:4200/`
 
-```
-[INFO] HTTP address: http://localhost:4200/
-[INFO] DevServer listening on http://localhost:4200/
-```
+Abre tu navegador en: **http://localhost:4200**
 
-El frontend estará disponible en: **http://localhost:4200**
+> ⚠️ **No cierres esta terminal.** El frontend debe seguir corriendo.
 
 ---
 
-### **Paso 7: Configuración de la IA**
+## 🤖 Configurar la IA (una sola vez)
 
-El backend usa integración con Groq Cloud para generar preguntas y evaluar respuestas.
+Necesitas una API Key de Groq (gratis en [console.groq.com](https://console.groq.com)).
 
-#### Configurar la API Key desde el programa:
+1. En la pantalla de **login**, toca el ícono ⚙️ en el pie de página.
+2. Pega tu API Key (`gsk_...`) y presiona **"Guardar API Key"**.
+3. En el mismo panel, selecciona el modelo **`llama-3.3-70b-versatile`** y presiona **"Guardar configuración"**.
+
+---
+
+## 🗃️ Cargar datos de demostración (opcional)
+
+Si quieres ver la app con datos de ejemplo ya cargados:
 
 ```bash
-En el login seleccionar el engranaje en el pie de pagina y añadir la API Key de Groq, luego guarda la configuracion
-```
-
-#### Obtener modelos disponibles:
-
-```bash
-Vuelve a seleccionar el engranaje en el pie de pagina y ahora tendrás los modelos de IA disponibles
-(Te sugiero utilizar el modelo: llama-3.3-70b-versatile),
-luego guarda la configuracion
-```
-
-#### Usar datos de prueba
-
-Para restaurar los datos_presentacion.sql en otro PC, ejecuta en la terminal :
-
-```ini
-psql -U user_lexiscan -d lexiscan_db < datos_presentacion.sql
+# Desde la carpeta Producto
+docker exec -i lexiscan_db_container psql -U user_lexiscan -d lexiscan_db < datos_presentacion.sql
 ```
 
 ---
 
-## 📁 Estructura del Proyecto
+## 🐛 Errores comunes y soluciones
 
+### ❌ `"la ejecución de scripts está deshabilitada"`
+
+PowerShell bloquea los scripts por defecto en Windows. Solución rápida (solo afecta la terminal actual):
+
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
 ```
-LexiScan-PAES/
-├── README.md                           # Este archivo
-├── Gestion/
-│   └── Integrantes.txt                # Miembros del equipo
-├── Producto/
-│   ├── docker-compose.yml             # Configuración de Docker
-│   ├── lexiscan_schema.sql            # Esquema de la base de datos
-│   ├── tmp_hash.py                    # Utilidad de hashing
-│   │
-│   ├── backend/                       # API FastAPI
-│   │   ├── main.py                    # Punto de entrada
-│   │   ├── models.py                  # Modelos SQLAlchemy
-│   │   ├── schemas.py                 # Esquemas Pydantic
-│   │   ├── crud.py                    # Operaciones de BD
-│   │   ├── database.py                # Configuración de BD
-│   │   ├── requirements.txt           # Dependencias Python
-│   │   └── tests/
-│   │       └── test_api.py            # Pruebas unitarias
-│   │
-│   └── LexiScan_Angular/lexi-scan/    # App Ionic/Angular
-│       ├── package.json               # Dependencias Node.js
-│       ├── angular.json               # Configuración Angular
-│       ├── ionic.config.json          # Configuración Ionic
-│       ├── capacitor.config.ts        # Configuración Capacitor
-│       └── src/
-│           ├── app/
-│           │   ├── app.module.ts      # Módulo principal
-│           │   ├── app-routing.module.ts
-│           │   ├── home/              # Página de inicio
-│           │   ├── examen/            # Módulo de exámenes
-│           │   ├── habilidades/       # Módulo de habilidades
-│           │   ├── gym/               # Gimnasio de práctica
-│           │   ├── tab1/, tab2/, tab3/# Tabs de navegación
-│           │   ├── models/            # Modelos TypeScript
-│           │   └── services/          # Servicios
-│           ├── assets/                # Imágenes y recursos
-│           ├── environments/          # Configuración por entorno
-│           └── theme/                 # Estilos globales
-```
+
+Luego vuelve a ejecutar `.\venv\Scripts\activate`.
 
 ---
 
-## 🔌 API Endpoints
+### ❌ `UnicodeDecodeError: 'utf-8' codec can't decode byte...` al iniciar el backend
 
-### Configuración de IA
+Este error ocurre en Windows cuando el sistema tiene configuración de idioma en español. Solución: **forzar UTF-8 antes de iniciar el servidor**:
 
-**Configurar Groq**
-
-```
-POST /configurar-ia
-Content-Type: application/json
-
-{
-  "api_key": "gsk_tu_api_key",
-  "modelo": "llama-3.1-70b-versatile"
-}
+```powershell
+$env:PYTHONIOENCODING="utf-8"
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-**Modelos disponibles**
-
-```
-GET /modelos-disponibles
-```
-
-### Autenticación
-
-**Registro de usuario**
-
-```
-POST /register
-Content-Type: application/json
-
-{
-  "rut": "12345678-9",
-  "nombre_completo": "Juan Pérez",
-  "email": "juan@example.com",
-  "contrasena": "password123"
-}
-```
-
-**Login**
-
-```
-POST /login
-Content-Type: application/json
-
-{
-  "rut": "12345678-9",
-  "contrasena": "password123"
-}
-```
-
-### Usuario y habilidades
-
-**Dashboard del usuario**
-
-```
-GET /dashboard/{rut}
-```
-
-**Detalle de habilidad**
-
-```
-GET /habilidades/{habilidad}?rut={rut}
-```
-
-### Generación y evaluación de preguntas
-
-**Generar preguntas por habilidad**
-
-```
-POST /generar-preguntas
-Content-Type: application/json
-
-{
-  "habilidad": "Interpretar"
-}
-```
-
-**Evaluar preguntas de habilidad**
-
-```
-POST /evaluar-preguntas
-Content-Type: application/json
-
-{
-  "rut": "12345678-9",
-  "tipo_habilidad": "Interpretar",
-  "preguntas": [
-    {
-      "enunciado": "...",
-      "alternativas": {"A": "...", "B": "...", "C": "...", "D": "..."},
-      "respuesta_usuario": "B",
-      "respuesta_correcta": "A"
-    }
-  ]
-}
-```
-
-### Exámenes
-
-**Crear examen**
-
-```
-POST /examen
-Content-Type: application/json
-
-{
-  "rut": "12345678-9",
-  "cantidad_preguntas": 10
-}
-```
-
-**Evaluar examen**
-
-```
-POST /evaluar-examen
-Content-Type: application/json
-
-{
-  "id_examen": 1,
-  "respuestas": [
-    {"id_pregunta": 101, "respuesta_dada": "C"},
-    {"id_pregunta": 102, "respuesta_dada": "B"}
-  ]
-}
-```
-
-**Guardar resultados de examen**
-
-```
-POST /guardar-resultados-examen
-Content-Type: application/json
-
-{
-  "rut": "12345678-9",
-  "id_examen": 1,
-  "total_preguntas": 10,
-  "puntaje": 7,
-  "xp_ganada": 35,
-  "mensaje": "Resultados guardados"
-}
-```
-
-### Errores y GYM
-
-**Error frecuente**
-
-```
-GET /error-frecuente/{rut}
-```
-
-**Errores frecuentes**
-
-```
-GET /errores-frecuentes/{rut}
-```
-
-**Resolver error frecuente**
-
-```
-PUT /errores-frecuentes/{error_id}/resolver
-```
-
-### Configuración general
-
-**Obtener configuración**
-
-```
-GET /configuracion
-```
-
-**Actualizar configuración**
-
-```
-POST /configuracion
-Content-Type: application/json
-
-{
-  "clave": "GROQ_MODEL",
-  "valor": "llama-3.1-8b-instant",
-  "descripcion": "Modelo LLM por defecto"
-}
-```
-
-### Groq models
-
-**Obtener modelos Groq**
-
-```
-GET /groq-models
-```
-
-Prueba estos endpoints en: **http://localhost:8000/docs**
+Si el error persiste, también verifica que ni el usuario ni la contraseña de la base de datos tengan tildes o caracteres especiales en el archivo `.env`.
 
 ---
 
-## 💻 Desarrollo
+### ❌ El frontend carga pero no hace nada / pantallas en blanco
 
-### Ejecutar Pruebas del Backend
-
-```bash
-cd Producto/backend
-
-# Ejecutar todas las pruebas
-pytest
-
-# Con cobertura
-pytest --cov
-```
-
-### Compilar para Android
-
-```bash
-cd Producto/LexiScan_Angular/lexi-scan
-
-# Build de producción
-npm run build
-ionic capacitor build android
-```
-
-### Modo Debug en Chrome DevTools
-
-```bash
-# El navegador mostrará las DevTools automáticamente
-ionic serve --devapp
-```
+El backend no está corriendo. Verifica:
+- La Terminal 2 (backend) sigue abierta y muestra `Uvicorn running`.
+- No hay error en esa terminal.
+- Si la cerraste, vuelve a abrirla y corre el servidor de nuevo.
 
 ---
 
-## 🌍 Configuración de Entornos
-
-### Backend - Variables de Entorno
-
-Crear un archivo `.env` en `Producto/backend/`:
-
-```
-DATABASE_URL=postgresql://user_lexiscan:password123@localhost:5432/lexiscan_db
-SECRET_KEY=tu_clave_secreta_aqui
-DEBUG=True
-```
-
-### Frontend - Configuración de URLs
-
-Editar `Producto/LexiScan_Angular/lexi-scan/src/environments/environment.ts`:
-
-```typescript
-export const environment = {
-  production: false,
-  apiUrl: "http://localhost:8000",
-};
-```
-
----
-
-## 📊 Gestión de Datos
-
-### Poblar la Base de Datos con Datos de Prueba
+### ❌ `Port 5432 already in use`
 
 ```bash
-# Ejecutar desde la carpeta Producto
-docker exec -i lexiscan_db_container psql -U user_lexiscan -d lexiscan_db < poblar_datos.sql
-```
-
-### Ver Datos en la Base de Datos
-
-```bash
-# Conectar a PostgreSQL
-docker exec -it lexiscan_db_container psql -U user_lexiscan -d lexiscan_db
-
-# Comandos SQL útiles:
-\dt                          # Listar tablas
-SELECT * FROM usuarios;      # Ver usuarios
-SELECT * FROM examen;        # Ver exámenes
-\q                           # Salir
-```
-
----
-
-## 🛠️ Comandos Útiles
-
-### Docker
-
-```bash
-# Ver logs de un contenedor
-docker logs lexiscan_db_container -f
-
-# Detener contenedores
 docker-compose down
-
-# Detener y eliminar volúmenes
-docker-compose down -v
-
-# Reiniciar la base de datos
-docker-compose restart db
-```
-
-### Backend
-
-```bash
-# Recargar servidor (ctrl+C y)
-uvicorn main:app --reload
-
-# Especificar puerto diferente
-uvicorn main:app --port 8001
-```
-
-### Frontend
-
-```bash
-# Limpiar cache y reinstalar
-rm -r node_modules
-npm install
-
-# Build de producción
-npm run build
-
-# Ver dependencias
-npm list
-```
-
----
-
-## 🐛 Troubleshooting
-
-### **Error: "Port 5432 already in use"**
-
-```bash
-# Encuentra el contenedor que usa el puerto
-docker ps -a | grep 5432
-
-# Detén todos los contenedores
-docker-compose down
-```
-
-### **Error: "Module not found" en Backend**
-
-```bash
-# Asegúrate de activar el entorno virtual
-venv\Scripts\activate  # Windows
-source venv/bin/activate  # macOS/Linux
-
-# Reinstala dependencias
-pip install -r requirements.txt
-```
-
-### **Error: "npm: command not found"**
-
-```bash
-# Instala Node.js desde: https://nodejs.org/
-# Verifica la instalación
-node --version
-npm --version
-```
-
-### **La app no se conecta al backend**
-
-1. Verifica que el backend está corriendo en `http://localhost:8000`
-2. Revisa la URL en `src/environments/environment.ts`
-3. Verifica el CORS en `backend/main.py`
-4. Abre las DevTools: `F12` en el navegador
-
-### **Base de datos sin datos de prueba**
-
-```bash
-# Ejecuta el script de población
-docker exec -i lexiscan_db_container psql -U user_lexiscan -d lexiscan_db < poblar_datos.sql
-```
-
----
-
-## 📞 Resumen - Quick Start (5 minutos)
-
-```bash
-# Terminal 1: Base de datos
-cd Producto
 docker-compose up -d
-
-# Terminal 2: Backend
-cd Producto/backend
-pip install -r requirements.txt
-uvicorn main:app --reload
-
-# Terminal 3: Frontend
-cd Producto/LexiScan_Angular/lexi-scan
-npm install
-npm start
 ```
-
-Luego accede a:
-
-- **Frontend**: http://localhost:4200
-- **Backend Docs**: http://localhost:8000/docs
-- **Base de datos**: localhost:5432
 
 ---
 
-## 📝 Notas
+### ❌ `py -3.12` no funciona / Python no encontrado
 
-- El proyecto usa CORS habilitado para desarrollo (`allow_origins=['*']`)
-- Las contraseñas se almacenan en texto plano (implementar bcrypt en producción)
-- Los datos se persisten en volúmenes de Docker
-- El servidor se recarga automáticamente con `--reload`
+Descarga Python 3.12 desde [python.org/downloads](https://www.python.org/downloads/releases/). Durante la instalación, marca **"Add Python to PATH"**.
 
-¡Bienvenido a LexiScan-PAES! 🎉
+---
+
+## 📋 Resumen rápido
+
+```
+Terminal 1  →  cd Producto  →  docker-compose up -d
+Terminal 2  →  cd Producto/backend  →  activar venv  →  uvicorn ...
+Terminal 3  →  cd Producto/LexiScan_Angular/lexi-scan  →  npm start
+```
+
+Luego abre → **http://localhost:4200**
