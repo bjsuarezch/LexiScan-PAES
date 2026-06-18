@@ -173,16 +173,43 @@ def build_system_prompt() -> str:
         'Debes responder ÚNICAMENTE con el objeto JSON válido solicitado, sin texto introductorio ni de cierre, y sin bloques de código markdown (como ```json).'
     )
 
+# Rotación de 15 formatos de texto (narrativo / expositivo / argumentativo)
+# según los tipos de texto que aparecen en la PAES de Compresión Lectora
+_FORMATO_ROTACION = [
+    {"tipo": "narrativo",      "subtipo": "fragmento de cuento clásico",              "descripcion": "Fragmento de un cuento clásico con narrador, personajes y conflicto central."},
+    {"tipo": "expositivo",     "subtipo": "artículo de divulgación científica",        "descripcion": "Artículo de divulgación científica con datos, conceptos y explicaciones claras."},
+    {"tipo": "argumentativo",  "subtipo": "columna de opinión",                        "descripcion": "Columna de opinión donde el autor defiende una tesis con argumentos y ejemplos."},
+    {"tipo": "narrativo",      "subtipo": "fragmento de novela",                       "descripcion": "Fragmento de novela con descripción de ambiente, pensamiento interno y desarrollo de personaje."},
+    {"tipo": "expositivo",     "subtipo": "artículo de divulgación científica",        "descripcion": "Artículo de divulgación científica con comparaciones, ejemplos y datos."},
+    {"tipo": "argumentativo",  "subtipo": "editorial de periódico",                    "descripcion": "Editorial periodístico que expone la postura de un medio ante un hecho de actualidad."},
+    {"tipo": "narrativo",      "subtipo": "fragmento de mito",                         "descripcion": "Fragmento de un mito con dioses o héroes, narrado en tercera persona y con lenguaje elevado."},
+    {"tipo": "expositivo",     "subtipo": "capítulo de manual educativo",              "descripcion": "Capítulo de manual con definiciones, clasificaciones y ejemplos didácticos."},
+    {"tipo": "argumentativo",  "subtipo": "carta al director",                         "descripcion": "Carta al director de un medio donde un ciudadano argumenta una postura personal."},
+    {"tipo": "narrativo",      "subtipo": "fragmento de leyenda",                      "descripcion": "Fragmento de una leyenda popular con elementos sobrenaturales y moraleja implícita."},
+    {"tipo": "expositivo",     "subtipo": "infografía textualizada",                  "descripcion": "Texto que describe datos visuales como si fuera el contenido de una infografía (incluye dato_clave y grafico_barra)."},
+    {"tipo": "argumentativo",  "subtipo": "crítica de arte o cine",                   "descripcion": "Crítica de una obra artística o película donde el crítico evalúa con criterios estéticos."},
+    {"tipo": "narrativo",      "subtipo": "fragmento de crónica literaria",            "descripcion": "Crónica literaria que narra un evento real con recursos narrativos y punto de vista personal."},
+    {"tipo": "expositivo",     "subtipo": "biografía",                                "descripcion": "Biografía que expone de forma ordenada los hitos de la vida de una persona relevante."},
+    {"tipo": "argumentativo",  "subtipo": "ensayo filosófico o cultural",             "descripcion": "Ensayo que reflexiona sobre una idea filosófica o cultural con tesis, argumentos y conclusión."},
+]
+
+
+def _get_formato_rotacion(seed: int) -> dict:
+    """Devuelve el formato de texto según posición en la rotación."""
+    return _FORMATO_ROTACION[seed % len(_FORMATO_ROTACION)]
+
+
 def build_user_prompt(habilidad: str, tema: str) -> str:
     import random
-    num_preguntas = 4
-    if habilidad == "Tipos_de_Texto" or habilidad == "Tipos de Texto":
-        num_preguntas = 1
-    
-    tema_instruccion = f"El tema central del texto debe ser sobre: '{tema}'." if tema else "Elige un tema educativo y muy interesante al azar."
 
-    # Semilla aleatoria para forzar diversidad en cada llamada
-    variante_seed = random.randint(1000, 9999)
+    tema_instruccion = (
+        f"El tema central del texto debe ser sobre: '{tema}'."
+        if tema
+        else "Elige un tema educativo y muy interesante al azar."
+    )
+
+    # Semilla aleatoria para: (a) variedad de ángulo temático y (b) rotación de formato
+    variante_seed = random.randint(0, 9999)
     subtemas_variantes = [
         "un aspecto poco conocido",
         "una perspectiva histórica",
@@ -194,33 +221,140 @@ def build_user_prompt(habilidad: str, tema: str) -> str:
         "una comparación internacional",
     ]
     angulo = subtemas_variantes[variante_seed % len(subtemas_variantes)]
+    fmt = _get_formato_rotacion(variante_seed)
+
+    # ---- Instrucciones específicas por habilidad ----
+    if habilidad in ("Vocabulario",):
+        num_preguntas = 4
+        instruccion_habilidad = (
+            "HABILIDAD: Vocabulario.\n"
+            "Las 4 preguntas DEBEN evaluar el significado de palabras específicas del texto.\n"
+            "Formatos aceptados para las preguntas:\n"
+            "  - '¿Qué significa la palabra X en el contexto del texto?' con 4 opciones de significado.\n"
+            "  - '¿Con qué expresión se puede reemplazar X sin cambiar el sentido?' con 4 opciones.\n"
+            "  - '¿En qué sentido se usa la palabra X en el segundo párrafo?' con 4 opciones.\n"
+            "PROHIBIDO: No hagas preguntas sobre el tema general, la idea principal ni la estructura del texto.\n"
+            "Cada pregunta debe citar la palabra exacta del texto entre comillas."
+        )
+    elif habilidad in ("Tipos_de_Texto", "Tipos de Texto"):
+        num_preguntas = 1
+        instruccion_habilidad = (
+            "HABILIDAD: Tipos de Texto.\n"
+            "DEBES generar EXACTAMENTE 1 pregunta que evalúe la identificación del tipo de texto.\n"
+            f"El texto que generes será de tipo '{fmt['tipo']}' ({fmt['subtipo']}).\n"
+            "La pregunta DEBE ser: '¿Qué tipo de texto es el que acabas de leer?'\n"
+            "Las 4 alternativas deben ser los 4 tipos: Narrativo, Expositivo, Argumentativo, Descriptivo.\n"
+            f"La respuesta correcta es: {fmt['tipo'].capitalize()}.\n"
+            "La justificacion_cot debe explicar los rasgos del texto que evidencian ese tipo."
+        )
+    elif habilidad == "Localizar":
+        num_preguntas = 4
+        instruccion_habilidad = (
+            "HABILIDAD: Localizar información.\n"
+            "Las 4 preguntas DEBEN requerir que el estudiante encuentre información EXPLÍCITA en el texto.\n"
+            "REQUISITO CRÍTICO: La respuesta correcta debe poder ser copiada literalmente o parafraseada directamente del texto, sin necesidad de inferencia.\n"
+            "Formatos de pregunta aceptados:\n"
+            "  - 'Según el texto, ¿cuál es [dato]?'\n"
+            "  - '¿Qué menciona el texto sobre [aspecto]?'\n"
+            "  - 'De acuerdo al texto, ¿cuándo/dónde/quién [acción]?'\n"
+            "  - '¿Cuál de las siguientes afirmaciones aparece explícitamente en el texto?'\n"
+            "Las 3 alternativas incorrectas deben ser plausibles pero NO aparecer en el texto.\n"
+            "PROHIBIDO: No hagas preguntas que requieran inferencia, interpretación o juicio crítico.\n"
+            "PROHIBIDO: No hagas preguntas sobre la idea principal, el propósito del autor, el tipo de texto ni el significado de palabras."
+        )
+    elif habilidad == "Interpretar":
+        num_preguntas = 4
+        instruccion_habilidad = (
+            "HABILIDAD: Interpretar e integrar.\n"
+            "Las 4 preguntas deben requerir que el estudiante DEDUZCA o INFIERA información que NO aparece explícita en el texto.\n"
+            "Sub-tipos de pregunta que DEBES incluir (usa los 4 sub-tipos distintos):\n"
+            "  1. Idea principal: '¿Cuál es la idea central que plantea el texto?' (síntesis global, no copiable del texto)\n"
+            "  2. Inferencia lógica: '¿Qué se puede concluir / inferir a partir del texto?'\n"
+            "  3. Relación entre ideas: '¿Qué relación existe entre [concepto A] y [concepto B] según el texto?' (causal, temporal, contraste)\n"
+            "  4. Referente implícito: '¿A qué se refiere el autor cuando menciona \"[frase literal del texto]\"?'\n"
+            "Las respuestas correctas NO deben aparecer literales en el texto, sino deducirse de él.\n"
+            "PROHIBIDO: No hagas preguntas donde la respuesta esté copiada del texto (eso es Localizar).\n"
+            "PROHIBIDO: No hagas preguntas de juicio externo sobre el propósito del autor ni sobre la validez del argumento (eso es Evaluar)."
+        )
+    elif habilidad == "Evaluar":
+        num_preguntas = 4
+        instruccion_habilidad = (
+            "HABILIDAD: Evaluar y reflexionar.\n"
+            "Las 4 preguntas deben pedir al estudiante que JUZGUE o EVALÚE el texto DESDE AFUERA, usando criterios externos al contenido del texto.\n"
+            "Sub-tipos de pregunta que DEBES incluir (usa los 4 sub-tipos distintos):\n"
+            "  1. Propósito comunicativo: '¿Cuál es el propósito del texto?' con opciones como informar/persuadir/entretener/instruir.\n"
+            "  2. Audiencia: '¿A qué tipo de lector va dirigido principalmente el texto?' (deducible del tono, vocabulario y formato).\n"
+            "  3. Función estructural: '¿Qué función cumple el párrafo [N] dentro del texto?' con opciones como introducir/ejemplificar/refutar/concluir.\n"
+            "  4. Estrategia retórica: '¿Qué recurso utiliza el autor para apoyar su argumento?' con opciones como estadísticas/anécdotas/citas de autoridad/comparaciones.\n"
+            "Las respuestas correctas implican un juicio META sobre el texto, no sobre el contenido temático.\n"
+            "PROHIBIDO: No hagas preguntas de comprensión del contenido (eso es Localizar o Interpretar).\n"
+            "PROHIBIDO: No hagas preguntas sobre el significado de palabras (eso es Vocabulario)."
+        )
+    elif habilidad in ("Lectura_Critica", "Lectura Crítica"):
+        num_preguntas = 4
+        instruccion_habilidad = (
+            "HABILIDAD: Lectura Crítica.\n"
+            "Las 4 preguntas deben situar al estudiante FUERA del texto para cuestionar su discurso, ideología o supuestos implícitos.\n"
+            "Sub-tipos de pregunta que DEBES incluir (usa los 4 sub-tipos distintos):\n"
+            "  1. Supuesto implícito: '¿Qué supuesto o creencia implícita subyace en el argumento del texto?' (idea que el texto asume como verdadera sin declararla).\n"
+            "  2. Postura del enunciador: '¿Qué postura ideológica o valórica adopta el enunciador del texto frente al tema?' con opciones contrastantes.\n"
+            "  3. Contraejemplo crítico: '¿Cuál de las siguientes afirmaciones debilitaría el argumento principal del texto?'\n"
+            "  4. Sesgo por omisión: '¿Qué perspectiva, grupo o información queda excluida o silenciada en el texto?'\n"
+            "Las respuestas correctas exigen que el estudiante reconozca la POSICIÓN DEL TEXTO ante la realidad, no solo entender su contenido.\n"
+            "PROHIBIDO: No hagas preguntas de comprensión literal ni de vocabulario.\n"
+            "PROHIBIDO: No repitas el estilo de Evaluar (propósito/función/estrategia retórica). Lectura Crítica va más allá: exige cuestionar el discurso mismo."
+        )
+    else:
+        num_preguntas = 4
+        instruccion_habilidad = (
+            f"HABILIDAD: {habilidad}.\n"
+            "Las preguntas deben evaluar rigurosamente esta habilidad según los estándares PAES."
+        )
+
+    # ---- Instrucciones de formato de texto (rotación) ----
+    # Para Vocabulario y Lectura Crítica no forzamos un formato narrativo específico,
+    # pero sí indicamos el ángulo temático para variedad
+    if habilidad in ("Tipos_de_Texto", "Tipos de Texto"):
+        formato_instruccion = (
+            f"FORMATO DEL TEXTO: Debes escribir un '{fmt['subtipo']}' (texto {fmt['tipo']}).\n"
+            f"Descripción del formato: {fmt['descripcion']}\n"
+        )
+    else:
+        formato_instruccion = (
+            f"FORMATO DEL TEXTO [VARIANTE #{variante_seed}]: Escribe un '{fmt['subtipo']}' (texto {fmt['tipo']}).\n"
+            f"Descripción: {fmt['descripcion']}\n"
+            f"Ángulo del tema: {angulo}.\n"
+            "NO repitas formatos ni ángulos de sesiones anteriores.\n"
+        )
 
     return (
-        f"[VARIANTE #{variante_seed}] "
-        f"Genera un ejercicio NUEVO y ÚNICO de Comprension Lectora PAES para la habilidad '{habilidad}'. "
-        f"{tema_instruccion} "
-        f"Enfoca el texto desde {angulo} del tema. "
-        f"NO repitas estructuras, ejemplos ni ideas de ejercicios anteriores sobre este tema.\n\n"
-        "Tu tarea es generar un texto inédito de al menos 2 párrafos.\n\n"
-        f"CANTIDAD DE PREGUNTAS A GENERAR: {num_preguntas}.\n\n"
-        f"basándote exclusivamente en ese texto inedito y en la habilidad a evaluar, genera exactamente {num_preguntas} pregunta(s) de selección múltiple.\n"
-        "Devuelve únicamente un JSON válido con esta estructura exacta: \n"
+        f"{formato_instruccion}\n"
+        f"{instruccion_habilidad}\n\n"
+        f"{tema_instruccion}\n\n"
+        "Tu tarea: genera un texto inédito de al menos 2 párrafos en el formato indicado.\n\n"
+        f"CANTIDAD DE PREGUNTAS: {num_preguntas}. "
+        "Basándote EXCLUSIVAMENTE en ese texto, genera las preguntas indicadas.\n\n"
+        "Devuelve únicamente un JSON válido con esta estructura:\n"
         "{\n"
         "  \"tipo_habilidad\": \"string\",\n"
         "  \"texto_inedito\": [\n"
         "     {\"tipo\": \"parrafo\", \"contenido\": \"...\"},\n"
         "     {\"tipo\": \"dato_clave\", \"contenido\": \"...\"},\n"
-        "     {\"tipo\": \"grafico_barra\", \"datos\": [{\"etiqueta\": \"...\", \"valor\": 80}]},\n"
-        "     {\"tipo\": \"imagen\", \"concepto\": \"palabra clave en ingles para buscar imagen relacionada\"}\n"
+        "     {\"tipo\": \"grafico_barra\", \"titulo\": \"...\", \"datos\": [{\"etiqueta\": \"...\", \"valor\": 80}]},\n"
+        "     {\"tipo\": \"imagen\", \"concepto\": \"keyword en ingles para imagen relacionada\"}\n"
         "  ],\n"
-        "  \"preguntas\": [ \n"
-        "    { \"enunciado\": \"...\", \"alternativas\": {\"A\": \"...\", \"B\": \"...\", \"C\": \"...\", \"D\": \"...\"}, \"respuesta_correcta\": \"A\", \"justificacion_cot\": \"...\" }\n"
+        "  \"preguntas\": [\n"
+        "    {\"enunciado\": \"...\", \"alternativas\": {\"A\": \"...\", \"B\": \"...\", \"C\": \"...\", \"D\": \"...\"},"
+        " \"respuesta_correcta\": \"A\", \"justificacion_cot\": \"...\"}\n"
         "  ]\n"
         "}\n"
-        "REGLA DE ORO: El campo 'texto_inedito' DEBE ser un arreglo JSON con los distintos bloques que forman el texto."
-        "Puedes usar varios 'parrafo'. Si aplica, añade 'dato_clave' y un 'grafico_barra'. SIEMPRE incluye un bloque 'imagen' con un concepto clave en inglés. "
-        "Las preguntas deben ser imposibles de responder sin leer el texto inédito. "
+        "REGLAS DE ORO:\n"
+        "1. 'texto_inedito' DEBE ser un arreglo con bloques. Usa varios 'parrafo'. "
+        "Si el formato lo permite, añade 'dato_clave' y/o 'grafico_barra'. SIEMPRE incluye 'imagen'.\n"
+        "2. Las preguntas deben ser imposibles de responder sin leer el texto.\n"
+        "3. NO generes preguntas genéricas de cultura general."
     )
+
 
 
 
@@ -299,6 +433,22 @@ def call_groq_feedback(tipo_habilidad: str, preguntas: list[dict], db: Session) 
 
     if response.status_code != 200:
         print(f'Error de Groq: {response.text}')
+        # Detectar rate limit y extraer tiempo de espera
+        try:
+            err_data = response.json()
+            err_msg = err_data.get('error', {}).get('message', '')
+            if response.status_code == 429 or 'rate_limit' in err_msg.lower() or 'rate limit' in err_msg.lower():
+                import re
+                wait_match = re.search(r'try again in ([\d.]+\s*\w+)', err_msg, re.IGNORECASE)
+                wait_str = wait_match.group(1) if wait_match else 'unos minutos'
+                raise HTTPException(
+                    status_code=429,
+                    detail=f'Límite de tokens de Groq alcanzado. Espera {wait_str} o cambia a otro modelo en la configuración de la IA.'
+                )
+        except HTTPException:
+            raise
+        except Exception:
+            pass
         raise HTTPException(status_code=502, detail='Error en la comunicación con Groq')
 
     data = response.json()
@@ -358,12 +508,28 @@ def call_gemini_api(habilidad: str, tema: str, db: Session) -> dict:
 
     if response.status_code != 200:
         print(f"Error de Groq: {response.text}")
+        # Detectar error de límite de tasa (rate limit) y exponer tiempo de espera
+        try:
+            err_data = response.json()
+            err_msg = err_data.get('error', {}).get('message', '')
+            if response.status_code == 429 or 'rate_limit' in err_msg.lower() or 'rate limit' in err_msg.lower():
+                # Intentar extraer tiempo de espera del mensaje de Groq
+                import re
+                wait_match = re.search(r'try again in ([\d.]+\s*\w+)', err_msg, re.IGNORECASE)
+                wait_str = wait_match.group(1) if wait_match else 'unos minutos'
+                raise HTTPException(
+                    status_code=429,
+                    detail=f'Límite de tokens de Groq alcanzado. Por favor espera {wait_str} antes de intentarlo de nuevo, o cambia a otro modelo en la configuración de la IA.'
+                )
+        except HTTPException:
+            raise
+        except Exception:
+            pass
         raise HTTPException(status_code=502, detail="Error en la comunicación con Groq")
 
     data = response.json()
     
     try:
-        # Groq sigue el formato de OpenAI: choices[0].message.content
         raw_output = data['choices'][0]['message']['content']
         return parse_gemini_output(raw_output)
     except (KeyError, IndexError) as e:
@@ -371,6 +537,7 @@ def call_gemini_api(habilidad: str, tema: str, db: Session) -> dict:
         raise HTTPException(status_code=502, detail="Formato de respuesta inválido")
     
     
+
 @app.post('/register', response_model=schemas.UserResponse)
 def register(user_create: schemas.UserCreate, db: Session = Depends(get_db)):
     existing_rut = crud.get_user_by_rut(db, user_create.rut)
