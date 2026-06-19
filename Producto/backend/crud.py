@@ -887,3 +887,13 @@ def delete_user(db: Session, rut: str) -> bool:
     db.delete(user)
     db.commit()
     return True
+
+
+def fallar_error(db: Session, id_error: int):
+    error = db.query(models.ErroresFavoritos).filter(models.ErroresFavoritos.id_error == id_error).first()
+    if not error:
+        raise ValueError("Error no encontrado")
+    error.veces_fallada += 1
+    db.commit()
+    db.refresh(error)
+    return error

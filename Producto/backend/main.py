@@ -957,6 +957,16 @@ def resolver_error(error_id: int, db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f'Error al resolver error: {str(e)}')
 
+@app.put('/errores-frecuentes/{error_id}/fallar')
+def fallar_error_endpoint(error_id: int, db: Session = Depends(get_db)):
+    """Incrementa las veces fallada de un error."""
+    try:
+        crud.fallar_error(db, error_id)
+        return {"message": "Error fallado incrementado"}
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f'Error al fallar error: {str(e)}')
 
 @app.get('/configuracion')
 def get_configuracion(db: Session = Depends(get_db)):

@@ -8,7 +8,11 @@ import { ProfileService } from './profile.service';
   providedIn: 'root'
 })
 export class DesafiosService {
-  private readonly STORAGE_KEY = 'lexiscan_desafios_diarios';
+  private currentRut: string | null = null;
+  
+  private getStorageKey(): string {
+    return this.currentRut ? `lexiscan_desafios_diarios_${this.currentRut}` : 'lexiscan_desafios_diarios_default';
+  }
   
   private desafiosDiariosSubject = new BehaviorSubject<Desafio[]>([]);
   public desafiosDiarios$ = this.desafiosDiariosSubject.asObservable();
@@ -75,12 +79,19 @@ export class DesafiosService {
     private habilidadesService: HabilidadesService,
     private profileService: ProfileService
   ) {
-    this.inicializarDesafios();
+    this.profileService.profile$.subscribe(profile => {
+      if (profile?.rut) {
+        this.currentRut = profile.rut;
+        this.inicializarDesafios();
+      } else {
+        this.currentRut = null;
+      }
+    });
   }
 
   private inicializarDesafios() {
     const hoy = new Date().toISOString().split('T')[0];
-    const dataGuardada = localStorage.getItem(this.STORAGE_KEY);
+    const dataGuardada = localStorage.getItem(this.getStorageKey());
     
     if (dataGuardada) {
       const progreso: DesafioProgresoLocal = JSON.parse(dataGuardada);
@@ -111,12 +122,12 @@ export class DesafiosService {
   }
 
   private obtenerProgresoActual(): DesafioProgresoLocal | null {
-    const data = localStorage.getItem(this.STORAGE_KEY);
+    const data = localStorage.getItem(this.getStorageKey());
     return data ? JSON.parse(data) : null;
   }
 
   private guardarProgreso(progreso: DesafioProgresoLocal) {
-    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(progreso));
+    localStorage.setItem(this.getStorageKey(), JSON.stringify(progreso));
   }
 
   private updateDesafio(tipo: string, act: (desafio: Desafio, progresoLocal: DesafioProgresoLocal) => void) {

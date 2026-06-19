@@ -74,6 +74,10 @@ export class ExamenSimulacroPage implements OnInit, OnDestroy {
     if (this.timerSubscription) {
       this.timerSubscription.unsubscribe();
     }
+    const mins = this.getElapsedMinutes();
+    if (mins > 0) {
+      this.desafiosService.reportarTiempoExamen(mins);
+    }
   }
 
   // ============================================================

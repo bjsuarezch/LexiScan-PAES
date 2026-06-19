@@ -408,12 +408,12 @@ ion-progress-bar {
 
   span:first-child {
     font-size: 0.85rem;
-    color: var(--ion-color-medium, #64748b);
+    color: #475569 !important;
   }
 
   .correct-answer-key {
     font-size: 0.95rem;
-    color: var(--ion-color-success, #38bdf8);
+    color: #0284c7 !important;
     font-weight: 700;
   }
 }

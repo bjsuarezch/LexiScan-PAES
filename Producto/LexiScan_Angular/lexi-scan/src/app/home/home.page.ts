@@ -36,6 +36,7 @@ export class HomePage implements OnInit, ViewWillEnter {
       this.profile = profile;
       if (profile?.rut) {
         this.loadDashboard(profile.rut);
+        this.checkDailyGoalClaimed();
       }
     });
     this.habilidadesService.dashboard$.subscribe(
@@ -52,7 +53,6 @@ export class HomePage implements OnInit, ViewWillEnter {
     this.desafiosService.desafiosDiarios$.subscribe(desafios => {
       this.desafios = desafios;
     });
-    this.checkDailyGoalClaimed();
   }
 
   ionViewWillEnter() {
@@ -64,8 +64,10 @@ export class HomePage implements OnInit, ViewWillEnter {
   }
 
   private checkDailyGoalClaimed() {
+    if (!this.profile?.rut) return;
+    const rut = this.profile.rut;
     const todayStr = new Date().toDateString();
-    this.dailyGoalClaimed = localStorage.getItem('daily_goal_claimed') === todayStr;
+    this.dailyGoalClaimed = localStorage.getItem(`daily_goal_claimed_${rut}`) === todayStr;
   }
 
   loadDashboard(rut: string): void {
@@ -114,14 +116,16 @@ export class HomePage implements OnInit, ViewWillEnter {
   }
 
   getDailyGoalPct(): number {
+    if (!this.profile?.rut) return 0;
+    const rut = this.profile.rut;
     const todayStr = new Date().toDateString();
-    const savedDate = localStorage.getItem('daily_goal_date');
+    const savedDate = localStorage.getItem(`daily_goal_date_${rut}`);
     if (savedDate !== todayStr) {
-      localStorage.setItem('daily_goal_date', todayStr);
-      localStorage.setItem('daily_goal_count', '0');
+      localStorage.setItem(`daily_goal_date_${rut}`, todayStr);
+      localStorage.setItem(`daily_goal_count_${rut}`, '0');
       return 0;
     }
-    const count = parseInt(localStorage.getItem('daily_goal_count') || '0', 10);
+    const count = parseInt(localStorage.getItem(`daily_goal_count_${rut}`) || '0', 10);
     return Math.min(100, count * 50);
   }
 
@@ -188,9 +192,10 @@ export class HomePage implements OnInit, ViewWillEnter {
   async reclamarMetaDiaria() {
     if (this.dailyGoalClaimed || this.getDailyGoalPct() < 100) return;
     if (!this.profile?.rut) return;
+    const rut = this.profile.rut;
 
     const todayStr = new Date().toDateString();
-    localStorage.setItem('daily_goal_claimed', todayStr);
+    localStorage.setItem(`daily_goal_claimed_${rut}`, todayStr);
     this.dailyGoalClaimed = true;
 
     // Acreditar 50 monedas directamente en la DB

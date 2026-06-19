@@ -13,7 +13,7 @@
     <div class="error-card card-elevated" *ngIf="errorFrecuente">
       <div class="error-header">
         <ion-icon name="flame"></ion-icon>
-        <span>Error frecuente:</span>
+        <span>Habilidad con más errores cometidos:</span>
       </div>
       <p class="error-title">{{ getSkillDisplayName(errorFrecuente.nombre_habilidad) }}</p>
 
@@ -86,6 +86,10 @@
         <ion-icon name="bulb"></ion-icon>
         <p class="coaching-title">Concentrémonos en esto</p>
       </div>
+      <div class="session-counter" *ngIf="erroresTotalesSesion > 0" style="text-align: center; font-weight: bold; margin-bottom: 15px; color: var(--ion-color-medium);">
+        <p style="margin: 0;">Errores resueltos en esta sesión: {{ erroresResueltosSesion }}</p>
+        <p style="margin: 0; font-size: 0.9em;">Errores por resolver: {{ erroresFrecuentes.length }}</p>
+      </div>
 
       <div class="error-info" *ngIf="errorActual">
         <p class="error-label">
@@ -113,7 +117,7 @@
 
       <div class="alternatives-section" *ngIf="errorActual">
         <h4>Selecciona tu respuesta:</h4>
-        <ion-radio-group [(ngModel)]="selectedAnswer" [disabled]="evaluationSubmitted">
+        <ion-radio-group [(ngModel)]="selectedAnswer" [disabled]="isSubmitLocked">
           <ion-item *ngFor="let alt of getAlternativesArray()" lines="none" class="alt-item">
             <ion-label class="ion-text-wrap"><strong>{{ alt.key }}.</strong> {{ alt.value }}</ion-label>
             <ion-radio slot="start" [value]="alt.key"></ion-radio>
@@ -122,18 +126,18 @@
       </div>
 
       <!-- Buttons -->
-      <div class="button-group" *ngIf="errorActual && !evaluationSubmitted">
+      <div class="button-group" *ngIf="errorActual && !showFeedbackBlock">
         <button
           class="btn-chunky-3d btn-chunky-3d-sky"
           (click)="submitErrorAnswer()"
-          [disabled]="!selectedAnswer"
+          [disabled]="!selectedAnswer || isSubmitLocked"
         >
           Verificar Respuesta
         </button>
       </div>
 
       <!-- Results -->
-      <div class="result-section" *ngIf="errorActual && evaluationSubmitted">
+      <div class="result-section" *ngIf="errorActual && showFeedbackBlock">
         <div
           [ngClass]="isCorrect ? 'result-correct' : 'result-incorrect'"
           style="padding: 16px; text-align: center;"
@@ -146,15 +150,11 @@
         </div>
 
         <div class="button-group">
-          <button class="btn-chunky-3d btn-chunky-3d-orange" (click)="resetErrorAnswer()">
-            Intentar de Nuevo
-          </button>
           <button
-            class="btn-chunky-3d btn-chunky-3d-gray"
-            (click)="loadNextError()"
-            *ngIf="erroresFrecuentes.length > 1"
+            class="btn-chunky-3d btn-chunky-3d-sky"
+            (click)="avanzarSiguiente()"
           >
-            Siguiente Error
+            Avanzar al siguiente error
           </button>
         </div>
       </div>

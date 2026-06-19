@@ -40,7 +40,9 @@ export class HabilidadesPage implements OnInit, OnDestroy, ViewWillEnter {
   xpGanada = 0;
   submitting = false;
   isSubmitted = false;
+
   evaluationError: string | null = null;
+  generating: boolean = false;
   textosRestantes: number = 0;
   temaActualId: number | null = null;
   temaActualNombre: string | null = null;
@@ -209,6 +211,8 @@ export class HabilidadesPage implements OnInit, OnDestroy, ViewWillEnter {
 
     if (!this.profile?.rut) return;
 
+    this.generating = true;
+
     this.habilidadesService.generarPreguntas(this.profile.rut, skill, null, false).subscribe({
       next: (data) => {
         this.selectedHabilidad = data;
@@ -216,6 +220,7 @@ export class HabilidadesPage implements OnInit, OnDestroy, ViewWillEnter {
         this.startTimer();
         // --- PROBLEMA 1: Refrescar el contador DESPUÉS de generar preguntas ---
         this.refreshTextosRestantes();
+        this.generating = false;
       },
       error: (error) => {
         console.error('Error al generar preguntas:', error);
@@ -239,8 +244,17 @@ export class HabilidadesPage implements OnInit, OnDestroy, ViewWillEnter {
         } else {
           alert(detail || 'No se pudo generar las preguntas. Inténtalo de nuevo.');
         }
+        this.generating = false;
       },
     });
+  }
+
+  clearSelection() {
+    this.selectedHabilidad = null;
+    this.selectedAnswers = {};
+    this.evaluationResults = [];
+    this.evaluationError = null;
+    this.isSubmitted = false;
   }
 
   get minSecondsRequired(): number {
@@ -286,12 +300,26 @@ export class HabilidadesPage implements OnInit, OnDestroy, ViewWillEnter {
     );
   }
 
+  // --- Feedback Modal State ---
+  oldHabilidades: HabilidadData[] | null = null;
+  showFeedbackModal = false;
+  rendimientoCambio: number | null = null;
+  rendimientoText: string = '';
+  rendimientoColor: string = '';
+
+  closeFeedbackModal() {
+    this.showFeedbackModal = false;
+  }
+
   submitAnswers(): void {
     if (this.isSubmitted || this.isSubmitLocked) return;
 
     if (!this.selectedHabilidad || !this.profile?.rut) {
       return;
     }
+
+    // Guardar estado previo para la animación de feedback
+    this.oldHabilidades = JSON.parse(JSON.stringify(this.habilidades));
 
     this.stopTimer();
     this.submitting = true;
@@ -323,38 +351,33 @@ export class HabilidadesPage implements OnInit, OnDestroy, ViewWillEnter {
         this.submitting = false;
         this.isSubmitted = true;
 
-        // Refrescar habilidades y contador silenciosamente tras entregar respuestas
         if (this.profile?.rut) {
-          this.loadHabilidades(this.profile.rut);
+          const rut = this.profile.rut;
+          this.loadHabilidades(rut);
+
+          const todayStr = new Date().toDateString();
+          const savedDate = localStorage.getItem(`daily_goal_date_${rut}`);
+          let count = 0;
+          if (savedDate === todayStr) {
+            count = parseInt(localStorage.getItem(`daily_goal_count_${rut}`) || '0', 10);
+          } else {
+            localStorage.setItem(`daily_goal_date_${rut}`, todayStr);
+          }
+          localStorage.setItem(`daily_goal_count_${rut}`, (count + 1).toString());
         }
 
-        // Increment daily goal count
-        const todayStr = new Date().toDateString();
-        const savedDate = localStorage.getItem('daily_goal_date');
-        let count = 0;
-        if (savedDate === todayStr) {
-          count = parseInt(localStorage.getItem('daily_goal_count') || '0', 10);
-        } else {
-          localStorage.setItem('daily_goal_date', todayStr);
-        }
-        localStorage.setItem('daily_goal_count', (count + 1).toString());
-
-        // --- Alerta de Rendimiento ---
+        // --- Alerta de Rendimiento Personalizada (Modal) ---
         if (result.rendimiento_cambio !== undefined) {
            const cambio = result.rendimiento_cambio;
+           this.rendimientoCambio = cambio;
            const isPositive = cambio > 0;
            const isNegative = cambio < 0;
            const prefix = isPositive ? 'Subió' : isNegative ? 'Bajó' : 'Se mantuvo';
            const symbol = isPositive ? '+' : '';
-           // We use css styles directly or ion-text-color classes if they exist, but standard CSS works in message.
-           const colorHtml = isPositive ? 'color: var(--ion-color-success);' : isNegative ? 'color: var(--ion-color-danger);' : 'color: var(--ion-color-medium);';
+           this.rendimientoText = `${prefix} ${symbol}${cambio.toFixed(2)}%`;
+           this.rendimientoColor = isPositive ? 'var(--ion-color-success)' : isNegative ? 'var(--ion-color-danger)' : 'var(--ion-color-medium)';
            
-           this.alertController.create({
-             header: 'Rendimiento de Habilidad',
-             subHeader: 'Resultados de tu práctica',
-             message: new IonicSafeString(`Tu rendimiento en la habilidad ${this.selectedHabilidad?.tipo_habilidad} <strong style="${colorHtml}">${prefix} ${symbol}${cambio.toFixed(2)}%</strong>.`),
-             buttons: ['Entendido']
-           }).then(alert => alert.present());
+           this.showFeedbackModal = true;
         }
 
         // --- Desafios Report ---
@@ -440,6 +463,23 @@ export class HabilidadesPage implements OnInit, OnDestroy, ViewWillEnter {
       return texto;
     }
     return [];
+  }
+
+  getBarWidth(datoValor: number, block: any): number {
+    if (!block || !block.datos || block.datos.length === 0) return 0;
+    // Extract numeric values, handling strings if necessary
+    const vals = block.datos.map((d: any) => {
+      const v = Number(d.valor);
+      return isNaN(v) ? 0 : v;
+    });
+    const maxVal = Math.max(...vals);
+    if (maxVal === 0) return 0;
+    
+    // Si el valor numérico es válido, calcular porcentaje respecto al máximo.
+    const currentVal = Number(datoValor);
+    if (isNaN(currentVal)) return 0;
+    
+    return (currentVal / maxVal) * 100;
   }
 
   async handleGroqError() {

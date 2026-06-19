@@ -153,6 +153,13 @@ export class HabilidadesService {
     );
   }
 
+  fallarError(errorId: number): Observable<any> {
+    return this.http.put<any>(
+      `${this.baseUrl}/errores-frecuentes/${errorId}/fallar`,
+      {},
+    );
+  }
+
   getConfiguracion(): Observable<ConfiguracionItem[]> {
     return this.http.get<ConfiguracionItem[]>(`${this.baseUrl}/configuracion`);
   }

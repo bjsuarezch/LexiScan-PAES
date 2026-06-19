@@ -438,3 +438,53 @@ ion-content {
   width: 100%;
   margin-top: 12px;
 }
+
+// ============================================================
+// FEEDBACK MODAL
+// ============================================================
+.feedback-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.feedback-modal-overlay.overlay-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+.feedback-modal-content {
+  background: var(--ion-background-color, #ffffff);
+  width: 100%;
+  max-width: 400px;
+  border-radius: 24px;
+  padding: 24px;
+  text-align: center;
+  transform: translateY(20px);
+  animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+
+  h2 { margin-top: 0; font-size: 1.5rem; color: var(--ion-text-color, #1e293b); }
+  p { color: var(--ion-text-color, #475569); }
+}
+.feedback-chart {
+  margin: 20px 0;
+  padding: 10px;
+  background: var(--ion-surface, #ffffff);
+  border: 1px solid var(--ion-border-color, #e2e8f0);
+}
+.feedback-rendimiento {
+  margin-bottom: 20px;
+  h3 { font-size: 1.8rem; margin: 0; }
+}
+@keyframes slideUp {
+  to { transform: translateY(0); }
+}

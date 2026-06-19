@@ -25,6 +25,12 @@ export class GymPage implements OnInit {
   feedback = '';
   trainingStarted = false;
 
+  erroresTotalesSesion = 0;
+  erroresResueltosSesion = 0;
+  showFeedbackBlock = false;
+  isSubmitLocked = false;
+
+
   constructor(
     private router: Router,
     private habilidadesService: HabilidadesService,
@@ -74,10 +80,11 @@ export class GymPage implements OnInit {
     this.habilidadesService.getErroresFrecuentes(rut).subscribe({
       next: (errores) => {
         this.erroresFrecuentes = errores;
+        this.erroresTotalesSesion = errores.length;
+        this.erroresResueltosSesion = 0;
         if (errores.length > 0) {
           this.errorActual = errores[0];
-          this.selectedAnswer = '';
-          this.evaluationSubmitted = false;
+          this.resetErrorState();
         }
       },
       error: (error) => {
@@ -95,73 +102,76 @@ export class GymPage implements OnInit {
   }
 
   submitErrorAnswer(): void {
-    if (!this.selectedAnswer || !this.errorActual) return;
+    if (!this.selectedAnswer || !this.errorActual || this.isSubmitLocked) return;
 
     this.evaluationSubmitted = true;
+    this.isSubmitLocked = true;
     this.isCorrect =
       this.selectedAnswer === this.errorActual.pregunta.respuesta_correcta;
 
     if (this.isCorrect) {
       this.feedback = '¡Excelente! ¡Resolviste este error! 🎉';
-      // Resolve the error
+      this.showFeedbackBlock = true;
+      this.erroresResueltosSesion++;
+
       this.habilidadesService
         .resolveError(this.errorActual.id_error)
         .subscribe({
           next: () => {
-            // Increment daily goal count
-            const todayStr = new Date().toDateString();
-            const savedDate = localStorage.getItem('daily_goal_date');
-            let count = 0;
-            if (savedDate === todayStr) {
-              count = parseInt(localStorage.getItem('daily_goal_count') || '0', 10);
-            } else {
-              localStorage.setItem('daily_goal_date', todayStr);
+            if (this.profile?.rut) {
+              const rut = this.profile.rut;
+              const todayStr = new Date().toDateString();
+              const savedDate = localStorage.getItem(`daily_goal_date_${rut}`);
+              let count = 0;
+              if (savedDate === todayStr) {
+                count = parseInt(localStorage.getItem(`daily_goal_count_${rut}`) || '0', 10);
+              } else {
+                localStorage.setItem(`daily_goal_date_${rut}`, todayStr);
+              }
+              localStorage.setItem(`daily_goal_count_${rut}`, (count + 1).toString());
             }
-            localStorage.setItem('daily_goal_count', (count + 1).toString());
-
-            // Remove from list
-            this.erroresFrecuentes = this.erroresFrecuentes.filter(
-              (e) => e.id_error !== this.errorActual.id_error,
-            );
-            // Set next or null
-            if (this.erroresFrecuentes.length > 0) {
-              this.errorActual = this.erroresFrecuentes[0];
-            } else {
-              this.errorActual = null;
-              // --- Desafios Report ---
-              this.desafiosService.reportarGymSinErrores();
-              // -----------------------
-            }
-            this.selectedAnswer = '';
-            this.evaluationSubmitted = false;
-            this.feedback = '';
           },
           error: (err) => {
             console.error('Error resolving error:', err);
-            // Still show feedback but don't update
           },
         });
     } else {
       this.feedback = `Respuesta incorrecta. La respuesta correcta es: ${this.errorActual.pregunta.respuesta_correcta}. ${this.errorActual.pregunta.justificacion_cot}`;
+      this.showFeedbackBlock = true;
+
+      this.habilidadesService.fallarError(this.errorActual.id_error).subscribe({
+          next: () => console.log('Error fallado registrado'),
+          error: (err) => console.error('Error fallando error:', err)
+      });
     }
   }
 
-  loadNextError(): void {
-    if (!this.errorActual || this.erroresFrecuentes.length <= 1) return;
+  avanzarSiguiente(): void {
+    if (this.isCorrect) {
+      this.erroresFrecuentes = this.erroresFrecuentes.filter(
+        (e) => e.id_error !== this.errorActual.id_error,
+      );
+    } else {
+      this.erroresFrecuentes = this.erroresFrecuentes.filter(
+        (e) => e.id_error !== this.errorActual.id_error,
+      );
+      this.erroresFrecuentes.push(this.errorActual);
+    }
 
-    const currentIndex = this.erroresFrecuentes.findIndex(
-      (e) => e.id_error === this.errorActual.id_error,
-    );
-    const nextIndex = (currentIndex + 1) % this.erroresFrecuentes.length;
-    this.errorActual = this.erroresFrecuentes[nextIndex];
-    this.selectedAnswer = '';
-    this.evaluationSubmitted = false;
-    this.feedback = '';
+    if (this.erroresFrecuentes.length > 0) {
+      this.errorActual = this.erroresFrecuentes[0];
+    } else {
+      this.errorActual = null;
+      this.desafiosService.reportarGymSinErrores();
+    }
+    this.resetErrorState();
   }
 
-  resetErrorAnswer(): void {
+  resetErrorState(): void {
     this.selectedAnswer = '';
     this.evaluationSubmitted = false;
+    this.isSubmitLocked = false;
+    this.showFeedbackBlock = false;
     this.feedback = '';
   }
 

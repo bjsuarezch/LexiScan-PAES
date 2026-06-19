@@ -35,9 +35,9 @@ export class StatsPage implements OnInit {
       if (profile?.rut) {
         this.loadDashboard(profile.rut);
         this.loadErroresFrecuentes(profile.rut);
+        this.loadTrendHistory(profile.rut);
       }
     });
-    this.loadTrendHistory();
   }
 
   loadDashboard(rut: string): void {
@@ -46,7 +46,7 @@ export class StatsPage implements OnInit {
       next: (dashboard) => {
         this.dashboard = dashboard;
         this.loading = false;
-        this.saveCurrentScoreToHistory();
+        this.saveCurrentScoreToHistory(rut);
       },
       error: () => { this.loading = false; },
     });
@@ -62,15 +62,15 @@ export class StatsPage implements OnInit {
   // ============================================================
   // TREND HISTORY (localStorage)
   // ============================================================
-  private loadTrendHistory(): void {
-    const raw = localStorage.getItem('lexiscan_score_history');
+  private loadTrendHistory(rut: string): void {
+    const raw = localStorage.getItem(`lexiscan_score_history_${rut}`);
     if (raw) {
       try { this.trendHistory = JSON.parse(raw); }
       catch { this.trendHistory = []; }
     }
   }
 
-  private saveCurrentScoreToHistory(): void {
+  private saveCurrentScoreToHistory(rut: string): void {
     if (!this.dashboard) return;
     const score = this.getEstimatedPAES();
     const today = new Date().toISOString().slice(0, 10);
@@ -83,7 +83,7 @@ export class StatsPage implements OnInit {
     if (this.trendHistory.length > 20) {
       this.trendHistory = this.trendHistory.slice(-20);
     }
-    localStorage.setItem('lexiscan_score_history', JSON.stringify(this.trendHistory));
+    localStorage.setItem(`lexiscan_score_history_${rut}`, JSON.stringify(this.trendHistory));
   }
 
   // ============================================================

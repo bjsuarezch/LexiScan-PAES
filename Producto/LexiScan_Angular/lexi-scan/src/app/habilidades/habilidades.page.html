@@ -35,28 +35,43 @@
 
 <ion-content [fullscreen]="true" class="ion-padding module-gradient-bg">
   <div class="habilidades-container">
-    <h2>Elige una habilidad:</h2>
+    <ng-container *ngIf="!selectedHabilidad && !generating">
+      <h2>Elige una habilidad:</h2>
 
-    <div class="habilidades-grid">
-      <button
-        *ngFor="let habilidad of habilidades"
-        class="btn-chunky-3d habilidad-btn"
-        [ngClass]="getClass(habilidad.nivel_maestria)"
-        (click)="selectSkill(habilidad.nombre_habilidad)"
-      >
-        <div class="habilidad-btn-content">
-          <span class="habilidad-name">{{ getSkillDisplayName(habilidad.nombre_habilidad) }}</span>
-          <span class="habilidad-pct">{{ habilidad.nivel_maestria }}%</span>
-        </div>
-      </button>
-    </div>
+      <div class="habilidades-grid">
+        <button
+          *ngFor="let habilidad of habilidades"
+          class="btn-chunky-3d habilidad-btn"
+          [ngClass]="getClass(habilidad.nivel_maestria)"
+          (click)="selectSkill(habilidad.nombre_habilidad)"
+        >
+          <div class="habilidad-btn-content">
+            <span class="habilidad-name">{{ getSkillDisplayName(habilidad.nombre_habilidad) }}</span>
+            <span class="habilidad-pct">{{ habilidad.nivel_maestria }}%</span>
+          </div>
+        </button>
+      </div>
 
-    <!-- Radar Chart Card -->
-    <div class="chart-card card-elevated">
-      <app-radar-chart [habilidades]="habilidades"></app-radar-chart>
+      <!-- Radar Chart Card -->
+      <div class="chart-card card-elevated">
+        <app-radar-chart [habilidades]="habilidades"></app-radar-chart>
+      </div>
+    </ng-container>
+
+    <!-- Loading State -->
+    <div class="loading-state" *ngIf="generating" style="text-align: center; margin-top: 40px; padding: 40px;">
+      <ion-spinner name="crescent" color="primary" style="width: 50px; height: 50px;"></ion-spinner>
+      <p style="font-family: 'Fredoka', sans-serif; color: var(--ion-color-medium, #64748b); font-size: 1.1rem; margin-top: 20px;">
+        Generando texto y preguntas con IA...
+      </p>
     </div>
 
     <div class="habilidad-detail" *ngIf="selectedHabilidad">
+      <ion-button fill="clear" color="medium" (click)="clearSelection()" style="margin-bottom: 12px; --padding-start: 0; font-family: 'Fredoka', sans-serif;">
+        <ion-icon name="arrow-back" slot="start"></ion-icon>
+        Volver a habilidades
+      </ion-button>
+      
       <h3>{{ getSkillDisplayName(selectedHabilidad.tipo_habilidad) }}</h3>
 
       <div class="rich-text-container">
@@ -80,7 +95,7 @@
               <div class="bar-item" *ngFor="let dato of block.datos">
                 <span class="bar-label">{{ dato.etiqueta }}</span>
                 <div class="bar-track">
-                  <div class="bar-fill" [style.width.%]="dato.valor"></div>
+                  <div class="bar-fill" [style.width.%]="getBarWidth(dato.valor, block)"></div>
                 </div>
                 <span class="bar-value">{{ dato.valor }}</span>
               </div>
@@ -147,6 +162,31 @@
       </div>
     </div>
   </div>
+
+  <!-- Feedback Modal -->
+  <div class="feedback-modal-overlay" *ngIf="showFeedbackModal" [class.overlay-visible]="showFeedbackModal">
+    <div class="feedback-modal-content card-elevated">
+      <h2 class="font-heading">Resultados de tu práctica</h2>
+      <p class="font-body">Habilidad: <strong>{{ getSkillDisplayName(selectedHabilidad?.tipo_habilidad || '') }}</strong></p>
+      
+      <div class="chart-card card-elevated feedback-chart">
+        <app-radar-chart 
+          [habilidades]="habilidades" 
+          [oldHabilidades]="oldHabilidades" 
+          [animateFeedback]="true">
+        </app-radar-chart>
+      </div>
+
+      <div class="feedback-rendimiento">
+        <h3 class="font-heading" [style.color]="rendimientoColor">{{ rendimientoText }}</h3>
+      </div>
+
+      <button class="btn-chunky-3d btn-chunky-3d-indigo btn-full" (click)="closeFeedbackModal()">
+        Entendido
+      </button>
+    </div>
+  </div>
+
 </ion-content>
 
 <ion-footer class="ion-no-border">

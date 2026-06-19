@@ -1,4 +1,4 @@
-<div class="radar-container">
+<div class="radar-container" (mouseenter)="playAnimation()">
   <svg viewBox="0 0 250 210" class="radar-chart">
     <!-- 1. Hexágonos de fondo (Niveles de profundidad) -->
     <polygon
@@ -30,14 +30,35 @@
       <line x1="125" y1="100" x2="70" y2="70" />
     </g>
 
-    <!-- 3. Regiones de color dinámicas -->
+    <!-- 3. Ghost regions (Estado anterior delineado) -->
+    <ng-container *ngIf="oldHabilidades && oldHabilidades.length > 0">
+      <polygon
+        [attr.points]="getOldRadarPolygon()"
+        fill="none"
+        stroke="#64748b"
+        stroke-width="2"
+        stroke-dasharray="4,4"
+      />
+      <circle
+        *ngFor="let p of getOldRadarPointsArray()"
+        [attr.cx]="p.x"
+        [attr.cy]="p.y"
+        r="4"
+        fill="#ffffff"
+        stroke="#64748b"
+        stroke-width="1.5"
+      />
+    </ng-container>
+
+    <!-- 4. Regiones de color dinámicas -->
     <path
       *ngFor="let reg of regiones; let i = index"
       [attr.d]="getRegionPath(i)"
       [attr.fill]="reg.color"
+      class="animated-path"
     />
 
-    <!-- 4. Círculos de progreso (morados) -->
+    <!-- 5. Círculos de progreso (morados) -->
     <circle
       *ngFor="let p of getRadarPointsArray()"
       [attr.cx]="p.x"
@@ -46,6 +67,7 @@
       fill="#6366f1"
       stroke="white"
       stroke-width="1.5"
+      class="animated-circle"
     />
 
     <!-- 5. Círculos blancos fijos -->

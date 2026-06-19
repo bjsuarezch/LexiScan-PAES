@@ -69,6 +69,35 @@ export class ExamenResultadosPage implements OnInit {
     return points.join(' ');
   }
 
+  getRadarPointsArray(): { x: number; y: number }[] {
+    if (!this.examResult?.rendimiento_habilidades) return [];
+
+    const center = { x: 100, y: 100 };
+    const vertices: { [key: string]: { x: number; y: number } } = {
+      Interpretar:     { x: 100, y: 30 },
+      Vocabulario:     { x: 150, y: 55 },
+      Tipos_de_Texto:  { x: 150, y: 130 },
+      Localizar:       { x: 100, y: 170 },
+      Lectura_Critica: { x: 50,  y: 130 },
+      Evaluar:         { x: 50,  y: 55 },
+    };
+
+    const order = ['Interpretar','Vocabulario','Tipos_de_Texto','Localizar','Lectura_Critica','Evaluar'];
+    const points: { x: number; y: number }[] = [];
+
+    for (const skill of order) {
+      const vertex = vertices[skill];
+      const hab = this.examResult.rendimiento_habilidades.find(
+        (h: any) => h.nombre_habilidad === skill,
+      );
+      const percent = hab ? hab.porcentaje / 100 : 0;
+      const x = center.x + (vertex.x - center.x) * percent;
+      const y = center.y + (vertex.y - center.y) * percent;
+      points.push({ x, y });
+    }
+    return points;
+  }
+
   // ============================================================
   // SAVE RESULTS — con popup de cambios por habilidad
   // ============================================================
@@ -237,6 +266,16 @@ export class ExamenResultadosPage implements OnInit {
       if (y + neededH > pageH - marginB) { doc.addPage(); y = marginT; }
     };
 
+    const sanitizeText = (str: string) => {
+      if (!str) return '';
+      // Remove soft hyphens (\u00AD) and other zero-width characters completely
+      let clean = str.replace(/[\u00AD\u200B-\u200D\uFEFF]/g, '');
+      // Replace non-breaking spaces (\u00A0) with normal spaces
+      clean = clean.replace(/\u00A0/g, ' ');
+      // Normalize multiple spaces
+      return clean.replace(/\s+/g, ' ').trim();
+    };
+
     const addWrappedText = (
       text: string, x: number, fontSize: number,
       fontStyle: 'normal' | 'bold',
@@ -246,7 +285,7 @@ export class ExamenResultadosPage implements OnInit {
       doc.setFontSize(fontSize);
       doc.setFont('helvetica', fontStyle);
       doc.setTextColor(...color);
-      const lines: string[] = doc.splitTextToSize(text, usableW);
+      const lines: string[] = doc.splitTextToSize(sanitizeText(text), usableW);
       const lineH = fontSize * 0.3528 * lineSpacing;
       lines.forEach((line: string) => {
         checkNewPage(lineH);
@@ -271,7 +310,7 @@ export class ExamenResultadosPage implements OnInit {
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(100, 100, 100);
-    doc.text(`Estudiante: ${nombre}  |  Fecha: ${new Date().toLocaleDateString('es-CL')}`, marginL, y);
+    doc.text(`Estudiante: ${sanitizeText(nombre)}  |  Fecha: ${new Date().toLocaleDateString('es-CL')}`, marginL, y);
     y += 4;
     doc.text(`Puntaje: ${this.examResult.total_correctas}/${this.examResult.total_preguntas}  (${this.examResult.porcentaje}%)`, marginL, y);
     y += 5;
@@ -325,7 +364,7 @@ export class ExamenResultadosPage implements OnInit {
         doc.setFontSize(10.5);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(30, 30, 30);
-        const enunciadoLines: string[] = doc.splitTextToSize(pregunta.enunciado, usableW - 10);
+        const enunciadoLines: string[] = doc.splitTextToSize(sanitizeText(pregunta.enunciado), usableW - 10);
         enunciadoLines.forEach((line: string, li: number) => {
           doc.text(line, marginL + 9, y);
           y += li === 0 ? 5 : 4.8;
@@ -346,7 +385,7 @@ export class ExamenResultadosPage implements OnInit {
           doc.setFontSize(10);
           doc.setFont('helvetica', 'normal');
           doc.setTextColor(50, 50, 50);
-          const altLines: string[] = doc.splitTextToSize(alt.value, usableW - 20);
+          const altLines: string[] = doc.splitTextToSize(sanitizeText(alt.value), usableW - 20);
           altLines.forEach((line: string) => {
             checkNewPage(5);
             doc.text(line, marginL + 16, y);
@@ -380,7 +419,7 @@ export class ExamenResultadosPage implements OnInit {
 
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Nombre: ${nombre}`, marginL, y); y += 6;
+    doc.text(`Nombre: ${sanitizeText(nombre)}`, marginL, y); y += 6;
     doc.text(`RUT: ${this.profile?.rut || 'No disponible'}`, marginL, y); y += 6;
     doc.text(`Fecha: ${new Date().toLocaleDateString('es-CL')}`, marginL, y); y += 10;
 
@@ -408,10 +447,104 @@ export class ExamenResultadosPage implements OnInit {
         headStyles: { fillColor: [99, 102, 241] },
         styles: { font: 'helvetica', fontSize: 10 }
       });
+      
+      y = (doc as any).lastAutoTable.finalY + 15;
+      
+      // -- GRÁFICO DE BARRAS DE RENDIMIENTO --
+      checkNewPage(80); // Ensure space for the chart
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(30, 30, 30);
+      doc.text('Gráfico de Rendimiento por Habilidad', marginL, y);
+      y += 10;
+      
+      const maxBarW = usableW - 55;
+      this.examResult.rendimiento_habilidades.forEach((hab: any) => {
+         const label = this.getSkillDisplayName(hab.nombre_habilidad);
+         const pct = hab.porcentaje;
+         doc.setFontSize(9);
+         doc.setFont('helvetica', 'normal');
+         doc.setTextColor(50, 50, 50);
+         doc.text(label, marginL, y + 4);
+         
+         // background bar
+         doc.setFillColor(235, 235, 235);
+         doc.rect(marginL + 45, y, maxBarW, 6, 'F');
+         
+         // filled bar
+         doc.setFillColor(99, 102, 241);
+         doc.rect(marginL + 45, y, (pct / 100) * maxBarW, 6, 'F');
+         
+         // text pct
+         doc.setFontSize(8);
+         doc.setFont('helvetica', 'bold');
+         doc.text(`${pct}%`, marginL + 45 + ((pct / 100) * maxBarW) + 2, y + 4.5);
+         
+         y += 10;
+      });
     }
+
+    // ── PARTE 3: Advertencia de Solucionario ─────────────────────────────────
+    doc.addPage();
+    doc.setFillColor(239, 68, 68); // Tailwind red-500
+    doc.rect(0, 0, pageW, pageH, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(32);
+    doc.setFont('helvetica', 'bold');
+    doc.text('¡ALTO AHÍ!', pageW / 2, pageH / 2 - 20, { align: 'center' });
+    
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'normal');
+    const warningText = 'Las siguientes páginas contienen las respuestas correctas y sus justificaciones.\n\nPor favor, procede solo si ya has intentado resolver el examen por tu propia cuenta.';
+    const warningLines = doc.splitTextToSize(warningText, usableW - 20);
+    doc.text(warningLines, pageW / 2, pageH / 2 + 10, { align: 'center' });
+
+    // ── PARTE 4: Solucionario y Justificaciones ──────────────────────────────
+    doc.addPage();
+    y = marginT;
+    doc.setFillColor(34, 197, 94); // Tailwind green-500
+    doc.rect(0, 0, pageW, 14, 'F');
+    doc.setFontSize(13);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(255, 255, 255);
+    doc.text('Solucionario y Justificaciones', marginL, 9.5);
+    y = 25;
+
+    grouped.forEach((grupo, grupoIdx) => {
+      checkNewPage(15);
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(30, 30, 30);
+      doc.text(`Lectura Contextual ${grupoIdx + 1}`, marginL, y);
+      y += 8;
+
+      grupo.preguntas.forEach((pregunta: any) => {
+         checkNewPage(40);
+         doc.setFontSize(10);
+         doc.setFont('helvetica', 'bold');
+         doc.setTextColor(99, 102, 241);
+         doc.text(`Pregunta ${pregunta.globalIndex}`, marginL, y);
+         y += 6;
+         
+         const correctKey = pregunta.respuesta_correcta;
+         const alts = this.getAlternativesArray(pregunta.alternativas);
+         const correctAlt = alts.find(a => a.key === correctKey);
+         
+         addWrappedText(`Respuesta Correcta: ${correctKey} - ${correctAlt ? correctAlt.value : ''}`, marginL, 9.5, 'bold', [21, 128, 61]);
+         y += 3;
+         
+         addWrappedText(`Justificación:`, marginL, 9, 'bold', [50, 50, 50]);
+         y += 1.5;
+         const justificacion = pregunta.justificacion_cot || pregunta.justificacion || 'No se proporcionó justificación detallada para esta pregunta.';
+         addWrappedText(justificacion, marginL, 9, 'normal', [80, 80, 80], 1.4);
+         y += 8;
+      });
+      y += 5;
+    });
 
     // ── Paginación ───────────────────────────────────────────────────────────
     const totalPages = (doc.internal as any).getNumberOfPages();
+    // Start pagination ignoring the warning page, or just paginate all pages
     for (let p = 1; p <= totalPages; p++) {
       doc.setPage(p);
       doc.setFontSize(8);
