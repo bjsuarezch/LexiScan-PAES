@@ -1,3 +1,14 @@
 <ion-app>
+  <!-- Global Backend Health Banner -->
+  <div class="backend-down-banner" *ngIf="backendIsDown">
+    <div class="banner-content">
+      <ion-icon name="warning"></ion-icon>
+      <div class="banner-text">
+        <strong>Conexión perdida</strong>
+        <span>El servidor backend no está respondiendo. Verifica que esté corriendo en el puerto 8000.</span>
+      </div>
+    </div>
+  </div>
+  
   <ion-router-outlet></ion-router-outlet>
 </ion-app>

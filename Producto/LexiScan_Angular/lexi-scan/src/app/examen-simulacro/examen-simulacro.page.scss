@@ -302,7 +302,8 @@ ion-progress-bar {
   transform: translateY(100%);
   transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   max-height: 60vh;
-  overflow-y: auto;
+  // El overflow va en el contenido interior para preservar el border-radius superior
+  overflow: hidden;
 }
 
 .feedback-open {
@@ -310,15 +311,17 @@ ion-progress-bar {
 }
 
 .feedback-correct {
-  background: linear-gradient(180deg, rgba(56, 189, 248, 0.15) 0%, var(--ion-background-color, #ffffff) 100%);
-  border-top: 4px solid var(--ion-color-success, #38bdf8);
-  box-shadow: 0 -6px 30px rgba(56, 189, 248, 0.2);
+  // Fondo completamente opaco — elimina el traspaso del contenido subyacente
+  background: #edfafe;
+  border-top: 4px solid #0ea5e9;
+  box-shadow: 0 -8px 40px rgba(14, 165, 233, 0.25);
 }
 
 .feedback-incorrect {
-  background: linear-gradient(180deg, rgba(248, 113, 113, 0.15) 0%, var(--ion-background-color, #ffffff) 100%);
-  border-top: 4px solid var(--ion-color-danger, #f87171);
-  box-shadow: 0 -6px 30px rgba(248, 113, 113, 0.2);
+  // Fondo completamente opaco — elimina el traspaso del contenido subyacente
+  background: #fff1f1;
+  border-top: 4px solid #ef4444;
+  box-shadow: 0 -8px 40px rgba(239, 68, 68, 0.25);
 }
 
 .feedback-drawer-content {
@@ -326,6 +329,9 @@ ion-progress-bar {
   padding-bottom: calc(28px + env(safe-area-inset-bottom, 0));
   max-width: 600px;
   margin: 0 auto;
+  // El scroll va aquí para que el border-radius del drawer no se vea afectado
+  overflow-y: auto;
+  max-height: 60vh;
 }
 
 .feedback-header {
@@ -350,18 +356,18 @@ ion-progress-bar {
 }
 
 .feedback-correct .feedback-icon-wrap {
-  background: rgba(56, 189, 248, 0.2);
+  background: rgba(14, 165, 233, 0.15);
 
   ion-icon {
-    color: var(--ion-color-success, #38bdf8);
+    color: #0369a1;
   }
 }
 
 .feedback-incorrect .feedback-icon-wrap {
-  background: rgba(248, 113, 113, 0.2);
+  background: rgba(239, 68, 68, 0.15);
 
   ion-icon {
-    color: var(--ion-color-danger, #f87171);
+    color: #b91c1c;
   }
 }
 
@@ -381,13 +387,13 @@ ion-progress-bar {
 }
 
 .feedback-correct .feedback-title {
-  h2 { color: var(--ion-color-success, #38bdf8); }
-  p { color: rgba(56, 189, 248, 0.8); }
+  h2 { color: #0369a1; }
+  p { color: #0ea5e9; }
 }
 
 .feedback-incorrect .feedback-title {
-  h2 { color: var(--ion-color-danger, #f87171); }
-  p { color: rgba(248, 113, 113, 0.8); }
+  h2 { color: #b91c1c; }
+  p { color: #ef4444; }
 }
 
 // --- Correct Answer Reveal ---

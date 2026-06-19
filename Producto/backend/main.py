@@ -100,6 +100,11 @@ current_config = {
     "modelo": "llama-3.1-70b-versatile"
 }
 
+@app.get("/health")
+def health_check():
+    """Endpoint liviano para verificar que el backend está en línea. No accede a la BD."""
+    return {"status": "ok", "version": "0.1.0"}
+
 @app.post("/configurar-ia")
 def configurar_ia(config: ConfigAPI, db: Session = Depends(get_db)):
     if not config.api_key.startswith("gsk_"):

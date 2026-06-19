@@ -57,6 +57,10 @@ export class HabilidadesService {
     this.saldoMonedasSubject.next(nuevoSaldo);
   }
 
+  checkBackendHealth(): Observable<{status: string, version: string}> {
+    return this.http.get<{status: string, version: string}>(`${this.baseUrl}/health`);
+  }
+
   getHabilidadDetail(
     rut: string,
     habilidad: string,
