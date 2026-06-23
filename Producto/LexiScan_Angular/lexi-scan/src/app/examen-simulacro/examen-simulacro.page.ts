@@ -123,6 +123,28 @@ export class ExamenSimulacroPage implements OnInit, OnDestroy {
     return (grupo.textoPlano as string).split('\n\n').filter((p: string) => p.trim());
   }
 
+  /** Devuelve los bloques raw del texto del grupo actual (parrafo, dato_clave, imagen, grafico_barra). */
+  getTextoBlocks(): Array<{ tipo: string; contenido?: string; titulo?: string; url?: string; fuente?: string; datos?: any }> {
+    const grupo = this.getCurrentGrupo();
+    if (!grupo?.textoRaw) return [];
+    let raw = grupo.textoRaw;
+    if (typeof raw === 'string') {
+      try { raw = JSON.parse(raw); } catch { return [{ tipo: 'parrafo', contenido: raw }]; }
+    }
+    if (!Array.isArray(raw)) return [{ tipo: 'parrafo', contenido: String(raw) }];
+    return raw.filter((b: any) => ['parrafo', 'dato_clave', 'imagen', 'grafico_barra'].includes(b.tipo));
+  }
+
+  /** Parsea datos de grafico_barra desde el bloque (viene como JSON string o array). */
+  parseGraficoDatos(datos: any): Array<{ etiqueta: string; valor: number }> {
+    if (!datos) return [];
+    if (typeof datos === 'string') {
+      try { datos = JSON.parse(datos); } catch { return []; }
+    }
+    if (Array.isArray(datos)) return datos;
+    return [];
+  }
+
   organizeQuestions() {
     const groups: { [key: string]: any } = {};
     let globalCounter = 1;

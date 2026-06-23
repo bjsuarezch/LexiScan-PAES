@@ -328,7 +328,7 @@ ion-content {
   }
 
   .radar-label {
-    fill: #334155;
+    fill: var(--ion-text-color, #334155);
     font-size: 8px;
     font-family: 'Nunito', sans-serif;
     font-weight: 700;

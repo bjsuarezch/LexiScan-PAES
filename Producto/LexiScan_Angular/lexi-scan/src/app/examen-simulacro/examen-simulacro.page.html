@@ -35,7 +35,47 @@
         <span class="font-heading">Lectura Contextual</span>
       </div>
       <div class="text-context-body font-body">
-        <p *ngFor="let parrafo of getParrafosGrupoActual()" class="text-parrafo">{{ parrafo }}</p>
+        <!-- Renderizado enriquecido por tipo de bloque -->
+        <ng-container *ngFor="let block of getTextoBlocks()">
+          <!-- Parrafo -->
+          <p *ngIf="block.tipo === 'parrafo'" class="text-parrafo">{{ block.contenido }}</p>
+
+          <!-- Dato Clave -->
+          <div *ngIf="block.tipo === 'dato_clave'" class="dato-clave">
+            <div class="dato-clave-icon">
+              <ion-icon name="bulb-outline"></ion-icon>
+            </div>
+            <div class="dato-clave-body">
+              <span class="dato-clave-label" *ngIf="block.titulo">{{ block.titulo }}</span>
+              <p class="dato-clave-texto">{{ block.contenido }}</p>
+            </div>
+          </div>
+
+          <!-- Imagen -->
+          <div *ngIf="block.tipo === 'imagen'" class="imagen-block">
+            <img [src]="block.url" [alt]="block.titulo || 'Imagen contextual'" />
+            <span class="imagen-fuente" *ngIf="block.fuente">{{ block.fuente }}</span>
+          </div>
+
+          <!-- Grafico de Barras -->
+          <div *ngIf="block.tipo === 'grafico_barra'" class="grafico-barra-block">
+            <span class="grafico-titulo" *ngIf="block.titulo">{{ block.titulo }}</span>
+            <div class="barra-chart">
+              <div *ngFor="let item of parseGraficoDatos(block.datos)" class="barra-item">
+                <span class="barra-label">{{ item.etiqueta }}</span>
+                <div class="barra-track">
+                  <div class="barra-fill" [style.width.%]="item.valor"></div>
+                </div>
+                <span class="barra-value">{{ item.valor }}%</span>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- Fallback: parrafos simples si no hay bloques -->
+        <ng-container *ngIf="getTextoBlocks().length === 0">
+          <p *ngFor="let parrafo of getParrafosGrupoActual()" class="text-parrafo">{{ parrafo }}</p>
+        </ng-container>
       </div>
     </div>
 

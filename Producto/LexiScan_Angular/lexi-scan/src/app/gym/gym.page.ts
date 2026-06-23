@@ -186,43 +186,6 @@ export class GymPage implements OnInit {
       .sort((a, b) => a.key.localeCompare(b.key));
   }
 
-  getRadarPoints(): string {
-    if (!this.dashboard?.habilidades) return '';
-
-    const center = { x: 100, y: 100 };
-    const vertices: { [key: string]: { x: number; y: number } } = {
-      Interpretar: { x: 100, y: 30 },
-      Vocabulario: { x: 150, y: 55 },
-      Tipos_de_Texto: { x: 150, y: 130 },
-      Localizar: { x: 100, y: 170 },
-      Lectura_Critica: { x: 50, y: 130 },
-      Evaluar: { x: 50, y: 55 },
-    };
-
-    const order = [
-      'Interpretar',
-      'Vocabulario',
-      'Tipos_de_Texto',
-      'Localizar',
-      'Lectura_Critica',
-      'Evaluar',
-    ];
-    const points: string[] = [];
-
-    for (const skill of order) {
-      const vertex = vertices[skill];
-      const habilidad = this.dashboard.habilidades.find(
-        (h) => h.nombre_habilidad === skill,
-      );
-      const percent = habilidad ? habilidad.nivel_maestria / 100 : 0;
-      const x = center.x + (vertex.x - center.x) * percent;
-      const y = center.y + (vertex.y - center.y) * percent;
-      points.push(`${x.toFixed(1)},${y.toFixed(1)}`);
-    }
-
-    return points.join(' ');
-  }
-
   getSkillDisplayName(name: string): string {
     const map: { [key: string]: string } = {
       'Interpretar': 'Interpretar',
@@ -233,5 +196,88 @@ export class GymPage implements OnInit {
       'Evaluar': 'Evaluar',
     };
     return map[name] || name.replace(/_/g, ' ');
+  }
+
+  // ============================================================
+  // RADAR CHART — Professional redesign
+  // ============================================================
+  readonly skillOrder = [
+    'Interpretar', 'Vocabulario', 'Tipos_de_Texto',
+    'Localizar', 'Lectura_Critica', 'Evaluar',
+  ];
+
+  readonly vertices: { [key: string]: { x: number; y: number } } = {
+    Interpretar:      { x: 100, y: 35 },
+    Vocabulario:      { x: 155, y: 62 },
+    Tipos_de_Texto:   { x: 155, y: 138 },
+    Localizar:        { x: 100, y: 165 },
+    Lectura_Critica:  { x: 45,  y: 138 },
+    Evaluar:          { x: 45,  y: 62 },
+  };
+
+  readonly sectorColors = [
+    'rgba(99, 102, 241, 0.55)',
+    'rgba(249, 115, 22, 0.55)',
+    'rgba(239, 68, 68, 0.55)',
+    'rgba(14, 165, 233, 0.55)',
+    'rgba(168, 85, 247, 0.55)',
+    'rgba(234, 179, 8, 0.55)',
+  ];
+
+  readonly sectorStrokes = [
+    '#6366f1', '#f97316', '#ef4444', '#0ea5e9', '#a855f7', '#eab308',
+  ];
+
+  getRadarPointsArray(): { x: number; y: number }[] {
+    const center = { x: 100, y: 100 };
+    return this.skillOrder.map(skill => {
+      const vertex = this.vertices[skill];
+      const h = this.dashboard?.habilidades.find(
+        hp => hp.nombre_habilidad === skill
+      );
+      const pct = h ? Math.min(h.nivel_maestria / 100, 1) : 0;
+      return {
+        x: center.x + (vertex.x - center.x) * pct,
+        y: center.y + (vertex.y - center.y) * pct,
+      };
+    });
+  }
+
+  getRegionPath(index: number): string {
+    const center = { x: 100, y: 100 };
+    const pts = this.getRadarPointsArray();
+    const curr = pts[index];
+    const next = pts[(index + 1) % 6];
+    return `M ${center.x} ${center.y} L ${curr.x.toFixed(1)} ${curr.y.toFixed(1)} L ${next.x.toFixed(1)} ${next.y.toFixed(1)} Z`;
+  }
+
+  getGuideHexagonPath(level: number): string {
+    const center = { x: 100, y: 100 };
+    const maxR = 65;
+    const r = maxR * level;
+    const points = this.skillOrder.map(skill => {
+      const v = this.vertices[skill];
+      const dx = v.x - center.x;
+      const dy = v.y - center.y;
+      const len = Math.sqrt(dx * dx + dy * dy);
+      return `${(center.x + dx / len * r).toFixed(1)},${(center.y + dy / len * r).toFixed(1)}`;
+    });
+    return points.join(' ');
+  }
+
+  getErrorCountForSkill(skillName: string): number {
+    return this.erroresFrecuentes
+      .filter(e => e.habilidad?.nombre === skillName)
+      .reduce((sum, e) => sum + (e.veces_fallada || 0), 0);
+  }
+
+  hasErrorsForSkill(skillName: string): boolean {
+    return this.getErrorCountForSkill(skillName) > 0;
+  }
+
+  getRadarPoints(): string {
+    return this.getRadarPointsArray()
+      .map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`)
+      .join(' ');
   }
 }

@@ -117,6 +117,136 @@ ion-progress-bar {
   }
 }
 
+// --- Dato Clave ---
+.dato-clave {
+  display: flex;
+  gap: 12px;
+  background: rgba(99, 102, 241, 0.06);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin: 12px 0;
+  border-left: 4px solid var(--ion-color-primary, #6366f1);
+}
+
+.dato-clave-icon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(99, 102, 241, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  ion-icon {
+    font-size: 1.1rem;
+    color: var(--ion-color-primary, #6366f1);
+  }
+}
+
+.dato-clave-body {
+  flex: 1;
+}
+
+.dato-clave-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ion-color-primary, #6366f1);
+  margin-bottom: 4px;
+}
+
+.dato-clave-texto {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--ion-text-color, #1e293b);
+  font-weight: 500;
+}
+
+// --- Imagen ---
+.imagen-block {
+  margin: 12px 0;
+  text-align: center;
+
+  img {
+    max-width: 100%;
+    max-height: 220px;
+    border-radius: 12px;
+    object-fit: contain;
+    background: var(--ion-color-light, #f1f5f9);
+    border: 1px solid var(--ion-border-color, #e2e8f0);
+  }
+
+  .imagen-fuente {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.75rem;
+    color: var(--ion-color-medium, #94a3b8);
+    font-style: italic;
+  }
+}
+
+// --- Grafico de Barras ---
+.grafico-barra-block {
+  margin: 14px 0;
+}
+
+.grafico-titulo {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--ion-color-primary, #6366f1);
+  margin-bottom: 10px;
+}
+
+.barra-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.barra-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.barra-label {
+  width: 90px;
+  font-size: 0.82rem;
+  color: var(--ion-text-color, #475569);
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.barra-track {
+  flex: 1;
+  height: 18px;
+  border-radius: 9px;
+  background: var(--ion-color-light, #f1f5f9);
+  overflow: hidden;
+}
+
+.barra-fill {
+  height: 100%;
+  border-radius: 9px;
+  background: linear-gradient(90deg, var(--ion-color-primary, #6366f1), var(--ion-color-primary-shade, #4f46e5));
+  transition: width 0.5s ease;
+}
+
+.barra-value {
+  width: 38px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--ion-text-color, #334155);
+  font-variant-numeric: tabular-nums;
+}
+
 
 // ============================================================
 // QUESTION CARD
