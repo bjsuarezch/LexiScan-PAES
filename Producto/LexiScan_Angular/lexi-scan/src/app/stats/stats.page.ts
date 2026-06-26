@@ -105,7 +105,7 @@ export class StatsPage implements OnInit {
     const pct = (score - 100) / 900; // 0→1
     if (pct <= 0) return '';
 
-    const cx = 150, cy = 155, r = 115;
+    const cx = 160, cy = 155, r = 115;
     // Ángulo: va de π (izquierda) bajando hacia 0 (derecha), pasando por π/2 (arriba)
     const startAngle = Math.PI;
     const endAngle   = Math.PI - pct * Math.PI; // π→0 a medida que pct sube
@@ -127,7 +127,7 @@ export class StatsPage implements OnInit {
     // En CSS rotate, 0° = derecha, negativo = antihorario
     // Convertimos pct a grados: 0%→-180° / 100%→0° → rotate(-180 + pct*180)
     const deg = -180 + pct * 180;
-    return `rotate(${deg.toFixed(1)}, 150, 155)`;
+    return `rotate(${deg.toFixed(1)}, 160, 155)`;
   }
 
   // ============================================================

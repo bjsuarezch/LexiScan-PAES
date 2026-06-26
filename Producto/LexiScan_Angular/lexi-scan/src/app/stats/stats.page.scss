@@ -47,14 +47,14 @@ ion-content {
 // GAUGE CHART — Thick arc + gradient
 // ============================================================
 .gauge-card {
-  padding: 24px 16px 20px;
+  padding: 24px 16px 60px;
   overflow: visible;
 }
 
 .gauge-wrap {
   position: relative;
   width: 100%;
-  max-width: 320px;
+  max-width: 340px;
   margin: 0 auto;
 }
 
@@ -80,8 +80,13 @@ ion-content {
 }
 
 @keyframes gaugeLoad {
-  from { stroke-dasharray: 0 400; }
-  to { stroke-dasharray: 400 0; }
+  from {
+    stroke-dasharray: 0 400;
+  }
+
+  to {
+    stroke-dasharray: 400 0;
+  }
 }
 
 .gauge-label {
@@ -93,16 +98,19 @@ ion-content {
 
 .gauge-score {
   text-align: center;
-  margin-top: -36px;
-  position: relative;
+  position: absolute;
+  top: 75%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
   z-index: 2;
 }
 
 .gauge-score-number {
   display: block;
   font-family: 'Fredoka', sans-serif;
-  font-size: 3.5rem;
-  line-height: 1;
+  font-size: 2.5rem;
+  line-height: 2;
   color: var(--ion-text-color, #1e293b);
 }
 
@@ -119,7 +127,7 @@ ion-content {
   align-items: center;
   justify-content: center;
   gap: 16px;
-  margin-top: 24px;
+  margin-top: 44px;
   padding-top: 18px;
   border-top: 1px solid var(--ion-border-color, #f1f5f9);
 }
@@ -220,8 +228,15 @@ ion-content {
 }
 
 @keyframes trendDraw {
-  from { stroke-dasharray: 500; stroke-dashoffset: 500; }
-  to { stroke-dasharray: 500; stroke-dashoffset: 0; }
+  from {
+    stroke-dasharray: 500;
+    stroke-dashoffset: 500;
+  }
+
+  to {
+    stroke-dasharray: 500;
+    stroke-dashoffset: 0;
+  }
 }
 
 .trend-area {
@@ -229,8 +244,13 @@ ion-content {
 }
 
 @keyframes areaFade {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .trend-dot {
@@ -245,8 +265,15 @@ ion-content {
 }
 
 @keyframes dotPop {
-  from { opacity: 0; r: 0; }
-  to { opacity: 1; r: 7; }
+  from {
+    opacity: 0;
+    r: 0;
+  }
+
+  to {
+    opacity: 1;
+    r: 7;
+  }
 }
 
 // ============================================================
@@ -317,7 +344,9 @@ ion-content {
 }
 
 @keyframes barGrow {
-  from { width: 0 !important; }
+  from {
+    width: 0 !important;
+  }
 }
 
 // ============================================================
@@ -390,7 +419,10 @@ ion-content {
   .revenge-count {
     font-size: 0.78rem;
     color: var(--ion-color-medium, #94a3b8);
-    strong { color: var(--ion-color-secondary, #f97316); }
+
+    strong {
+      color: var(--ion-color-secondary, #f97316);
+    }
   }
 }
 
