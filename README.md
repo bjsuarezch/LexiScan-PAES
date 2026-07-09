@@ -13,6 +13,7 @@ Instala esto antes de empezar:
 | Python | **3.12.x** (no uses 3.13+) | [python.org](https://www.python.org/downloads/) |
 | Node.js | 18+ | [nodejs.org](https://nodejs.org/) |
 | Docker Desktop | Cualquiera | [docker.com](https://www.docker.com/products/docker-desktop/) |
+| Ionic CLI | (Opcional pero recomendado) | `npm install -g @ionic/cli` |
 
 > ⚠️ **Python 3.12 obligatorio.** Las versiones 3.13+ rompen las dependencias binarias (psycopg2, bcrypt).
 
@@ -82,6 +83,7 @@ cd Producto/LexiScan_Angular/lexi-scan
 npm install
 npm start
 ```
+*(Alternativamente puedes usar `ionic serve` si tienes Ionic CLI instalado).*
 
 ✅ Listo cuando veas: `http://localhost:4200/`
 
@@ -101,14 +103,44 @@ Necesitas una API Key de Groq (gratis en [console.groq.com](https://console.groq
 
 ---
 
-## 🗃️ Cargar datos de demostración (opcional)
+## 🗃️ Cargar datos de demostración y temas (opcional)
 
-Si quieres ver la app con datos de ejemplo ya cargados:
+Si quieres ver la app con datos de ejemplo ya cargados (usuarios, partidas, economía):
 
 ```bash
 # Desde la carpeta Producto
 docker exec -i lexiscan_db_container psql -U user_lexiscan -d lexiscan_db < datos_presentacion.sql
 ```
+
+Si deseas inicializar la base de datos de forma destructiva o agregar temas adicionales, en la terminal del backend (con el `venv` activado) puedes ejecutar:
+
+```bash
+# Destruye y recrea la base de datos con información inicial
+python scripts/migrate_and_seed.py
+
+# Agrega temas y misiones adicionales al mapa de juego
+python scripts/add_themes.py
+```
+
+---
+
+## 📱 Compilación para Dispositivos Móviles (Android)
+
+El proyecto utiliza **Capacitor** para empaquetar la aplicación web como una aplicación móvil nativa. Para generar el APK de Android:
+
+1. Asegúrate de estar en la carpeta del frontend (`Producto/LexiScan_Angular/lexi-scan`).
+2. Compila los recursos web de la aplicación:
+   ```bash
+   npm run build
+   ```
+3. Sincroniza los archivos con la carpeta del proyecto Android:
+   ```bash
+   npx cap sync android
+   ```
+4. Abre Android Studio para compilar y generar el APK:
+   ```bash
+   npx cap open android
+   ```
 
 ---
 
